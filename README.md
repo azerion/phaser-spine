@@ -1,1 +1,2 @@
-Spine \o/
+Phaser Spine
+============

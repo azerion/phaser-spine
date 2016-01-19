@@ -1,0 +1,35 @@
+{
+  "name": "phaser-spine",
+  "author": "OrangeGames",
+  "version": "1.0.0",
+  "description": "Spine plugin for Phaser.io!",
+  "contributors": [
+    {
+      "name": "Ale Bles",
+      "email": "a.bles@orangegames.com"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://gitlab.ds.orangegames.com/js-libs/phaser-spine.git"
+  },
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "https://gitlab.ds.orangegames.com/js-libs/phaser-spine/raw/master/LICENSE"
+    }
+  ],
+  "private": true,
+  "devDependencies": {
+    "grunt": "0.4.x",
+    "grunt-banner": "^0.6.0",
+    "grunt-contrib-clean": "0.6.0",
+    "grunt-contrib-uglify": "0.7.0",
+    "grunt-typescript": "0.8.0",
+    "phaser": "2.4.4",
+    "typescript": "1.6.x"
+  },
+  "engines": {
+    "node": "5.x.x"
+  }
+}
