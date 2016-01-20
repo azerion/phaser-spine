@@ -38,7 +38,7 @@ module Fabrique {
 
                     var cacheData = {
                         atlas: atlasKey,
-                        basePath: url.substring(0, url.lastIndexOf('/'))
+                        basePath: (url.substring(0, url.lastIndexOf('/')) === '') ? '.' : url.substring(0, url.lastIndexOf('/'))
                     };
 
                     this.json(key, url);

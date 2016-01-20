@@ -3,7 +3,7 @@
  * Spine plugin for Phaser.io!
  *
  * OrangeGames
- * Build at 19-01-2016
+ * Build at 20-01-2016
  * Released under MIT License 
  */
 
@@ -14,42 +14,67 @@ var __extends = (this && this.__extends) || function (d, b) {
 };
 var Fabrique;
 (function (Fabrique) {
-    /**
-     * Supporting class to load images from spine atlases as per spine spec.
-     *
-     * @class SpineTextureLoader
-     * @uses EventTarget
-     * @constructor
-     * @param basePath {String} Tha base path where to look for the images to be loaded
-     * @param crossorigin {Boolean} Whether requests should be treated as crossorigin
-     */
-    var SpineTextureLoader = (function () {
-        function SpineTextureLoader(basePath, crossorigin) {
-            /**
-             * Starts loading a base texture as per spine specification
-             *
-             * @method load
-             * @param page {spine.AtlasPage} Atlas page to which texture belongs
-             * @param file {String} The file to load, this is just the file path relative to the base path configured in the constructor
-             */
-            this.load = function (page, file) {
-                page.rendererObject = PIXI.BaseTexture.fromImage(this.basePath + '/' + file, this.crossorigin);
+    var Plugins;
+    (function (Plugins) {
+        var Spine = (function (_super) {
+            __extends(Spine, _super);
+            function Spine(game, parent) {
+                _super.call(this, game, parent);
+                this.addSpineCache();
+                this.addSpineFactory();
+                this.addSpineLoader();
+            }
+            Spine.prototype.addSpineLoader = function () {
+                Phaser.Loader.prototype.spine = function (key, url) {
+                    var atlasKey = key + "Atlas";
+                    var cacheData = {
+                        atlas: atlasKey,
+                        basePath: (url.substring(0, url.lastIndexOf('/')) === '') ? '.' : url.substring(0, url.lastIndexOf('/'))
+                    };
+                    this.json(key, url);
+                    this.text(atlasKey, url.substr(0, url.lastIndexOf('.')) + '.atlas');
+                    this.image(key, url.substr(0, url.lastIndexOf('.')) + '.png');
+                    this.game.cache.addSpine(key, cacheData);
+                };
             };
             /**
-             * Unloads a previously loaded texture as per spine specification
-             *
-             * @method unload
-             * @param texture {BaseTexture} Texture object to destroy
+             * Extends the GameObjectFactory prototype with the support of adding spine. this allows us to add spine methods to the game just like any other object:
+             * game.add.spine();
              */
-            this.unload = function (texture) {
-                texture.destroy();
+            Spine.prototype.addSpineFactory = function () {
+                Phaser.GameObjectFactory.prototype.spine = function (x, y, key, group) {
+                    if (group === undefined) {
+                        group = this.world;
+                    }
+                    var spineObject = new Fabrique.Spine(this.game, key);
+                    spineObject.skeleton.setToSetupPose();
+                    spineObject.position.x = x;
+                    spineObject.position.y = y;
+                    return group.add(spineObject);
+                };
             };
-            this.basePath = basePath;
-            this.crossorigin = crossorigin;
-        }
-        return SpineTextureLoader;
-    })();
-    Fabrique.SpineTextureLoader = SpineTextureLoader;
+            /**
+             * Extends the Phaser.Cache prototype with spine properties
+             */
+            Spine.prototype.addSpineCache = function () {
+                //Create the cache space
+                Phaser.Cache.prototype.spine = {};
+                //Method for adding a spine dict to the cache space
+                Phaser.Cache.prototype.addSpine = function (key, data) {
+                    this.spine[key] = data;
+                };
+                //Method for fetching a spine dict from the cache space
+                Phaser.Cache.prototype.getSpine = function (key) {
+                    return this.spine[key];
+                };
+            };
+            return Spine;
+        })(Phaser.Plugin);
+        Plugins.Spine = Spine;
+    })(Plugins = Fabrique.Plugins || (Fabrique.Plugins = {}));
+})(Fabrique || (Fabrique = {}));
+var Fabrique;
+(function (Fabrique) {
     var Spine = (function (_super) {
         __extends(Spine, _super);
         /**
@@ -299,63 +324,41 @@ var Fabrique;
 })(Fabrique || (Fabrique = {}));
 var Fabrique;
 (function (Fabrique) {
-    var Plugins;
-    (function (Plugins) {
-        var Spine = (function (_super) {
-            __extends(Spine, _super);
-            function Spine(game, parent) {
-                _super.call(this, game, parent);
-                this.addSpineCache();
-                this.addSpineFactory();
-                this.addSpineLoader();
-            }
-            Spine.prototype.addSpineLoader = function () {
-                Phaser.Loader.prototype.spine = function (key, url) {
-                    var atlasKey = key + "Atlas";
-                    var cacheData = {
-                        atlas: atlasKey,
-                        basePath: url.substring(0, url.lastIndexOf('/'))
-                    };
-                    this.json(key, url);
-                    this.text(atlasKey, url.substr(0, url.lastIndexOf('.')) + '.atlas');
-                    this.image(key, url.substr(0, url.lastIndexOf('.')) + '.png');
-                    this.game.cache.addSpine(key, cacheData);
-                };
+    /**
+     * Supporting class to load images from spine atlases as per spine spec.
+     *
+     * @class SpineTextureLoader
+     * @uses EventTarget
+     * @constructor
+     * @param basePath {String} Tha base path where to look for the images to be loaded
+     * @param crossorigin {Boolean} Whether requests should be treated as crossorigin
+     */
+    var SpineTextureLoader = (function () {
+        function SpineTextureLoader(basePath, crossorigin) {
+            /**
+             * Starts loading a base texture as per spine specification
+             *
+             * @method load
+             * @param page {spine.AtlasPage} Atlas page to which texture belongs
+             * @param file {String} The file to load, this is just the file path relative to the base path configured in the constructor
+             */
+            this.load = function (page, file) {
+                page.rendererObject = PIXI.BaseTexture.fromImage(this.basePath + '/' + file, this.crossorigin);
             };
             /**
-             * Extends the GameObjectFactory prototype with the support of adding spine. this allows us to add spine methods to the game just like any other object:
-             * game.add.spine();
+             * Unloads a previously loaded texture as per spine specification
+             *
+             * @method unload
+             * @param texture {BaseTexture} Texture object to destroy
              */
-            Spine.prototype.addSpineFactory = function () {
-                Phaser.GameObjectFactory.prototype.spine = function (x, y, key, group) {
-                    if (group === undefined) {
-                        group = this.world;
-                    }
-                    var spineObject = new Fabrique.Spine(this.game, key);
-                    spineObject.skeleton.setToSetupPose();
-                    spineObject.position.x = x;
-                    spineObject.position.y = y;
-                    return group.add(spineObject);
-                };
+            this.unload = function (texture) {
+                texture.destroy();
             };
-            /**
-             * Extends the Phaser.Cache prototype with spine properties
-             */
-            Spine.prototype.addSpineCache = function () {
-                //Create the cache space
-                Phaser.Cache.prototype.spine = {};
-                //Method for adding a spine dict to the cache space
-                Phaser.Cache.prototype.addSpine = function (key, data) {
-                    this.spine[key] = data;
-                };
-                //Method for fetching a spine dict from the cache space
-                Phaser.Cache.prototype.getSpine = function (key) {
-                    return this.spine[key];
-                };
-            };
-            return Spine;
-        })(Phaser.Plugin);
-        Plugins.Spine = Spine;
-    })(Plugins = Fabrique.Plugins || (Fabrique.Plugins = {}));
+            this.basePath = basePath;
+            this.crossorigin = crossorigin;
+        }
+        return SpineTextureLoader;
+    })();
+    Fabrique.SpineTextureLoader = SpineTextureLoader;
 })(Fabrique || (Fabrique = {}));
 //# sourceMappingURL=phaser-spine.js.map

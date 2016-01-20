@@ -1,33 +1,40 @@
 declare module Fabrique {
-    /**
-     * Supporting class to load images from spine atlases as per spine spec.
-     *
-     * @class SpineTextureLoader
-     * @uses EventTarget
-     * @constructor
-     * @param basePath {String} Tha base path where to look for the images to be loaded
-     * @param crossorigin {Boolean} Whether requests should be treated as crossorigin
-     */
-    class SpineTextureLoader {
-        private basePath;
-        private crossorigin;
-        constructor(basePath: string, crossorigin: boolean);
-        /**
-         * Starts loading a base texture as per spine specification
-         *
-         * @method load
-         * @param page {spine.AtlasPage} Atlas page to which texture belongs
-         * @param file {String} The file to load, this is just the file path relative to the base path configured in the constructor
-         */
-        load: (page: any, file: string) => void;
-        /**
-         * Unloads a previously loaded texture as per spine specification
-         *
-         * @method unload
-         * @param texture {BaseTexture} Texture object to destroy
-         */
-        unload: (texture: PIXI.BaseTexture) => void;
+    module Plugins {
+        interface SpineObjectFactory extends Phaser.GameObjectFactory {
+            spine: (x: number, y: number, key: string, group?: Phaser.Group) => Fabrique.Spine;
+        }
+        interface SpineCache extends Phaser.Cache {
+            addSpine: (key: string, data: any) => void;
+            getSpine: (key: string) => any;
+            spine: {
+                [key: string]: any;
+            };
+        }
+        interface SpineLoader extends Phaser.Loader {
+            spine: (key: string, url: string) => void;
+            cache: SpineCache;
+        }
+        interface SpineGame extends Phaser.Game {
+            add: SpineObjectFactory;
+            load: SpineLoader;
+            cache: SpineCache;
+        }
+        class Spine extends Phaser.Plugin {
+            constructor(game: SpineGame, parent: PIXI.DisplayObject);
+            private addSpineLoader();
+            /**
+             * Extends the GameObjectFactory prototype with the support of adding spine. this allows us to add spine methods to the game just like any other object:
+             * game.add.spine();
+             */
+            private addSpineFactory();
+            /**
+             * Extends the Phaser.Cache prototype with spine properties
+             */
+            private addSpineCache();
+        }
     }
+}
+declare module Fabrique {
     class Spine extends Phaser.Group {
         private spineData;
         skeleton: {
@@ -100,39 +107,33 @@ declare module Fabrique {
     }
 }
 declare module Fabrique {
-    module Plugins {
-        interface SpineObjectFactory extends Phaser.GameObjectFactory {
-            spine: (x: number, y: number, key: string, group?: Phaser.Group) => Fabrique.Spine;
-        }
-        interface SpineCache extends Phaser.Cache {
-            addSpine: (key: string, data: any) => void;
-            getSpine: (key: string) => any;
-            spine: {
-                [key: string]: any;
-            };
-        }
-        interface SpineLoader extends Phaser.Loader {
-            spine: (key: string, url: string) => void;
-            cache: SpineCache;
-        }
-        interface SpineGame extends Phaser.Game {
-            add: SpineObjectFactory;
-            load: SpineLoader;
-            phaserSpine: Spine;
-            cache: SpineCache;
-        }
-        class Spine extends Phaser.Plugin {
-            constructor(game: SpineGame, parent: PIXI.DisplayObject);
-            private addSpineLoader();
-            /**
-             * Extends the GameObjectFactory prototype with the support of adding spine. this allows us to add spine methods to the game just like any other object:
-             * game.add.spine();
-             */
-            private addSpineFactory();
-            /**
-             * Extends the Phaser.Cache prototype with spine properties
-             */
-            private addSpineCache();
-        }
+    /**
+     * Supporting class to load images from spine atlases as per spine spec.
+     *
+     * @class SpineTextureLoader
+     * @uses EventTarget
+     * @constructor
+     * @param basePath {String} Tha base path where to look for the images to be loaded
+     * @param crossorigin {Boolean} Whether requests should be treated as crossorigin
+     */
+    class SpineTextureLoader {
+        private basePath;
+        private crossorigin;
+        constructor(basePath: string, crossorigin: boolean);
+        /**
+         * Starts loading a base texture as per spine specification
+         *
+         * @method load
+         * @param page {spine.AtlasPage} Atlas page to which texture belongs
+         * @param file {String} The file to load, this is just the file path relative to the base path configured in the constructor
+         */
+        load: (page: any, file: string) => void;
+        /**
+         * Unloads a previously loaded texture as per spine specification
+         *
+         * @method unload
+         * @param texture {BaseTexture} Texture object to destroy
+         */
+        unload: (texture: PIXI.BaseTexture) => void;
     }
 }
