@@ -19,7 +19,6 @@
       "url": "https://gitlab.ds.orangegames.com/js-libs/phaser-spine/raw/master/LICENSE"
     }
   ],
-  "private": true,
   "devDependencies": {
     "grunt": "0.4.x",
     "grunt-banner": "^0.6.0",
