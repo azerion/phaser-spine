@@ -1,9 +1,9 @@
 /*!
- * phaser-spine - version 1.0.0 
+ * phaser-spine - version 1.0.1 
  * Spine plugin for Phaser.io!
  *
  * OrangeGames
- * Build at 20-01-2016
+ * Build at 05-02-2016
  * Released under MIT License 
  */
 
@@ -87,7 +87,7 @@ var Fabrique;
         function Spine(game, key) {
             _super.call(this, game);
             var data = this.game.cache.getSpine(key);
-            var textureLoader = new Fabrique.SpineTextureLoader(data.basePath, false);
+            var textureLoader = new Fabrique.SpineTextureLoader(game);
             // create a spine atlas using the loaded text and a spine texture loader instance //
             var spineAtlas = new spine.Atlas(game.cache.getText(data.atlas), textureLoader);
             // now we use an atlas attachment loader //
@@ -334,7 +334,7 @@ var Fabrique;
      * @param crossorigin {Boolean} Whether requests should be treated as crossorigin
      */
     var SpineTextureLoader = (function () {
-        function SpineTextureLoader(basePath, crossorigin) {
+        function SpineTextureLoader(game) {
             /**
              * Starts loading a base texture as per spine specification
              *
@@ -343,7 +343,9 @@ var Fabrique;
              * @param file {String} The file to load, this is just the file path relative to the base path configured in the constructor
              */
             this.load = function (page, file) {
-                page.rendererObject = PIXI.BaseTexture.fromImage(this.basePath + '/' + file, this.crossorigin);
+                var key = file.substr(0, file.indexOf('.png'));
+                var image = this.game.make.image(0, 0, key);
+                page.rendererObject = image.texture.baseTexture;
             };
             /**
              * Unloads a previously loaded texture as per spine specification
@@ -354,8 +356,7 @@ var Fabrique;
             this.unload = function (texture) {
                 texture.destroy();
             };
-            this.basePath = basePath;
-            this.crossorigin = crossorigin;
+            this.game = game;
         }
         return SpineTextureLoader;
     })();

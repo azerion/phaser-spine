@@ -1,3 +1,4 @@
+declare var game: Phaser.Game;
 module Fabrique {
     /**
      * Supporting class to load images from spine atlases as per spine spec.
@@ -9,12 +10,10 @@ module Fabrique {
      * @param crossorigin {Boolean} Whether requests should be treated as crossorigin
      */
     export class SpineTextureLoader {
-        private basePath:string;
-        private crossorigin:boolean;
+        private game: Phaser.Game;
 
-        constructor(basePath:string, crossorigin:boolean) {
-            this.basePath = basePath;
-            this.crossorigin = crossorigin
+        constructor(game: Phaser.Game) {
+            this.game = game
         }
 
         /**
@@ -25,7 +24,10 @@ module Fabrique {
          * @param file {String} The file to load, this is just the file path relative to the base path configured in the constructor
          */
         public load = function (page:any, file:string) {
-            page.rendererObject = PIXI.BaseTexture.fromImage(this.basePath + '/' + file, this.crossorigin);
+            var key = file.substr(0, file.indexOf('.png'));
+            var image = this.game.make.image(0, 0, key);
+
+            page.rendererObject = image.texture.baseTexture;
         };
 
         /**

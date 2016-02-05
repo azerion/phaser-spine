@@ -34,7 +34,7 @@ module Fabrique {
 
             var data = this.game.cache.getSpine(key);
 
-            var textureLoader = new Fabrique.SpineTextureLoader(data.basePath, false);
+            var textureLoader = new Fabrique.SpineTextureLoader(game);
             // create a spine atlas using the loaded text and a spine texture loader instance //
             var spineAtlas = new spine.Atlas(game.cache.getText(data.atlas), textureLoader);
             // now we use an atlas attachment loader //

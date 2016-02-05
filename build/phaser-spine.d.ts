@@ -106,6 +106,7 @@ declare module Fabrique {
         addAnimationByName(trackIndex: number, animationName: string, loop: boolean, delay: number): void;
     }
 }
+declare var game: Phaser.Game;
 declare module Fabrique {
     /**
      * Supporting class to load images from spine atlases as per spine spec.
@@ -117,9 +118,8 @@ declare module Fabrique {
      * @param crossorigin {Boolean} Whether requests should be treated as crossorigin
      */
     class SpineTextureLoader {
-        private basePath;
-        private crossorigin;
-        constructor(basePath: string, crossorigin: boolean);
+        private game;
+        constructor(game: Phaser.Game);
         /**
          * Starts loading a base texture as per spine specification
          *

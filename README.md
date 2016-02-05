@@ -9,6 +9,8 @@ Usage
 
 Changelog
 ---------
+### 1.0.1
+* Made the SpineTextureLoader use Phaser instead of PIXI
 ### 1.0.0
 * Initial release
 
