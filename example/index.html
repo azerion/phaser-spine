@@ -1,0 +1,42 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title>Phaser Spine Example</title>
+
+    <script src="../node_modules/phaser/dist/phaser.js"></script>
+    <script src="../build/phaser-spine.min.js"></script>
+
+    <style>
+        body {
+            padding: 0;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+<script>
+
+    var buddy, game;
+
+    game = new Phaser.Game(800, 600, Phaser.CANVAS, '', {preload: preload, create: create});
+
+    function preload() {
+        game.plugins.add(Fabrique.Plugins.Spine);
+
+        game.load.spine('buddy', "buddy_skeleton.json");
+    }
+
+    function create() {
+
+        //create the spine object
+        buddy = game.add.spine(400, 300, "buddy");
+
+        // play animation
+        buddy.setAnimationByName(0, "idle", true);
+        buddy.setSkinByName('outfit01');
+    }
+
+</script>
+
+</body>
+</html>

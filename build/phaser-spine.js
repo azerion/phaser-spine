@@ -3,7 +3,7 @@
  * Spine plugin for Phaser.io!
  *
  * OrangeGames
- * Build at 05-02-2016
+ * Build at 23-02-2016
  * Released under MIT License 
  */
 
@@ -47,7 +47,7 @@ var Fabrique;
                         group = this.world;
                     }
                     var spineObject = new Fabrique.Spine(this.game, key);
-                    spineObject.skeleton.setToSetupPose();
+                    spineObject.setToSetupPose();
                     spineObject.position.x = x;
                     spineObject.position.y = y;
                     return group.add(spineObject);
@@ -87,7 +87,7 @@ var Fabrique;
         function Spine(game, key) {
             _super.call(this, game);
             var data = this.game.cache.getSpine(key);
-            var textureLoader = new Fabrique.SpineTextureLoader(game);
+            var textureLoader = new Fabrique.SpineTextureLoader(game, key);
             // create a spine atlas using the loaded text and a spine texture loader instance //
             var spineAtlas = new spine.Atlas(game.cache.getText(data.atlas), textureLoader);
             // now we use an atlas attachment loader //
@@ -95,13 +95,13 @@ var Fabrique;
             // spine animation
             var spineJsonParser = new spine.SkeletonJson(attachmentLoader);
             //get the Skeleton Data
-            this.spineData = spineJsonParser.readSkeletonData(game.cache.getJSON(key));
-            if (!this.spineData) {
+            this.skeletonData = spineJsonParser.readSkeletonData(game.cache.getJSON(key));
+            if (!this.skeletonData) {
                 throw new Error('Spine data must be preloaded using Loader.spine');
             }
-            this.skeleton = new spine.Skeleton(this.spineData);
+            this.skeleton = new spine.Skeleton(this.skeletonData);
             this.skeleton.updateWorldTransform();
-            this.stateData = new spine.AnimationStateData(this.spineData);
+            this.stateData = new spine.AnimationStateData(this.skeletonData);
             this.state = new spine.AnimationState(this.stateData);
             this.slotContainers = [];
             for (var i = 0, n = this.skeleton.drawOrder.length; i < n; i++) {
@@ -277,7 +277,6 @@ var Fabrique;
             var baseTexture = descriptor.page.rendererObject;
             var texture = new PIXI.Texture(baseTexture);
             var strip = new PIXI.Strip(texture);
-            //strip.drawMode = PIXI.Strip.DrawModes.TRIANGLES;
             strip.canvasPadding = 1.5;
             strip.vertices = [];
             strip.uvs = attachment.uvs;
@@ -298,26 +297,63 @@ var Fabrique;
         };
         ;
         /**
-         * [setAnimationByName set the animation for the specified track]
-         * @param {Integer} trackIndex    [index to find the animation track]
-         * @param {String} animationName [the name of the aniamtion to set]
-         * @param {Boolean} loop          [true if the animation must continue in a loop]
+         * exposing the state's setAnimation
+         * We override the original runtime's error because warnings dont stop the VM
+         *
+         * @param {number}  trackIndex
+         * @param {string}  animationName
+         * @param {boolean} loop
+         * @param {number}  delay
+         * @returns {any}
          */
         Spine.prototype.setAnimationByName = function (trackIndex, animationName, loop) {
-            this.state.setAnimationByName(trackIndex, animationName, loop);
+            var animation = this.state.data.skeletonData.findAnimation(animationName);
+            if (!animation) {
+                console.warn("Animation not found: " + animationName);
+                return null;
+            }
+            return this.state.setAnimation(trackIndex, animation, loop);
         };
         ;
         /**
-         * [addAnimationByName description]
-         * @param {[type]} trackIndex    [description]
-         * @param {[type]} animationName [description]
-         * @param {[type]} loop          [description]
-         * @param {[type]} delay         [description]
+         * exposing the state's addAnimation
+         * We override the original runtime's error because warnings dont stop the VM
+         *
+         * @param {number}  trackIndex
+         * @param {string}  animationName
+         * @param {boolean} loop
+         * @param {number}  delay
+         * @returns {any}
          */
         Spine.prototype.addAnimationByName = function (trackIndex, animationName, loop, delay) {
-            this.state.addAnimationByName(trackIndex, animationName, loop, delay);
+            var animation = this.state.data.skeletonData.findAnimation(animationName);
+            if (!animation) {
+                console.warn("Animation not found: " + animationName);
+                return null;
+            }
+            return this.state.addAnimation(trackIndex, animation, loop, delay);
         };
         ;
+        /**
+         * Exposing the skeleton's method to change the skin
+         * We override the original runtime's error because warnings dont stop the VM
+         *
+         * @param {string}  skinName  The name of the skin we'd like to set
+         */
+        Spine.prototype.setSkinByName = function (skinName) {
+            var skin = this.skeleton.data.findSkin(skinName);
+            if (!skin) {
+                console.warn("Skin not found: " + skinName);
+                return;
+            }
+            this.skeleton.setSkin(skin);
+        };
+        /**
+         * Set to initial setup pose
+         */
+        Spine.prototype.setToSetupPose = function () {
+            this.skeleton.setToSetupPose();
+        };
         return Spine;
     })(Phaser.Group);
     Fabrique.Spine = Spine;
@@ -334,7 +370,7 @@ var Fabrique;
      * @param crossorigin {Boolean} Whether requests should be treated as crossorigin
      */
     var SpineTextureLoader = (function () {
-        function SpineTextureLoader(game) {
+        function SpineTextureLoader(game, key) {
             /**
              * Starts loading a base texture as per spine specification
              *
@@ -343,8 +379,7 @@ var Fabrique;
              * @param file {String} The file to load, this is just the file path relative to the base path configured in the constructor
              */
             this.load = function (page, file) {
-                var key = file.substr(0, file.indexOf('.png'));
-                var image = this.game.make.image(0, 0, key);
+                var image = this.game.make.image(0, 0, this.key);
                 page.rendererObject = image.texture.baseTexture;
             };
             /**
@@ -357,6 +392,7 @@ var Fabrique;
                 texture.destroy();
             };
             this.game = game;
+            this.key = key;
         }
         return SpineTextureLoader;
     })();

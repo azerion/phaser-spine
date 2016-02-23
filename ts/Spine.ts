@@ -1,21 +1,10 @@
 module Fabrique {
     export class Spine extends Phaser.Group
     {
-        private spineData: any;
-        public skeleton: {
-            setToSetupPose: () => void;
-            updateWorldTransform: () => void;
-            drawOrder: any[];
-            slots: any[];
-        };
-        private stateData: any;
-        private state: {
-            update: (dt: number) => void;
-            apply: (skeleton: any) => void;
-            setAnimationByName: (trackIndex: number, animationName: string, loop: boolean) => void;
-            addAnimationByName: (trackIndex: number, animationName: string, loop: boolean, delay: number) => void;
-            setMixByName: (fromName: string, toName: string, duration: number) => void;
-        };
+        private skeleton: spine.Skeleton;
+        private skeletonData: spine.SkeletonData;
+        private stateData: spine.AnimationStateData;
+        private state: spine.AnimationState;
         private slotContainers: any[];
         private lastTime: number;
 
@@ -34,7 +23,7 @@ module Fabrique {
 
             var data = this.game.cache.getSpine(key);
 
-            var textureLoader = new Fabrique.SpineTextureLoader(game);
+            var textureLoader = new Fabrique.SpineTextureLoader(game, key);
             // create a spine atlas using the loaded text and a spine texture loader instance //
             var spineAtlas = new spine.Atlas(game.cache.getText(data.atlas), textureLoader);
             // now we use an atlas attachment loader //
@@ -43,16 +32,16 @@ module Fabrique {
             var spineJsonParser = new spine.SkeletonJson(attachmentLoader);
 
             //get the Skeleton Data
-            this.spineData = spineJsonParser.readSkeletonData(game.cache.getJSON(key));
+            this.skeletonData = spineJsonParser.readSkeletonData(game.cache.getJSON(key));
 
-            if (!this.spineData) {
+            if (!this.skeletonData) {
                 throw new Error('Spine data must be preloaded using Loader.spine');
             }
 
-            this.skeleton = new spine.Skeleton(this.spineData);
+            this.skeleton = new spine.Skeleton(this.skeletonData);
             this.skeleton.updateWorldTransform();
 
-            this.stateData = new spine.AnimationStateData(this.spineData);
+            this.stateData = new spine.AnimationStateData(this.skeletonData);
             this.state = new spine.AnimationState(this.stateData);
 
             this.slotContainers = [];
@@ -260,7 +249,6 @@ module Fabrique {
             var texture = new PIXI.Texture(baseTexture);
 
             var strip = new PIXI.Strip(texture);
-            //strip.drawMode = PIXI.Strip.DrawModes.TRIANGLES;
             strip.canvasPadding = 1.5;
 
             strip.vertices = [];
@@ -284,24 +272,63 @@ module Fabrique {
         };
 
         /**
-         * [setAnimationByName set the animation for the specified track]
-         * @param {Integer} trackIndex    [index to find the animation track]
-         * @param {String} animationName [the name of the aniamtion to set]
-         * @param {Boolean} loop          [true if the animation must continue in a loop]
+         * exposing the state's setAnimation
+         * We override the original runtime's error because warnings dont stop the VM
+         *
+         * @param {number}  trackIndex
+         * @param {string}  animationName
+         * @param {boolean} loop
+         * @param {number}  delay
+         * @returns {any}
          */
         public setAnimationByName(trackIndex: number, animationName: string, loop: boolean) {
-            this.state.setAnimationByName(trackIndex, animationName, loop);
+            var animation = this.state.data.skeletonData.findAnimation(animationName);
+            if (!animation) {
+                console.warn("Animation not found: " + animationName);
+                return null;
+            }
+            return this.state.setAnimation(trackIndex, animation, loop);
         };
 
         /**
-         * [addAnimationByName description]
-         * @param {[type]} trackIndex    [description]
-         * @param {[type]} animationName [description]
-         * @param {[type]} loop          [description]
-         * @param {[type]} delay         [description]
+         * exposing the state's addAnimation
+         * We override the original runtime's error because warnings dont stop the VM
+         *
+         * @param {number}  trackIndex
+         * @param {string}  animationName
+         * @param {boolean} loop
+         * @param {number}  delay
+         * @returns {any}
          */
         public addAnimationByName(trackIndex: number, animationName: string, loop: boolean, delay: number) {
-            this.state.addAnimationByName(trackIndex, animationName, loop, delay);
+            var animation = this.state.data.skeletonData.findAnimation(animationName);
+            if (!animation) {
+                console.warn("Animation not found: " + animationName);
+                return null;
+            }
+            return this.state.addAnimation(trackIndex, animation, loop, delay);
         };
+
+        /**
+         * Exposing the skeleton's method to change the skin
+         * We override the original runtime's error because warnings dont stop the VM
+         *
+         * @param {string}  skinName  The name of the skin we'd like to set
+         */
+        public setSkinByName(skinName: string) {
+            var skin = this.skeleton.data.findSkin(skinName);
+            if (!skin) {
+                console.warn("Skin not found: " + skinName);
+                return;
+            }
+            this.skeleton.setSkin(skin);
+        }
+
+        /**
+         * Set to initial setup pose
+         */
+        public setToSetupPose() {
+            this.skeleton.setToSetupPose();
+        }
     }
 }

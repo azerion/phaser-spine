@@ -60,7 +60,7 @@ module Fabrique {
 
                     var spineObject = new Fabrique.Spine(this.game, key);
 
-                    spineObject.skeleton.setToSetupPose();
+                    spineObject.setToSetupPose();
                     spineObject.position.x = x;
                     spineObject.position.y = y;
 

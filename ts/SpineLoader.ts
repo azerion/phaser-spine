@@ -11,9 +11,11 @@ module Fabrique {
      */
     export class SpineTextureLoader {
         private game: Phaser.Game;
+        private key: string;
 
-        constructor(game: Phaser.Game) {
+        constructor(game: Phaser.Game, key: string) {
             this.game = game
+            this.key = key;
         }
 
         /**
@@ -24,8 +26,7 @@ module Fabrique {
          * @param file {String} The file to load, this is just the file path relative to the base path configured in the constructor
          */
         public load = function (page:any, file:string) {
-            var key = file.substr(0, file.indexOf('.png'));
-            var image = this.game.make.image(0, 0, key);
+            var image = this.game.make.image(0, 0, this.key);
 
             page.rendererObject = image.texture.baseTexture;
         };

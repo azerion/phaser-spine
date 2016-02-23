@@ -36,13 +36,8 @@ declare module Fabrique {
 }
 declare module Fabrique {
     class Spine extends Phaser.Group {
-        private spineData;
-        skeleton: {
-            setToSetupPose: () => void;
-            updateWorldTransform: () => void;
-            drawOrder: any[];
-            slots: any[];
-        };
+        private skeleton;
+        private skeletonData;
         private stateData;
         private state;
         private slotContainers;
@@ -90,20 +85,38 @@ declare module Fabrique {
          */
         setMixByName(fromName: string, toName: string, duration: number): void;
         /**
-         * [setAnimationByName set the animation for the specified track]
-         * @param {Integer} trackIndex    [index to find the animation track]
-         * @param {String} animationName [the name of the aniamtion to set]
-         * @param {Boolean} loop          [true if the animation must continue in a loop]
+         * exposing the state's setAnimation
+         * We override the original runtime's error because warnings dont stop the VM
+         *
+         * @param {number}  trackIndex
+         * @param {string}  animationName
+         * @param {boolean} loop
+         * @param {number}  delay
+         * @returns {any}
          */
-        setAnimationByName(trackIndex: number, animationName: string, loop: boolean): void;
+        setAnimationByName(trackIndex: number, animationName: string, loop: boolean): spine.TrackEntry;
         /**
-         * [addAnimationByName description]
-         * @param {[type]} trackIndex    [description]
-         * @param {[type]} animationName [description]
-         * @param {[type]} loop          [description]
-         * @param {[type]} delay         [description]
+         * exposing the state's addAnimation
+         * We override the original runtime's error because warnings dont stop the VM
+         *
+         * @param {number}  trackIndex
+         * @param {string}  animationName
+         * @param {boolean} loop
+         * @param {number}  delay
+         * @returns {any}
          */
-        addAnimationByName(trackIndex: number, animationName: string, loop: boolean, delay: number): void;
+        addAnimationByName(trackIndex: number, animationName: string, loop: boolean, delay: number): spine.TrackEntry;
+        /**
+         * Exposing the skeleton's method to change the skin
+         * We override the original runtime's error because warnings dont stop the VM
+         *
+         * @param {string}  skinName  The name of the skin we'd like to set
+         */
+        setSkinByName(skinName: string): void;
+        /**
+         * Set to initial setup pose
+         */
+        setToSetupPose(): void;
     }
 }
 declare var game: Phaser.Game;
@@ -119,7 +132,8 @@ declare module Fabrique {
      */
     class SpineTextureLoader {
         private game;
-        constructor(game: Phaser.Game);
+        private key;
+        constructor(game: Phaser.Game, key: string);
         /**
          * Starts loading a base texture as per spine specification
          *

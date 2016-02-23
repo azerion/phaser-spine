@@ -1,1 +1,1 @@
-declare var spine: any;
+/// <reference path="../vendor/Spine.d.ts"/>
