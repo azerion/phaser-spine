@@ -2,3 +2,4 @@ Gruntfile.js
 vendor
 ts
 .idea
+buddy-spine
