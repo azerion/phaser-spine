@@ -18,7 +18,7 @@
 
     var buddy, game;
 
-    game = new Phaser.Game(800, 600, Phaser.CANVAS, '', {init: init, preload: preload, create: create});
+    game = new Phaser.Game(800, 600, Phaser.CANVAS, '', {init: init, preload: preload, create: create, update: update});
 
     function init() {
         this.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
@@ -26,6 +26,7 @@
 
     function preload() {
         game.plugins.add(Fabrique.Plugins.Spine);
+        game.stage.disableVisibilityChange = true;
 
         game.load.spine('buddy', "buddy_skeleton.json");
     }
@@ -37,7 +38,17 @@
 
         // play animation
         buddy.setAnimationByName(0, "idle", true);
-        buddy.setSkinByName('outfit01');
+
+    }
+    var t = Date.now();
+    var s = 1;
+    function update() {
+        if ((Date.now() - t) / 1000 > 2) {
+            buddy.setSkinByName('outfit0' + s);
+            t = Date.now();
+            s ++;
+            if (s === 3) s = 1;
+        }
     }
 
 </script>
