@@ -9,6 +9,11 @@ Usage
 
 Changelog
 ---------
+### 1.2.0
+* Added support for combining skins
+* Added possibility to set Skins (not by name, just the skin object)
+* Updated example to display skin combining
+
 ### 1.1.0
 * Added support for skins
 * Fixed a bug where only key's with the same name can be used

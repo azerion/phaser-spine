@@ -1,9 +1,9 @@
 /*!
- * phaser-spine - version 1.0.1 
+ * phaser-spine - version 1.2.0 
  * Spine plugin for Phaser.io!
  *
  * OrangeGames
- * Build at 23-02-2016
+ * Build at 24-03-2016
  * Released under MIT License 
  */
 
@@ -335,7 +335,7 @@ var Fabrique;
         };
         ;
         /**
-         * Exposing the skeleton's method to change the skin
+         * Exposing the skeleton's method to change the skin by skinName
          * We override the original runtime's error because warnings dont stop the VM
          *
          * @param {string}  skinName  The name of the skin we'd like to set
@@ -349,10 +349,61 @@ var Fabrique;
             this.skeleton.setSkin(skin);
         };
         /**
+         * Exposing the skeleton's method to change the skin
+         *
+         * @param skin
+         */
+        Spine.prototype.setSkin = function (skin) {
+            this.skeleton.setSkin(skin);
+        };
+        /**
          * Set to initial setup pose
          */
         Spine.prototype.setToSetupPose = function () {
             this.skeleton.setToSetupPose();
+        };
+        /**
+         * You can combine skins here by supplying a name for the new skin, and then a nummer of existing skins names that needed to be combined in the new skin
+         * If the skins that will be combined contain any double attachment, only the first attachment will be added to the newskin.
+         * any subsequent attachment that is double will not be added!
+         *
+         * @param newSkinName
+         * @param skinNames
+         */
+        Spine.prototype.getCombinedSkin = function (newSkinName) {
+            var skinNames = [];
+            for (var _i = 1; _i < arguments.length; _i++) {
+                skinNames[_i - 1] = arguments[_i];
+            }
+            if (skinNames.length === 0) {
+                console.warn('Unable to combine skins when no skins are passed...');
+                return;
+            }
+            var newSkin = new spine.Skin(newSkinName);
+            for (var i = 0; i < skinNames.length; i++) {
+                var skinName = skinNames[i];
+                var skin = this.skeleton.data.findSkin(skinName);
+                if (!skin) {
+                    console.warn("Skin not found: " + skinName);
+                    return;
+                }
+                for (var key in skin.attachments) {
+                    var slotKeyPair = key.split(':');
+                    var slotIndex = slotKeyPair[0];
+                    var attachmentName = slotKeyPair[1];
+                    var attachment = skin.attachments[key];
+                    if (undefined === slotIndex || undefined === attachmentName) {
+                        console.warn('something went wrong with reading the attachments index and/or name');
+                        return;
+                    }
+                    if (newSkin.getAttachment(slotIndex, attachmentName) !== undefined) {
+                        console.warn('Found double attachment for: ' + skinName + '. Skipping');
+                        continue;
+                    }
+                    newSkin.addAttachment(slotIndex, attachmentName, attachment);
+                }
+            }
+            return newSkin;
         };
         return Spine;
     })(Phaser.Group);

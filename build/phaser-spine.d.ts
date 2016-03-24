@@ -107,16 +107,31 @@ declare module Fabrique {
          */
         addAnimationByName(trackIndex: number, animationName: string, loop: boolean, delay: number): spine.TrackEntry;
         /**
-         * Exposing the skeleton's method to change the skin
+         * Exposing the skeleton's method to change the skin by skinName
          * We override the original runtime's error because warnings dont stop the VM
          *
          * @param {string}  skinName  The name of the skin we'd like to set
          */
         setSkinByName(skinName: string): void;
         /**
+         * Exposing the skeleton's method to change the skin
+         *
+         * @param skin
+         */
+        setSkin(skin: spine.Skin): void;
+        /**
          * Set to initial setup pose
          */
         setToSetupPose(): void;
+        /**
+         * You can combine skins here by supplying a name for the new skin, and then a nummer of existing skins names that needed to be combined in the new skin
+         * If the skins that will be combined contain any double attachment, only the first attachment will be added to the newskin.
+         * any subsequent attachment that is double will not be added!
+         *
+         * @param newSkinName
+         * @param skinNames
+         */
+        getCombinedSkin(newSkinName: string, ...skinNames: string[]): spine.Skin;
     }
 }
 declare var game: Phaser.Game;

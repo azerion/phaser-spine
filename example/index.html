@@ -18,7 +18,7 @@
 
     var buddy, game;
 
-    game = new Phaser.Game(800, 600, Phaser.CANVAS, '', {init: init, preload: preload, create: create, update: update});
+    game = new Phaser.Game(800, 600, Phaser.CANVAS, '', {init: init, preload: preload, create: create});
 
     function init() {
         this.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
@@ -28,7 +28,9 @@
         game.plugins.add(Fabrique.Plugins.Spine);
         game.stage.disableVisibilityChange = true;
 
-        game.load.spine('buddy', "buddy_skeleton.json");
+        game.load.spine('buddy', "assets/buddy_skeleton.json");
+        game.load.image('button1', "assets/btn_01.png");
+        game.load.image('button2', "assets/btn_02.png");
     }
 
     function create() {
@@ -38,19 +40,16 @@
 
         // play animation
         buddy.setAnimationByName(0, "idle", true);
+        var newSkin = buddy.getCombinedSkin('outfit02', 'vest', 'mask', 'outfit01');
 
-    }
-    var t = Date.now();
-    var s = 1;
-    function update() {
-        if ((Date.now() - t) / 1000 > 2) {
-            buddy.setSkinByName('outfit0' + s);
-            t = Date.now();
-            s ++;
-            if (s === 3) s = 1;
-        }
-    }
+        var button1 = this.game.add.button(20, 20, 'button1', function () {
+            buddy.setSkinByName('outfit01');
+        });
 
+        var button1 = this.game.add.button(20, 130, 'button2', function () {
+            buddy.setSkin(newSkin);
+        });
+    }
 </script>
 
 </body>

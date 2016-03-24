@@ -310,7 +310,7 @@ module Fabrique {
         };
 
         /**
-         * Exposing the skeleton's method to change the skin
+         * Exposing the skeleton's method to change the skin by skinName
          * We override the original runtime's error because warnings dont stop the VM
          *
          * @param {string}  skinName  The name of the skin we'd like to set
@@ -325,10 +325,66 @@ module Fabrique {
         }
 
         /**
+         * Exposing the skeleton's method to change the skin
+         *
+         * @param skin
+         */
+        public setSkin(skin: spine.Skin) {
+            this.skeleton.setSkin(skin);
+        }
+
+        /**
          * Set to initial setup pose
          */
         public setToSetupPose() {
             this.skeleton.setToSetupPose();
+        }
+
+        /**
+         * You can combine skins here by supplying a name for the new skin, and then a nummer of existing skins names that needed to be combined in the new skin
+         * If the skins that will be combined contain any double attachment, only the first attachment will be added to the newskin.
+         * any subsequent attachment that is double will not be added!
+         *
+         * @param newSkinName
+         * @param skinNames
+         */
+        public getCombinedSkin(newSkinName: string, ...skinNames: string[]): spine.Skin {
+            if (skinNames.length === 0) {
+                console.warn('Unable to combine skins when no skins are passed...');
+                return;
+            }
+
+            let newSkin: spine.Skin = new spine.Skin(newSkinName);
+
+            for (let i: number = 0; i < skinNames.length; i++) {
+                let skinName: string = skinNames[i];
+                let skin = this.skeleton.data.findSkin(skinName);
+                if (!skin) {
+                    console.warn("Skin not found: " + skinName);
+                    return;
+                }
+
+                for (let key in skin.attachments) {
+                    let slotKeyPair = key.split(':');
+                    let slotIndex = slotKeyPair[0];
+                    let attachmentName = slotKeyPair[1];
+                    let attachment = skin.attachments[key];
+
+                    if (undefined === slotIndex || undefined === attachmentName) {
+                        console.warn('something went wrong with reading the attachments index and/or name');
+                        return;
+                    }
+
+                    if (newSkin.getAttachment(slotIndex, attachmentName) !== undefined) {
+                        console.warn('Found double attachment for: ' + skinName + '. Skipping');
+                        continue;
+                    }
+
+                    newSkin.addAttachment(slotIndex, attachmentName, attachment);
+                }
+            }
+
+            return newSkin;
         }
     }
 }

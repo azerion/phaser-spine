@@ -146,10 +146,12 @@
 			"facial_gear": { "name": "buddy_outfit01_glasses", "x": 1.07, "y": 7.47, "rotation": -92.29, "width": 78, "height": 28 }
 		}
 	},
-	"outfit02": {
+	"vest": {
 		"body_gear": {
 			"body_gear": { "name": "buddy_outfit02_vest", "x": 49.99, "y": -2.14, "rotation": 94.12, "width": 61, "height": 144 }
-		},
+		}
+	},
+	"mask": {
 		"facial_gear": {
 			"facial_gear": { "name": "buddy_outfit02_mask", "x": 0.46, "y": 0.84, "rotation": -92.29, "width": 85, "height": 114 }
 		}
