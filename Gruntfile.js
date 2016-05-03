@@ -41,6 +41,12 @@ module.exports = function (grunt) {
                 dest: 'build/<%= pkg.name %>.js'
             }
         },
+        concat: {
+            dist: {
+                src: ['vendor/Spine.d.ts', 'build/phaser-spine.d.ts'],
+                dest: 'build/phaser-spine.d.ts',
+            }
+        },
         uglify: {
             options: {
                 compress: {
@@ -72,15 +78,17 @@ module.exports = function (grunt) {
 
     grunt.loadNpmTasks('grunt-contrib-clean');
     grunt.loadNpmTasks('grunt-contrib-uglify');
+    grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-banner');
     grunt.loadNpmTasks('grunt-typescript');
 
     //dist Build
     grunt.registerTask('dist', [
-        'clean:dist',     //Clean the dist folder
-        'typescript:dist',//Run typescript on the preprocessed files, for dist (client)
-        'uglify:dist',    //Minify everything
-        'usebanner:dist'    //Minify everything
+        'clean:dist',
+        'typescript:dist',
+        'uglify:dist',
+        'concat:dist',
+        'usebanner:dist'
     ]);
 
 };
