@@ -134,7 +134,6 @@ declare module Fabrique {
         getCombinedSkin(newSkinName: string, ...skinNames: string[]): spine.Skin;
     }
 }
-declare var game: Phaser.Game;
 declare module Fabrique {
     /**
      * Supporting class to load images from spine atlases as per spine spec.

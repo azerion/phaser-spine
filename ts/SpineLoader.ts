@@ -1,4 +1,3 @@
-declare var game: Phaser.Game;
 module Fabrique {
     /**
      * Supporting class to load images from spine atlases as per spine spec.

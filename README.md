@@ -1,32 +1,28 @@
 Phaser Spine
 ============
 
+Spine plugin for Phaser, it works, somehow.. No? Submit an issue, otherwise have fun :)
+
+Key features:
+
+* Spine for Phaser! :o
+* Skin support
+* Possible to combine skins
+
 Getting Started
 ---------------
 
 Usage
 -----
 
-Changelog
----------
-### 1.2.0
-* Added support for combining skins
-* Added possibility to set Skins (not by name, just the skin object)
-* Updated example to display skin combining
-
-### 1.1.0
-* Added support for skins
-* Fixed a bug where only key's with the same name can be used
-* Added definition file for Spine
-* Added example, now with your awesome Buddy!
-
-### 1.0.1
-* Made the SpineTextureLoader use Phaser instead of PIXI
-
-### 1.0.0
-* Initial release
+Credits
+-------
+Credit due, where credit's due as my mom always said. This version of phaser-spine is based on the original work by [Studio krok's PhaserSpine](https://github.com/StudioKrok/PhaserSpine)
 
 Disclaimer
 ----------
 We at OrangeGames just love playing and creating
 awesome games. We aren't affiliated with Phaser.io and/or esotericsoftware. We just needed some awesome spine animations in our awesome HTML5 games. Feel free to use it for enhancing your own awesome games!
+
+Phaser Spine is distributed under the MIT license. All 3rd party libraries and components are distributed under their
+respective license terms.
