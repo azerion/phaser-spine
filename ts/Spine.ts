@@ -131,15 +131,16 @@ module Fabrique {
 
                     var bone = slot.bone;
 
+                    //Update positions
                     slotContainer.position.x = attachment.x * bone.a + attachment.y * bone.b + bone.worldX;
                     slotContainer.position.y = attachment.x * bone.c + attachment.y * bone.d + bone.worldY;
-                    // slotContainer.position.x = bone.worldX + attachment.x * bone.m00 + attachment.y * bone.m01;
-                    // slotContainer.position.y = bone.worldY + attachment.x * bone.m10 + attachment.y * bone.m11;
+
+                    //Update scaling
                     slotContainer.scale.x = bone.getWorldScaleX();
                     slotContainer.scale.y = bone.getWorldScaleY();
 
-                    // slotContainer.rotation = -(slot.bone.worldRotation * spine.degRad);
-                    // slotContainer.rotation = -(bone.getWorldRotationX() - attachment.rotation) * Math.PI / 180;
+                    //Update rotation
+                    slotContainer.rotation = (bone.getWorldRotationX() - attachment.rotation) * Math.PI / 180;
 
                     slot.currentSprite.tint = PIXI.rgb2hex([slot.r,slot.g,slot.b]);
                 } else if (type === spine.AttachmentType.weightedmesh) {
@@ -211,43 +212,22 @@ module Fabrique {
             var sprite = new Phaser.Sprite(this.game, 0, 0, spriteTexture);
 
             var baseRotation = descriptor.rotate ? Math.PI * 0.5 : 0.0;
-            sprite.scale.set(descriptor.width / descriptor.originalWidth, descriptor.height / descriptor.originalHeight);
-            // sprite.rotation = baseRotation - (attachment.rotation * Math.PI / 180);
-            sprite.rotation = baseRotation - (slot.bone.getWorldRotationX() - attachment.rotation) * Math.PI / 180;
-            sprite.anchor.x = sprite.anchor.y = 0.5;
+            sprite.scale.x = descriptor.width / descriptor.originalWidth;
+            sprite.scale.y = descriptor.height / descriptor.originalHeight;
+
+            sprite.rotation = baseRotation;
+;
+            sprite.anchor.x = 0.5;
+            sprite.anchor.y = 0.5;
+
+            sprite.alpha = attachment.a;
+
 
             slot.sprites = slot.sprites || {};
             slot.sprites[descriptor.name] = sprite;
 
-            //set bitmap for tint
-            this.createBitMap(sprite);
-
             return sprite;
         };
-
-        public createBitMap(sprite: Phaser.Sprite) {
-            var bitmap = this.game.make.bitmapData(sprite.width, sprite.height);
-
-            var spriteData = {
-                scaleX: sprite.scale.x,
-                scaleY: sprite.scale.y,
-                rotation: sprite.rotation
-            };
-
-            //reset the rotation and scale of sprite to draw into the bitmap
-            sprite.scale.x = sprite.scale.y = 1;
-            sprite.rotation = 0;
-
-            //draw the sprite into the bitmap
-            bitmap.draw(sprite, sprite.width/2, sprite.height/2);
-            bitmap.update();
-
-            //resotre the scale and rotation of the sprite
-            sprite.scale.set(spriteData.scaleX, spriteData.scaleY);
-            sprite.rotation = spriteData.rotation;
-
-            sprite.loadTexture(bitmap);
-        }
 
         public createMesh(slot: any, attachment: any) {
             var descriptor = attachment.rendererObject;

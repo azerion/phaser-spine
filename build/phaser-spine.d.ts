@@ -819,7 +819,6 @@ declare module Fabrique {
          * @private
          */
         createSprite(slot: any, attachment: any): Phaser.Sprite;
-        createBitMap(sprite: Phaser.Sprite): void;
         createMesh(slot: any, attachment: any): PIXI.Strip;
         /**
          * [setMixByName wrap to stateData.setMixByName]
