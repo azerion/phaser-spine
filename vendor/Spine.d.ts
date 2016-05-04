@@ -2,9 +2,15 @@ declare module spine {
     var degRad: number;
     var radDeg: number;
 
-    var Float32Array: any[] | Float32Array;
-    var Uint32Array: any[] | Uint32Array;
-    var Uint16Array: any[] | Uint16Array;
+    class Float32Array {
+        constructor(...args: any[]);
+    }
+    class Uint32Array {
+        constructor(...args: any[]);
+    }
+    class Uint16Array {
+        constructor(...args: any[]);
+    }
 
     var temp: Float32Array;
 

@@ -1,0 +1,43 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title>Phaser Spine Example</title>
+
+    <script src="../node_modules/phaser/dist/phaser.js"></script>
+    <script src="../vendor/Spine.js"></script>
+    <script src="../build/phaser-spine.js"></script>
+
+    <style>
+        body {
+            padding: 0;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+<script>
+
+    var buddy, game;
+
+    game = new Phaser.Game(400, 400, Phaser.AUTO, '', {init: init, preload: preload, create: create});
+
+    function init() {
+        this.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
+    }
+
+    function preload() {
+        game.plugins.add(Fabrique.Plugins.Spine);
+        game.stage.disableVisibilityChange = true;
+
+        game.load.spine('spineboy', "assets/spineboy.json");
+    }
+
+    function create() {
+        //create the spine object
+        spineboy = game.add.spine(200, 400, "spineboy");
+        spineboy.setAnimationByName(0, "walk", true);
+    }
+</script>
+
+</body>
+</html>

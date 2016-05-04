@@ -1,3 +1,5 @@
+(<any>PIXI.Strip).prototype.postUpdate = function () {};
+
 module Fabrique {
     export class Spine extends Phaser.Group
     {
@@ -53,15 +55,13 @@ module Fabrique {
                 this.slotContainers.push(slotContainer);
                 this.add(slotContainer);
 
-                console.log(slot);
-
                 if (attachment instanceof spine.RegionAttachment) {
                     var spriteName = attachment.rendererObject.name;
                     var sprite = this.createSprite(slot, attachment);
                     slot.currentSprite = sprite;
                     slot.currentSpriteName = spriteName;
                     slotContainer.add(sprite);
-                } else if (attachment instanceof spine.MeshAttachment) {
+                } else if (attachment instanceof spine.WeightedMeshAttachment) {
                     var mesh = this.createMesh(slot, attachment);
                     slot.currentMesh = mesh;
                     slot.currentMeshName = attachment.name;
@@ -129,7 +129,7 @@ module Fabrique {
                         }
                     }
 
-                    var bone = slot.bone;
+                    var bone: spine.Bone = slot.bone;
 
                     //Update positions
                     slotContainer.position.x = attachment.x * bone.a + attachment.y * bone.b + bone.worldX;
@@ -142,6 +142,7 @@ module Fabrique {
                     //Update rotation
                     slotContainer.rotation = (bone.getWorldRotationX() - attachment.rotation) * Math.PI / 180;
 
+                    slot.currentSprite.blendMode = slot.blendMode;
                     slot.currentSprite.tint = PIXI.rgb2hex([slot.r,slot.g,slot.b]);
                 } else if (type === spine.AttachmentType.weightedmesh) {
                     if (!slot.currentMeshName || slot.currentMeshName !== attachment.name) {
@@ -217,11 +218,10 @@ module Fabrique {
 
             sprite.rotation = baseRotation;
 ;
-            sprite.anchor.x = 0.5;
-            sprite.anchor.y = 0.5;
+            sprite.anchor.x = (0.5 * descriptor.originalWidth - descriptor.offsetX) / descriptor.width;
+            sprite.anchor.y = 1.0 - ((0.5 * descriptor.originalHeight - descriptor.offsetY) / descriptor.height);
 
             sprite.alpha = attachment.a;
-
 
             slot.sprites = slot.sprites || {};
             slot.sprites[descriptor.name] = sprite;
@@ -237,9 +237,10 @@ module Fabrique {
             var strip = new PIXI.Strip(texture);
             strip.canvasPadding = 1.5;
 
-            strip.vertices = [];
+            (<any>strip).vertices = new spine.Float32Array(attachment.uvs.length);
             strip.uvs = attachment.uvs;
             strip.indices = attachment.triangles;
+            strip.alpha = attachment.a;
 
             slot.meshes = slot.meshes || {};
             slot.meshes[attachment.name] = strip;
