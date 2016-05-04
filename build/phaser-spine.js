@@ -3,7 +3,7 @@
  * Spine plugin for Phaser.io!
  *
  * OrangeGames
- * Build at 03-05-2016
+ * Build at 04-05-2016
  * Released under MIT License 
  */
 
@@ -110,6 +110,7 @@ var Fabrique;
                 var slotContainer = new Phaser.Group(game);
                 this.slotContainers.push(slotContainer);
                 this.add(slotContainer);
+                console.log(slot);
                 if (attachment instanceof spine.RegionAttachment) {
                     var spriteName = attachment.rendererObject.name;
                     var sprite = this.createSprite(slot, attachment);
@@ -181,13 +182,17 @@ var Fabrique;
                         }
                     }
                     var bone = slot.bone;
-                    slotContainer.position.x = bone.worldX + attachment.x * bone.m00 + attachment.y * bone.m01;
-                    slotContainer.position.y = bone.worldY + attachment.x * bone.m10 + attachment.y * bone.m11;
-                    slotContainer.scale.x = bone.worldScaleX;
-                    slotContainer.scale.y = bone.worldScaleY;
-                    slotContainer.rotation = -(slot.bone.worldRotation * spine.degRad);
+                    slotContainer.position.x = attachment.x * bone.a + attachment.y * bone.b + bone.worldX;
+                    slotContainer.position.y = attachment.x * bone.c + attachment.y * bone.d + bone.worldY;
+                    // slotContainer.position.x = bone.worldX + attachment.x * bone.m00 + attachment.y * bone.m01;
+                    // slotContainer.position.y = bone.worldY + attachment.x * bone.m10 + attachment.y * bone.m11;
+                    slotContainer.scale.x = bone.getWorldScaleX();
+                    slotContainer.scale.y = bone.getWorldScaleY();
+                    // slotContainer.rotation = -(slot.bone.worldRotation * spine.degRad);
+                    // slotContainer.rotation = -(bone.getWorldRotationX() - attachment.rotation) * Math.PI / 180;
+                    slot.currentSprite.tint = PIXI.rgb2hex([slot.r, slot.g, slot.b]);
                 }
-                else if (type === spine.AttachmentType.skinnedmesh) {
+                else if (type === spine.AttachmentType.weightedmesh) {
                     if (!slot.currentMeshName || slot.currentMeshName !== attachment.name) {
                         var meshName = attachment.name;
                         if (slot.currentMesh !== undefined) {
@@ -245,7 +250,8 @@ var Fabrique;
             var sprite = new Phaser.Sprite(this.game, 0, 0, spriteTexture);
             var baseRotation = descriptor.rotate ? Math.PI * 0.5 : 0.0;
             sprite.scale.set(descriptor.width / descriptor.originalWidth, descriptor.height / descriptor.originalHeight);
-            sprite.rotation = baseRotation - (attachment.rotation * spine.degRad);
+            // sprite.rotation = baseRotation - (attachment.rotation * Math.PI / 180);
+            sprite.rotation = baseRotation - (slot.bone.getWorldRotationX() - attachment.rotation) * Math.PI / 180;
             sprite.anchor.x = sprite.anchor.y = 0.5;
             slot.sprites = slot.sprites || {};
             slot.sprites[descriptor.name] = sprite;

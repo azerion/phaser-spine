@@ -1,27 +1,589 @@
 declare module spine {
-
-    function binarySearch(values: any, target: any, step: any): any;
-    function linearSearch(values: any, target: any, step: any): number;
-
     var degRad: number;
+    var radDeg: number;
+
+    var Float32Array: any[] | Float32Array;
+    var Uint32Array: any[] | Uint32Array;
+    var Uint16Array: any[] | Uint16Array;
+
+    var temp: Float32Array;
+
+    enum BlendMode {
+        normal,
+        additive,
+        multiply,
+        screen
+    }
+
+    class BoneData {
+        public name: string;
+        public parent: Bone;
+
+        public length: number;
+        public x: number;
+        public y: number;
+        public rotation: number;
+        public scaleX: number;
+        public scaleY: number;
+        public inheritScale: boolean;
+        public inheritRotation: boolean;
+
+        constructor(name: string, parent: Bone);
+    }
+
+    class SlotData {
+        public name: string;
+        public boneData: BoneData;
+        
+        public r: number;
+        public g: number;
+        public b: number;
+        public a: number;
+        public attachmentName: string;
+        public blendMode: BlendMode;
+        
+        constructor(name: string, boneData: BoneData);
+    }
+
+    class IkConstraintData {
+        public name: string;
+        public bones: Bone[];
+
+        public target: Bone;
+        public bendDirection: number;
+        public mix: number;
+
+        constructor(name: string);
+    }
+
+    class TransformConstraintData {
+        public name: string;
+
+        public bone: Bone;
+        public target: Bone;
+        public translateMix: number;
+        public x: number;
+        public y: number;
+
+        constructor(name: string);
+    }
+
+    class Bone {
+        public data: BoneData;
+        public skeleton: Skeleton;
+        public parent: Bone;
+
+        static yDown: boolean;
+
+        public x: number;
+        public y: number;
+        public rotation: number;
+        public scaleX: number;
+        public scaleY: number;
+        public a: number;
+        public b: number;
+        public worldX: number;
+        public c: number;
+        public d: number;
+        public worldY: number;
+        public worldSignX: number;
+        public worldSignY: number;
+
+        constructor(boneData: BoneData, skeleton: Skeleton, parent: Bone);
+
+        public update(): void;
+        public updateWorldTransformWith(): void;
+        public updateWorldTransform(x: number, y: number, rotation: number, scaleX: number, scaleY: number): void;
+        public setToSetupPose(): void;
+        public getWorldRotationX(): number;
+        public getWorldRotationY(): number;
+        public getWorldScaleX(): number;
+        public getWorldScaleY(): number;
+        public worldToLocal(world: any): any;
+        public localToWorld(local: any): any;
+    }
+
+    class Slot {
+        public data: SlotData;
+        public bone: Bone;
+        public attachmentVertices: Float32Array;
+
+        public r: number;
+        public g: number;
+        public b: number;
+        public a: number;
+        private _attachmentTime: number;
+        public attachment: Attachment;
+
+        constructor(slotData: SlotData, bone: Bone);
+
+        public setAttachment(attachment: Attachment): void;
+        public setAttachmentTime(time: number): void;
+        public getAttachmentTime(): Attachment;
+        public setToSetupPose(): void;
+    }
+
+    class IkConstraint {
+        public data: any;
+        public mix: any;
+        public bendDirection: number;
+        public bones: Bone[];
+        public target: Bone;
+        
+        constructor(data: any, skeleton: Skeleton);
+        
+        public update(): void;
+        public apply(): void;
+        
+        public static apply1(bone: Bone, targetX: number, targetY: number, alpha: number): void;
+        public static apply2(parent: any, child: any, targetX: number, targetY: number, bendDir: number, alpha: number): void;
+    }
+
+    class TransformConstraint {
+        public data: any;
+        
+        public translateMix: any;
+        public x: number;
+        public y: number;
+        public bone: Bone;
+        public target: Bone;
+        
+        constructor(data: any, skeleton: Skeleton);
+        
+        public apply(): void;
+        public update(): void;
+    }
+
+    class Skin {
+        public name: string;
+        public attachments: any;
+        
+        constructor(name: string);
+        
+        public addAttachment(slotIndex: string, name: string, attachment: Attachment): void;
+        public getAttachment(slotIndex: string, name: string): any;
+        private _attachAll(skeleton: Skeleton, oldSkin: Skin);
+    }
 
     class Animation {
-        public name: any;
-        public timelines: any;
-        public duration: any;
-        constructor(name: any, timelines: any, duration: any);
-        public apply(skeleton: any, lastTime: any, time: any, loop: any, events: any): void;
-        public mix(skeleton: any, lastTime: any, time: any, loop: any, events: any, alpha: any): void;
+        public name: string;
+        public timelines: TimeLine;
+        public duration: number;
+
+        constructor(name: string, timelines: TimeLine, duration: number);
+        public apply(skeleton: Skeleton, lastTime: number, time: number, loop: boolean, events: any): void;
+        public mix(skeleton: Skeleton, lastTime: number, time: number, loop: boolean, events: any, alpha: number): void;
+
+        public static binarySearch(values: number[], target: number, step: number): any;
+        public static binarySearch1(values: number[], target: number): any;
+        public static linearSearch(values: number[], target: number, step: number): number;
+    }
+
+    class Curves {
+        public curves: Float32Array;
+
+        constructor(frameCount: number);
+
+        public setLinear(frameIndex: number): void;
+        public setStepped(frameIndex: number): void;
+        /** Sets the control handle positions for an interpolation bezier curve used to transition from this keyframe to the next.
+         * cx1 and cx2 are from 0 to 1, representing the percent of time between the two keyframes. cy1 and cy2 are the percent of
+         * the difference between the keyframe's values. */
+        public setCurve(frameIndex: number, cx1: number, cy1: number, cx2: number, cy2: number): void;
+        public getCurvePercent(frameIndex: number, percent: number): number;
+    }
+
+    class SkeletonData {
+        public bones: BoneData[];
+        public slots: SlotData[];
+        public skins: Skin[];
+        public events: EventData[];
+        public animations: Animation[];
+        public ikConstraints: IkConstraintData[];
+        public transformConstraints: TransformConstraintData[];
+
+        public name: string;
+        public defaultSkin: Skin;
+        public width: number;
+        public height: number;
+        public version: number;
+        public hash: string;
+
+        constructor();
+
+        /** @return May be null. */
+        public findBone(boneName: string): spine.BoneData;
+        /** @return -1 if the bone was not found. */
+        public findBoneIndex(boneName: string): number;
+        /** @return May be null. */
+        public findSlot(slotName: string): spine.SlotData;
+        /** @return -1 if the bone was not found. */
+        public findSlotIndex(slotName: string): number;
+        /** @return May be null. */
+        public findSkin(skinName: string): spine.Skin;
+        /** @return May be null. */
+        public findEvent(eventName: string): spine.EventData;
+        /** @return May be null. */
+        public findAnimation(animationName: string): Animation;
+        public findIkConstraint(constraintName: string): IkConstraint;
+        public findTransformConstraints(constraintName: string): TransformConstraintData;
+    }
+
+    class Skeleton {
+        public bones: Bone[];
+        public slots: Slot[];
+        public drawOrder: any[];
+        public ikConstraints: IkConstraint[];
+        public transformConstraints: TransformConstraint[];
+        public data: SkeletonData;
+        public cache: any[];
+
+        public x: number;
+        public y: number;
+        public skin: Skin;
+        public r: number;
+        public g: number;
+        public b: number;
+        public a: number;
+        public time: number;
+        public flipX: boolean;
+        public flipY: boolean;
+
+        constructor(skeletonData: SkeletonData);
+
+        public updateCache(): void;
+        /** Updates the world transform for each bone. */
+        public updateWorldTransform(): void;
+        /** Sets the bones and slots to their setup pose values. */
+        public setToSetupPose(): void;
+        public setBonesToSetupPose(): void;
+        public setSlotsToSetupPose(): void;
+        /** @return May return null. */
+        public getRootBone(): spine.Bone;
+        /** @return May be null. */
+        public findBone(boneName: any): spine.Bone;
+        /** @return -1 if the bone was not found. */
+        public findBoneIndex(boneName: any): number;
+        /** @return May be null. */
+        public findSlot(slotName: any): spine.Slot;
+        /** @return -1 if the bone was not found. */
+        public findSlotIndex(slotName: any): number;
+        public setSkinByName(skinName: any): void;
+        /** Sets the skin used to look up attachments not found in the {@link SkeletonData#getDefaultSkin() default skin}. Attachments
+         * from the new skin are attached if the corresponding attachment from the old skin was attached.
+         * @param newSkin May be null. */
+        public setSkin(newSkin: any): void;
+        /** @return May be null. */
+        public getAttachmentBySlotName(slotName: any, attachmentName: any): any;
+        /** @return May be null. */
+        public getAttachmentBySlotIndex(slotIndex: any, attachmentName: any): any;
+        public setAttachment(slotName: any, attachmentName: any): void;
+        public findIkConstraint(constraintName: string): IkConstraint;
+        public findTransformConstraint(constraintName: string): TransformConstraint;
+        public update(delta: number): void;
+    }
+
+    class EventData {
+        public name: string;
+
+        constructor(name: string);
+
+        public intValue: number;
+        public floatValue: number;
+        public stringValue: string;
+    }
+
+    class Event {
+        public data: any;
+        public time: number;
+
+        constructor(time: number, data: any);
+
+        public intValue: number;
+        public floatValue: number;
+        public stringValue: string;
+    }
+
+    enum AttachmentType {
+        region,
+        boundingbox,
+        mesh,
+        weightedmesh,
+        linkedmesh,
+        weightedlinkedmesh
+    }
+
+    interface Attachment {
+        name: string;
+        type: AttachmentType
+    }
+
+    class RegionAttachment implements Attachment {
+        public name: string;
+        public offset: Float32Array;
+        public uvs: Float32Array;
+
+        public type: AttachmentType;
+        public x: number;
+        public y: number;
+        public rotation: number;
+        public scaleX: number;
+        public scaleY: number;
+        public width: number;
+        public height: number;
+        public r: number;
+        public g: number;
+        public b: number;
+        public a: number;
+        public path: any;
+        public rendererObject: any;
+        public regionOffsetX: number;
+        public regionOffsetY: number;
+        public regionWidth: number;
+        public regionHeight: number;
+        public regionOriginalWidth: number;
+        public regionOriginalHeight: number;
+
+        constructor(name: string);
+
+        public setUVs(u: any, v: any, u2: any, v2: any, rotate: any): void;
+        public updateOffset(): void;
+        public computeVertices(x: any, y: any, bone: any, vertices: any): void;
+    }
+
+
+    class MeshAttachment implements Attachment {
+        public name: string;
+        public type: AttachmentType;
+        public vertices: any[];
+        public uvs: any[];
+        public regionUVs: any[];
+        public triangles: any[];
+        public hullLength: number;
+        public r: number;
+        public g: number;
+        public b: number;
+        public a: number;
+        public path: any;
+        public inheritFFD: boolean;
+        public parentMesh: any;
+        public rendererObject: any;
+        public regionU: number;
+        public regionV: number;
+        public regionU2: number;
+        public regionV2: number;
+        public regionRotate: boolean;
+        public regionOffsetX: number;
+        public regionOffsetY: number;
+        public regionWidth: number;
+        public regionHeight: number;
+        public regionOriginalWidth: number;
+        public regionOriginalHeight: number;
+        public edges: any;
+        public width: number;
+        public height: number;
+
+        constructor(name: string);
+
+        public updateUVs(): void;
+        public setParentMesh(parentMesh: any): void;
+        public computeWorldVertices(x: any, y: any, slot: any, worldVertices: any): void;
+    }
+
+    class WeightedMeshAttachment implements Attachment {
+        public name: string;
+        public type: AttachmentType;
+        public bones: any[];
+        public uvs: any[];
+        public regionUVs: any[];
+        public triangles: any[];
+        public hullLength: number;
+        public r: number;
+        public g: number;
+        public b: number;
+        public a: number;
+        public path: any;
+        public inheritFFD: boolean;
+        public parentMesh: any;
+        public rendererObject: any;
+        public regionU: number;
+        public regionV: number;
+        public regionU2: number;
+        public regionV2: number;
+        public regionRotate: boolean;
+        public regionOffsetX: number;
+        public regionOffsetY: number;
+        public regionWidth: number;
+        public regionHeight: number;
+        public regionOriginalWidth: number;
+        public regionOriginalHeight: number;
+        public edges: any;
+        public width: number;
+        public height: number;
+
+        constructor(name: string);
+
+        public updateUVs(u: any, v: any, u2: any, v2: any, rotate: any): void;
+        public setParentMesh(parentMesh: any): void;
+        public computeWorldVertices(x: any, y: any, slot: any, worldVertices: any): void;
+    }
+
+    class BoundingBoxAttachment implements Attachment {
+        public name: string;
+        public type: AttachmentType;
+        public vertices: any[];
+
+        constructor(name: string);
+
+        public computeWorldVertices(x: any, y: any, bone: any, worldVertices: any): void;
+    }
+
+    interface TimeLine {
+        frames: Float32Array;
+
+        getFrameCount(): number;
+        setFrame(...args: any[]): void;
+        apply(skeleton: Skeleton, lastTime: number, time: number, firedEvents: any, alpha: number): void;
+    }
+
+    class RotateTimeline implements TimeLine {
+        public boneIndex: number;
+        public curves: Curves;
+        public frames: Float32Array;
+
+        constructor(frameCount: number);
+
+        public getFrameCount(): number;
+        public setFrame(frameIndex: number, time: number, angle: number): void;
+        public apply(skeleton: Skeleton, lastTime: number, time: number, firedEvents: any, alpha: number): void;
+    }
+
+    class TranslateTimeline implements TimeLine {
+        public boneIndex: number;
+        public curves: Curves;
+        public frames: Float32Array;
+
+        constructor(frameCount: number);
+
+        public getFrameCount(): number;
+        public setFrame(frameIndex: any, time: any, x: any, y: any): void;
+        public apply(skeleton: Skeleton, lastTime: number, time: number, firedEvents: any, alpha: number): void;
+    }
+
+    class ScaleTimeline implements TimeLine {
+        public boneIndex: number;
+        public curves: Curves;
+        public frames: Float32Array;
+
+        constructor(frameCount: number);
+
+        public getFrameCount(): number;
+        public setFrame(frameIndex: any, time: any, x: any, y: any): void;
+        public apply(skeleton: Skeleton, lastTime: number, time: number, firedEvents: any, alpha: number): void;
+    }
+
+    class ColorTimeline implements TimeLine {
+        public slotIndex: number;
+        public curves: Curves;
+        public frames: Float32Array;
+
+        constructor(frameCount: number);
+
+        public getFrameCount(): number;
+        public setFrame(frameIndex: number, time: number, r: number, g: number, b: number, a: number): void;
+        public apply(skeleton: Skeleton, lastTime: number, time: number, firedEvents: any, alpha: number): void;
+    }
+
+    class AttachmentTimeline implements TimeLine {
+        public slotIndex: number;
+        public curves: Curves;
+        public frames: Float32Array;
+        public attachmentNames: string[];
+
+        constructor(frameCount: number);
+
+        public getFrameCount(): number;
+        public setFrame(frameIndex: number, time: number, attachmentName: string): void;
+        public apply(skeleton: Skeleton, lastTime: number, time: number, firedEvents: any, alpha: number): void;
+    }
+
+    class EventTimeline implements TimeLine {
+        public frames: Float32Array;
+        public events: any[];
+
+        constructor(frameCount: number);
+
+        public getFrameCount(): number;
+        public setFrame(frameIndex: any, event: any): void;
+        /** Fires events for frames > lastTime and <= time. */
+        public apply(skeleton: Skeleton, lastTime: number, time: number, firedEvents: any, alpha: any): void;
+    }
+
+    class DrawOrderTimeline implements TimeLine {
+        public frames: Float32Array;
+        public drawOrders: any[];
+
+        constructor(frameCount: number);
+
+        public getFrameCount(): number;
+        public setFrame(frameIndex: any, time: any, drawOrder: any): void;
+        public apply(skeleton: Skeleton, lastTime: number, time: number, firedEvents: any, alpha: any): void;
+    }
+
+    class FfdTimeline implements TimeLine {
+        public curves: Curves;
+        public frames: Float32Array;
+        public frameVertices: any[];
+
+        slotIndex: number;
+        attachment: number;
+
+        constructor(frameCount: number);
+
+        public getFrameCount(): number;
+        public setFrame(frameIndex: any, time: any, vertices: any): void;
+        public apply(skeleton: Skeleton, lastTime: number, time: number, firedEvents: any, alpha: any): void;
+    }
+
+    class IkConstraintTimeline implements TimeLine {
+        public frames: Float32Array;
+        public curves: Curves;
+
+        constructor(frameCount: number);
+
+        public getFrameCount(): number;
+        public setFrame(frameIndex: any, time: any, mix: any, bendDirection: number): void;
+        public apply(skeleton: Skeleton, lastTime: number, time: number, firedEvents: any, alpha: any): void;
     }
 
     class AnimationStateData {
-        public skeletonData: spine.SkeletonData;
+        public skeletonData: SkeletonData;
         public animationToMixTime: any;
         public defaultMix: number;
-        constructor(skeletonData: spine.SkeletonData);
+
+        constructor(skeletonData: SkeletonData);
+
         public setMixByName(fromName: any, toName: any, duration: any): void;
         public setMix(from: any, to: any, duration: any): void;
         public getMix(from: any, to: any): any;
+    }
+
+    class TrackEntry {
+        public next: any;
+        public previous: any;
+        public animation: any;
+        public loop: boolean;
+        public delay: number;
+        public time: number;
+        public lastTime: number;
+        public endTime: number;
+        public timeScale: number;
+        public mixTime: number;
+        public mixDuration: number;
+        public onStart: any;
+        public onEnd: any;
+        public onComplete: any;
+        public onEvent: any;
     }
 
     class AnimationState {
@@ -51,61 +613,25 @@ declare module spine {
         public getCurrent(trackIndex: any): any;
     }
 
-    class BoneData {
-        public name: any;
-        public parent: any;
-        public length: number;
-        public x: number;
-        public y: number;
-        public rotation: number;
-        public inheritScale: boolean;
-        public inheritRotation: boolean;
-        public scaleX: number;
-        public scaleY: number;
-        constructor(name: any, parent: any);
-    }
-
-    class Bone {
-        public data: any;
-        public parent: any;
-        static yDown: boolean;
-        public name: string;
-        public x: number;
-        public y: number;
-        public rotation: number;
-        public scaleX: number;
-        public scaleY: number;
-        public m00: number;
-        public m01: number;
-        public worldX: number;
-        public m10: number;
-        public m11: number;
-        public worldY: number;
-        public worldRotation: number;
-        public worldScaleX: number;
-        public worldScaleY: number;
-        constructor(data: any, parent: any);
-        public updateWorldTransform(flipX: any, flipY: any): void;
-        public setToSetupPose(): void;
-    }
-
-    class AttachmentTimeline {
-        public slotIndex: number;
-        public curves: any;
-        public Curves: any;
-        public frames: any[];
-        public attachmentNames: any[];
-        constructor(frameCount: any);
-        public getFrameCount(): number;
-        public setFrame(frameIndex: any, time: any, attachmentName: any): void;
-        public apply(skeleton: any, lastTime: any, time: any, firedEvents: any, alpha: any): void;
+    class SkeletonJson {
+        public attachmentLoader: any;
+        public scale: number;
+        constructor(attachmentLoader: any);
+        public readCurve(timeline: any, frameIndex: any, valueMap: any): void;
+        public toColor(hexString: any, colorIndex: any): number;
+        public readSkeletonData(root: any): SkeletonData;
+        public readAttachment(skin: any, name: any, map: any): any;
+        public readAnimation(name: any, map: any, skeletonData: any): void;
+        public getFloatArray(map: any, name: any, scale: number): Float32Array;
+        public getUint32Array(map: any, name: any): Uint32Array;
+        public getUint16Array(map: any, name: any): Uint16Array;
     }
 
     class Atlas {
-        public atlasText: any;
         public textureLoader: any;
         public pages: any[];
         public regions: any[];
+
         static Format: {
             alpha: number;
             intensity: number;
@@ -115,6 +641,7 @@ declare module spine {
             rgb888: number;
             rgba8888: number;
         };
+
         static TextureFilter: {
             nearest: number;
             linear: number;
@@ -124,6 +651,7 @@ declare module spine {
             mipMapNearestLinear: number;
             mipMapLinearLinear: number;
         };
+
         static TextureWrap: {
             mirroredRepeat: number;
             clampToEdge: number;
@@ -185,232 +713,6 @@ declare module spine {
         public readTuple(tuple: any): number;
     }
 
-    class AttachmentType {
-        static region: number;
-        static boundingBox: number;
-        static mesh: number;
-        static skinnedmesh: number;
-    }
-
-    class Curves {
-        public curves: any[];
-        constructor(frameCount: any);
-        public setLinear(frameIndex: any): void;
-        public setStepped(frameIndex: any): void;
-        /** Sets the control handle positions for an interpolation bezier curve used to transition from this keyframe to the next.
-         * cx1 and cx2 are from 0 to 1, representing the percent of time between the two keyframes. cy1 and cy2 are the percent of
-         * the difference between the keyframe's values. */
-        public setCurve(frameIndex: any, cx1: any, cy1: any, cx2: any, cy2: any): void;
-        public getCurvePercent(frameIndex: any, percent: any): any;
-    }
-
-    class ColorTimeline {
-        public slotIndex: number;
-        public curves: any;
-        public Curves: any;
-        public frames: any[];
-        constructor(frameCount: any);
-        public getFrameCount(): number;
-        public setFrame(frameIndex: any, time: any, r: any, g: any, b: any, a: any): void;
-        public apply(skeleton: any, lastTime: any, time: any, firedEvents: any, alpha: any): void;
-    }
-
-    class BoundingBoxAttachment {
-        public name: any;
-        public type: number;
-        public vertices: any[];
-        constructor(name: any);
-        public computeWorldVertices(x: any, y: any, bone: any, worldVertices: any): void;
-    }
-
-    class SlotData {
-        public name: any;
-        public boneData: any;
-        public r: number;
-        public g: number;
-        public b: number;
-        public a: number;
-        public attachmentName: string;
-        public additiveBlending: boolean;
-        constructor(name: any, boneData: any);
-    }
-
-    class Slot {
-        public data: any;
-        public skeleton: any;
-        public bone: any;
-        public r: number;
-        public g: number;
-        public b: number;
-        public a: number;
-        private _attachmentTime;
-        public attachment: any;
-        constructor(data: any, skeleton: any, bone: any);
-        public setAttachment(attachment: any): void;
-        public setAttachmentTime(time: any): void;
-        public getAttachmentTime(): number;
-        public setToSetupPose(): void;
-    }
-
-    class Skin {
-        public name: any;
-        public attachments: any;
-        constructor(name: any);
-        public addAttachment(slotIndex: any, name: any, attachment: any): void;
-        public getAttachment(slotIndex: any, name: any): any;
-        private _attachAll(skeleton, oldSkin);
-    }
-
-    class RotateTimeline {
-        public boneIndex: number;
-        public curves: spine.Curves;
-        public frames: any[];
-        constructor(frameCount: any);
-        public getFrameCount(): number;
-        public setFrame(frameIndex: any, time: any, angle: any): void;
-        public apply(skeleton: any, lastTime: any, time: any, firedEvents: any, alpha: any): void;
-    }
-
-    class RegionAttachment {
-        public name: any;
-        public type: number;
-        public x: number;
-        public y: number;
-        public rotation: number;
-        public scaleX: number;
-        public scaleY: number;
-        public width: number;
-        public height: number;
-        public rendererObject: any;
-        public regionOffsetX: number;
-        public regionOffsetY: number;
-        public regionWidth: number;
-        public regionHeight: number;
-        public regionOriginalWidth: number;
-        public regionOriginalHeight: number;
-        public offset: any[];
-        public uvs: any[];
-        constructor(name?: any);
-        public setUVs(u: any, v: any, u2: any, v2: any, rotate: any): void;
-        public updateOffset(): void;
-        public computeVertices(x: any, y: any, bone: any, vertices: any): void;
-    }
-
-    class EventTimeline {
-        public frames: any[];
-        public events: any[];
-        constructor(frameCount: any);
-        public getFrameCount(): number;
-        public setFrame(frameIndex: any, time: any, event: any): void;
-        /** Fires events for frames > lastTime and <= time. */
-        public apply(skeleton: any, lastTime: any, time: any, firedEvents: any, alpha: any): void;
-    }
-
-    class DrawOrderTimeline {
-        public frames: any[];
-        public drawOrders: any[];
-        constructor(frameCount: any);
-        public getFrameCount(): number;
-        public setFrame(frameIndex: any, time: any, drawOrder: any): void;
-        public apply(skeleton: any, lastTime: any, time: any, firedEvents: any, alpha: any): void;
-    }
-
-    class EventData {
-        public name: any;
-        constructor(name: any);
-        public intValue: number;
-        public floatValue: number;
-        public stringValue: string;
-    }
-
-    class Event {
-        public data: any;
-        constructor(data: any);
-        public intValue: number;
-        public floatValue: number;
-        public stringValue: string;
-    }
-
-    class ScaleTimeline {
-        public boneIndex: number;
-        public curves: spine.Curves;
-        public frames: any[];
-        constructor(frameCount: any);
-        public getFrameCount(): number;
-        public setFrame(frameIndex: any, time: any, x: any, y: any): void;
-        public apply(skeleton: any, lastTime: any, time: any, firedEvents: any, alpha: any): void;
-    }
-
-    class SkeletonData {
-        public bones: spine.BoneData[];
-        public slots: spine.SlotData[];
-        public skins: spine.Skin[];
-        public events: spine.EventData[];
-        public animations: any[];
-        public defaultSkin: any;
-        constructor();
-        /** @return May be null. */
-        public findBone(boneName: any): spine.BoneData;
-        /** @return -1 if the bone was not found. */
-        public findBoneIndex(boneName: any): number;
-        /** @return May be null. */
-        public findSlot(slotName: any): spine.SlotData;
-        /** @return -1 if the bone was not found. */
-        public findSlotIndex(slotName: any): number;
-        /** @return May be null. */
-        public findSkin(skinName: any): spine.Skin;
-        /** @return May be null. */
-        public findEvent(eventName: any): spine.EventData;
-        /** @return May be null. */
-        public findAnimation(animationName: any): any;
-    }
-
-    class Skeleton {
-        public bones: spine.Bone[];
-        public slots: spine.Slot[];
-        public drawOrder: any[];
-        public data: spine.SkeletonData;
-        public x: number;
-        public y: number;
-        public skin: spine.Skin;
-        public r: number;
-        public g: number;
-        public b: number;
-        public a: number;
-        public time: number;
-        public flipX: boolean;
-        public flipY: boolean;
-        constructor(skeletonData: spine.SkeletonData);
-        /** Updates the world transform for each bone. */
-        public updateWorldTransform(): void;
-        /** Sets the bones and slots to their setup pose values. */
-        public setToSetupPose(): void;
-        public setBonesToSetupPose(): void;
-        public setSlotsToSetupPose(): void;
-        /** @return May return null. */
-        public getRootBone(): spine.Bone;
-        /** @return May be null. */
-        public findBone(boneName: any): spine.Bone;
-        /** @return -1 if the bone was not found. */
-        public findBoneIndex(boneName: any): number;
-        /** @return May be null. */
-        public findSlot(slotName: any): spine.Slot;
-        /** @return -1 if the bone was not found. */
-        public findSlotIndex(slotName: any): number;
-        public setSkinByName(skinName: any): void;
-        /** Sets the skin used to look up attachments not found in the {@link SkeletonData#getDefaultSkin() default skin}. Attachments
-         * from the new skin are attached if the corresponding attachment from the old skin was attached.
-         * @param newSkin May be null. */
-        public setSkin(newSkin: any): void;
-        /** @return May be null. */
-        public getAttachmentBySlotName(slotName: any, attachmentName: any): any;
-        /** @return May be null. */
-        public getAttachmentBySlotIndex(slotIndex: any, attachmentName: any): any;
-        /** @param attachmentName May be null. */
-        public setAttachment(slotName: any, attachmentName: any): void;
-        public update(delta: number): void;
-    }
-
     class SkeletonBounds {
         public polygonPool: any[];
         public polygons: any[];
@@ -438,49 +740,6 @@ declare module spine {
         public getPolygon(attachment: any): any;
         public getWidth(): number;
         public getHeight(): number;
-    }
-
-    class SkeletonJson {
-        public attachmentLoader: any;
-        public scale: number;
-        constructor(attachmentLoader: any);
-        static readCurve(timeline: any, frameIndex: any, valueMap: any): void;
-        static toColor(hexString: any, colorIndex: any): number;
-        public readSkeletonData(root: any): spine.SkeletonData;
-        public readAttachment(skin: any, name: any, map: any): any;
-        public readAnimation(name: any, map: any, skeletonData: any): void;
-    }
-
-    class TranslateTimeline {
-        public boneIndex: number;
-        public curves: spine.Curves;
-        public frames: any[];
-        constructor(frameCount: any);
-        public getFrameCount(): number;
-        public setFrame(frameIndex: any, time: any, x: any, y: any): void;
-        public apply(skeleton: any, lastTime: any, time: any, firedEvents: any, alpha: any): void;
-    }
-
-    class TrackEntry {
-        public next: any;
-        public previous: any;
-        public animation: any;
-        public loop: boolean;
-        public delay: number;
-        public time: number;
-        public lastTime: number;
-        public endTime: number;
-        public timeScale: number;
-        public mixTime: number;
-        public mixDuration: number;
-        public onStart: any;
-        public onEnd: any;
-        public onComplete: any;
-        public onEvent: any;
-    }
-
-    class MeshAttachment {
-        public name: string;
     }
 }
 declare module Fabrique {
