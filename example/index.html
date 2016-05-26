@@ -45,10 +45,12 @@
 
         var button1 = this.game.add.button(20, 20, 'button1', function () {
             buddy.setSkinByName('outfit01');
+            buddy.setToSetupPose();
         });
 
         var button1 = this.game.add.button(20, 130, 'button2', function () {
             buddy.setSkin(newSkin);
+            buddy.setToSetupPose();
         });
     }
 </script>
