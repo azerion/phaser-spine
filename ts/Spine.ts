@@ -213,8 +213,8 @@ module Fabrique {
             var sprite = new Phaser.Sprite(this.game, 0, 0, spriteTexture);
 
             var baseRotation = descriptor.rotate ? Math.PI * 0.5 : 0.0;
-            sprite.scale.x = descriptor.width / descriptor.originalWidth;
-            sprite.scale.y = descriptor.height / descriptor.originalHeight;
+            sprite.scale.x = descriptor.width / descriptor.originalWidth * attachment.scaleX;
+            sprite.scale.y = descriptor.height / descriptor.originalHeight * attachment.scaleY;
 
             sprite.rotation = baseRotation;
 ;
@@ -222,6 +222,12 @@ module Fabrique {
             sprite.anchor.y = 1.0 - ((0.5 * descriptor.originalHeight - descriptor.offsetY) / descriptor.height);
 
             sprite.alpha = attachment.a;
+            
+            if (descriptor.rotate) {
+                var x1 = sprite.scale.x;
+                sprite.scale.x = sprite.scale.y;
+                sprite.scale.y = x1;
+            }
 
             slot.sprites = slot.sprites || {};
             slot.sprites[descriptor.name] = sprite;

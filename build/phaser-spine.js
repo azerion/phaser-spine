@@ -1,9 +1,9 @@
 /*!
- * phaser-spine - version 2.0.0 
+ * phaser-spine - version 2.0.0-alpha1 
  * Spine plugin for Phaser.io!
  *
  * OrangeGames
- * Build at 04-05-2016
+ * Build at 26-05-2016
  * Released under MIT License 
  */
 
@@ -250,13 +250,19 @@ var Fabrique;
             var spriteTexture = new PIXI.Texture(baseTexture, spriteRect);
             var sprite = new Phaser.Sprite(this.game, 0, 0, spriteTexture);
             var baseRotation = descriptor.rotate ? Math.PI * 0.5 : 0.0;
-            sprite.scale.x = descriptor.width / descriptor.originalWidth;
-            sprite.scale.y = descriptor.height / descriptor.originalHeight;
+            sprite.scale.x = descriptor.width / descriptor.originalWidth * attachment.scaleX;
+            sprite.scale.y = descriptor.height / descriptor.originalHeight * attachment.scaleY;
             sprite.rotation = baseRotation;
+            console.log(descriptor.rotate);
             ;
             sprite.anchor.x = (0.5 * descriptor.originalWidth - descriptor.offsetX) / descriptor.width;
             sprite.anchor.y = 1.0 - ((0.5 * descriptor.originalHeight - descriptor.offsetY) / descriptor.height);
             sprite.alpha = attachment.a;
+            if (descriptor.rotate) {
+                var x1 = sprite.scale.x;
+                sprite.scale.x = sprite.scale.y;
+                sprite.scale.y = x1;
+            }
             slot.sprites = slot.sprites || {};
             slot.sprites[descriptor.name] = sprite;
             return sprite;
