@@ -7,7 +7,7 @@ module Fabrique {
         private skeletonData: spine.SkeletonData;
         private stateData: spine.AnimationStateData;
         private state: spine.AnimationState;
-        private slotContainers: any[];
+        private slotContainers: Phaser.Group[];
         private lastTime: number;
 
         public game: Fabrique.Plugins.SpineGame;
@@ -274,7 +274,7 @@ module Fabrique {
          * @param {number}  delay
          * @returns {any}
          */
-        public setAnimationByName(trackIndex: number, animationName: string, loop: boolean) {
+        public setAnimationByName(trackIndex: number, animationName: string, loop: boolean = false) {
             var animation = this.state.data.skeletonData.findAnimation(animationName);
             if (!animation) {
                 console.warn("Animation not found: " + animationName);
@@ -293,7 +293,7 @@ module Fabrique {
          * @param {number}  delay
          * @returns {any}
          */
-        public addAnimationByName(trackIndex: number, animationName: string, loop: boolean, delay: number) {
+        public addAnimationByName(trackIndex: number, animationName: string, loop: boolean = false, delay: number = 0) {
             var animation = this.state.data.skeletonData.findAnimation(animationName);
             if (!animation) {
                 console.warn("Animation not found: " + animationName);
@@ -341,7 +341,7 @@ module Fabrique {
          * @param newSkinName
          * @param skinNames
          */
-        public getCombinedSkin(newSkinName: string, ...skinNames: string[]): spine.Skin {
+        public createCombinedSkin(newSkinName: string, ...skinNames: string[]): spine.Skin {
             if (skinNames.length === 0) {
                 console.warn('Unable to combine skins when no skins are passed...');
                 return;
@@ -376,6 +376,8 @@ module Fabrique {
                     newSkin.addAttachment(slotIndex, attachmentName, attachment);
                 }
             }
+
+            this.skeleton.data.skins.push(newSkin);
 
             return newSkin;
         }

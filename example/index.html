@@ -4,7 +4,6 @@
     <title>Phaser Spine Example</title>
 
     <script src="../node_modules/phaser/dist/phaser.js"></script>
-    <script src="../vendor/Spine.js"></script>
     <script src="../build/phaser-spine.js"></script>
 
     <style>
@@ -41,7 +40,7 @@
 
         // play animation
         buddy.setAnimationByName(0, "idle", true);
-        var newSkin = buddy.getCombinedSkin('outfit02', 'vest', 'mask', 'outfit01');
+        var newSkin = buddy.createCombinedSkin('outfit02', 'vest', 'mask');
 
         var button1 = this.game.add.button(20, 20, 'button1', function () {
             buddy.setSkinByName('outfit01');
@@ -49,7 +48,7 @@
         });
 
         var button1 = this.game.add.button(20, 130, 'button2', function () {
-            buddy.setSkin(newSkin);
+            buddy.setSkinByName('outfit02');
             buddy.setToSetupPose();
         });
     }

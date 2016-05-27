@@ -4,7 +4,6 @@
     <title>Phaser Spine Example</title>
 
     <script src="../node_modules/phaser/dist/phaser.js"></script>
-    <script src="../vendor/Spine.js"></script>
     <script src="../build/phaser-spine.js"></script>
 
     <style>
@@ -35,7 +34,15 @@
     function create() {
         //create the spine object
         spineboy = game.add.spine(200, 400, "spineboy");
-        spineboy.setAnimationByName(0, "walk", true);
+        // set up the mixes!
+        spineboy.setMixByName("walk", "jump", 0.2);
+        spineboy.setMixByName("jump", "walk", 0.4);
+
+        spineboy.setAnimationByName(0, "walk", false);
+        game.input.onDown.add(function () {
+            spineboy.setAnimationByName(0, "jump", false);
+            spineboy.addAnimationByName(0, "walk", true);
+        });
     }
 </script>
 

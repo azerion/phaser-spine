@@ -4,7 +4,6 @@
     <title>Phaser Spine Example</title>
 
     <script src="../node_modules/phaser/dist/phaser.js"></script>
-    <script src="../vendor/Spine.js"></script>
     <script src="../build/phaser-spine.js"></script>
 
     <style>
@@ -40,6 +39,7 @@
         goblin.setAnimationByName(0, "walk", true);
         goblin.setSkinByName("goblin");
         goblin.setToSetupPose();
+        goblin.scale.set(0.5);
 
         //Add skin switch button
         var button1 = this.game.add.button(20, 20, 'button1', function() {

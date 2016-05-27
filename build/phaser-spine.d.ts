@@ -843,7 +843,7 @@ declare module Fabrique {
          * @param {number}  delay
          * @returns {any}
          */
-        setAnimationByName(trackIndex: number, animationName: string, loop: boolean): spine.TrackEntry;
+        setAnimationByName(trackIndex: number, animationName: string, loop?: boolean): spine.TrackEntry;
         /**
          * exposing the state's addAnimation
          * We override the original runtime's error because warnings dont stop the VM
@@ -854,7 +854,7 @@ declare module Fabrique {
          * @param {number}  delay
          * @returns {any}
          */
-        addAnimationByName(trackIndex: number, animationName: string, loop: boolean, delay: number): spine.TrackEntry;
+        addAnimationByName(trackIndex: number, animationName: string, loop?: boolean, delay?: number): spine.TrackEntry;
         /**
          * Exposing the skeleton's method to change the skin by skinName
          * We override the original runtime's error because warnings dont stop the VM
@@ -880,7 +880,7 @@ declare module Fabrique {
          * @param newSkinName
          * @param skinNames
          */
-        getCombinedSkin(newSkinName: string, ...skinNames: string[]): spine.Skin;
+        createCombinedSkin(newSkinName: string, ...skinNames: string[]): spine.Skin;
     }
 }
 declare module Fabrique {

@@ -42,9 +42,13 @@ module.exports = function (grunt) {
             }
         },
         concat: {
-            dist: {
+            definitions: {
                 src: ['vendor/Spine.d.ts', 'build/phaser-spine.d.ts'],
-                dest: 'build/phaser-spine.d.ts',
+                dest: 'build/phaser-spine.d.ts'
+            },
+            dist: {
+                src: ['vendor/Spine.js', 'build/phaser-spine.js'],
+                dest: 'build/phaser-spine.js'
             }
         },
         uglify: {
@@ -57,7 +61,7 @@ module.exports = function (grunt) {
                     unused: true,
                     if_return: true,
                     join_vars: true,
-                    //drop_console: true
+                    drop_console: true
                 },
                 mangle: true,
                 beautify: false
@@ -87,7 +91,7 @@ module.exports = function (grunt) {
         'clean:dist',
         'typescript:dist',
         'uglify:dist',
-        'concat:dist',
+        'concat',
         'usebanner:dist'
     ]);
 
