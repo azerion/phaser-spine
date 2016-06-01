@@ -761,7 +761,7 @@ declare module Fabrique {
             };
         }
         interface SpineLoader extends Phaser.Loader {
-            spine: (key: string, url: string) => void;
+            spine: (key: string, url: string, scalingVariants?: string[]) => void;
             cache: SpineCache;
         }
         interface SpineGame extends Phaser.Game {

@@ -1,5 +1,5 @@
 /*!
- * phaser-spine - version 2.1.0 
+ * phaser-spine - version 2.1.1 
  * Spine plugin for Phaser.io!
  *
  * OrangeGames
