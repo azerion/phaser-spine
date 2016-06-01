@@ -1,9 +1,9 @@
 /*!
- * phaser-spine - version 2.0.0 
+ * phaser-spine - version 2.1.0 
  * Spine plugin for Phaser.io!
  *
  * OrangeGames
- * Build at 27-05-2016
+ * Build at 01-06-2016
  * Released under MIT License 
  */
 
@@ -2887,15 +2887,25 @@ var Fabrique;
                 this.addSpineLoader();
             }
             Spine.prototype.addSpineLoader = function () {
-                Phaser.Loader.prototype.spine = function (key, url) {
+                Phaser.Loader.prototype.spine = function (key, url, scalingVariants) {
+                    var _this = this;
                     var atlasKey = key + "Atlas";
                     var cacheData = {
                         atlas: atlasKey,
-                        basePath: (url.substring(0, url.lastIndexOf('/')) === '') ? '.' : url.substring(0, url.lastIndexOf('/'))
+                        basePath: (url.substring(0, url.lastIndexOf('/')) === '') ? '.' : url.substring(0, url.lastIndexOf('/')),
+                        variants: undefined
                     };
+                    if (undefined === scalingVariants) {
+                        scalingVariants = [''];
+                    }
+                    else {
+                        cacheData.variants = scalingVariants;
+                    }
                     this.json(key, url);
-                    this.text(atlasKey, url.substr(0, url.lastIndexOf('.')) + '.atlas');
-                    this.image(key, url.substr(0, url.lastIndexOf('.')) + '.png');
+                    scalingVariants.forEach(function (variant) {
+                        _this.text(atlasKey, url.substr(0, url.lastIndexOf('.')) + variant + '.atlas');
+                        _this.image(key, url.substr(0, url.lastIndexOf('.')) + variant + '.png');
+                    });
                     this.game.cache.addSpine(key, cacheData);
                 };
             };
@@ -2904,11 +2914,11 @@ var Fabrique;
              * game.add.spine();
              */
             Spine.prototype.addSpineFactory = function () {
-                Phaser.GameObjectFactory.prototype.spine = function (x, y, key, group) {
+                Phaser.GameObjectFactory.prototype.spine = function (x, y, key, scalingVariant, group) {
                     if (group === undefined) {
                         group = this.world;
                     }
-                    var spineObject = new Fabrique.Spine(this.game, key);
+                    var spineObject = new Fabrique.Spine(this.game, key, scalingVariant);
                     spineObject.setToSetupPose();
                     spineObject.position.x = x;
                     spineObject.position.y = y;
@@ -2930,6 +2940,7 @@ var Fabrique;
                     return this.spine[key];
                 };
             };
+            Spine.RESOLUTION_REGEXP = /@(.+)x/;
             return Spine;
         })(Phaser.Plugin);
         Plugins.Spine = Spine;
@@ -2947,9 +2958,16 @@ var Fabrique;
          * @param game {Phaser.Game} the game reference to add this object
          * @param key {String} the key to find the assets for this object
          */
-        function Spine(game, key) {
+        function Spine(game, key, scalingVariant) {
             _super.call(this, game);
+            this.imageScale = 1;
             var data = this.game.cache.getSpine(key);
+            if (undefined !== scalingVariant && data.variants.indexOf(scalingVariant) !== -1) {
+                this.imageScale = this.getScaleFromVariant(scalingVariant);
+            }
+            else if (data.variants && data.variants.length >= 1) {
+                this.imageScale = this.getScaleFromVariant(data.variants[0]);
+            }
             var textureLoader = new Fabrique.SpineTextureLoader(game, key);
             // create a spine atlas using the loaded text and a spine texture loader instance //
             var spineAtlas = new spine.Atlas(game.cache.getText(data.atlas), textureLoader);
@@ -3001,6 +3019,13 @@ var Fabrique;
         });
         ;
         ;
+        Spine.prototype.getScaleFromVariant = function (variant) {
+            var scale = Fabrique.Plugins.Spine.RESOLUTION_REGEXP.exec(variant);
+            if (scale) {
+                return parseFloat(scale[1]);
+            }
+            return 1;
+        };
         /**
          * Update the spine skeleton and its animations by delta time (dt)
          *
@@ -3112,8 +3137,8 @@ var Fabrique;
             var spriteTexture = new PIXI.Texture(baseTexture, spriteRect);
             var sprite = new Phaser.Sprite(this.game, 0, 0, spriteTexture);
             var baseRotation = descriptor.rotate ? Math.PI * 0.5 : 0.0;
-            sprite.scale.x = descriptor.width / descriptor.originalWidth * attachment.scaleX;
-            sprite.scale.y = descriptor.height / descriptor.originalHeight * attachment.scaleY;
+            sprite.scale.x = descriptor.width / descriptor.originalWidth * attachment.scaleX / this.imageScale;
+            sprite.scale.y = descriptor.height / descriptor.originalHeight * attachment.scaleY / this.imageScale;
             sprite.rotation = baseRotation;
             ;
             sprite.anchor.x = (0.5 * descriptor.originalWidth - descriptor.offsetX) / descriptor.width;

@@ -751,13 +751,13 @@ declare module spine {
 declare module Fabrique {
     module Plugins {
         interface SpineObjectFactory extends Phaser.GameObjectFactory {
-            spine: (x: number, y: number, key: string, group?: Phaser.Group) => Fabrique.Spine;
+            spine: (x: number, y: number, key: string, scalingVariant?: string, group?: Phaser.Group) => Fabrique.Spine;
         }
         interface SpineCache extends Phaser.Cache {
             addSpine: (key: string, data: any) => void;
             getSpine: (key: string) => any;
             spine: {
-                [key: string]: any;
+                [key: string]: SpineCacheData;
             };
         }
         interface SpineLoader extends Phaser.Loader {
@@ -769,7 +769,13 @@ declare module Fabrique {
             load: SpineLoader;
             cache: SpineCache;
         }
+        interface SpineCacheData {
+            atlas: string;
+            basePath: string;
+            variants: string[];
+        }
         class Spine extends Phaser.Plugin {
+            static RESOLUTION_REGEXP: RegExp;
             constructor(game: SpineGame, parent: PIXI.DisplayObject);
             private addSpineLoader();
             /**
@@ -792,6 +798,7 @@ declare module Fabrique {
         private state;
         private slotContainers;
         private lastTime;
+        private imageScale;
         game: Fabrique.Plugins.SpineGame;
         /**
          * @class Spine
@@ -800,8 +807,9 @@ declare module Fabrique {
          * @param game {Phaser.Game} the game reference to add this object
          * @param key {String} the key to find the assets for this object
          */
-        constructor(game: Fabrique.Plugins.SpineGame, key: string);
+        constructor(game: Fabrique.Plugins.SpineGame, key: string, scalingVariant?: string);
         autoUpdate: boolean;
+        private getScaleFromVariant(variant);
         /**
          * Update the spine skeleton and its animations by delta time (dt)
          *

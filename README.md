@@ -9,6 +9,7 @@ Key features:
 * Skin support
 * Possible to combine skins
 * Mixes and fading animations
+* Support for scaled atlases
 
 Getting Started
 ---------------
@@ -32,7 +33,7 @@ Usage
 -----
 
 Like any other asset in Phaser, you need to preload the spine object you want in your game. A spine Javascript export will deliver you three files; *.atlas, *.json and *.png.
-The preloader expects these to be in the same folder, and when so you can just preload the json file by adding the following code to youre game:
+The preloader expects these to be in the same folder, and when so you can just preload the json file by adding the following code to your game:
 
 ```javascript
 game.load.spine(
@@ -76,7 +77,7 @@ spineboy.setMixByName("jump", "walk", 0.4); //transition from jump to walk and f
 
 ### Switching skins
 Another great additions to spine is the support of skins and the ability to freely switch between them. Like animations this is simple and we use the same API as the runtime.
-Don't forget to call setToSetupPose after switching skings to update all attachments correctly.
+Don't forget to call setToSetupPose after switching skins to update all attachments correctly.
 ```javascript
 buddy.setSkinByName('outfit01');
 buddy.setToSetupPose();
@@ -99,6 +100,35 @@ buddy.setSkinByName(outfit02);
 //And then we shouldn't forget to setToSetupPose ;)
 buddy.setToSetupPose();
 ```
+
+### Scaled atlases
+In Spine it's possible to define different scales for your export atlases, including a special suffix that will be suffixed to each atlas name. By default this plugin assumes that no scale is configured, ergo everything is set with scale=1.
+If you export your atlases to a smaller scale, than this will only happen to the images, the original bone structure will still be defined at the original size you defined in your spine project.
+
+If the exported image is scaled up (or down), than this has to be inverted by the runtime in order to have the correct size of the images for the attachments. In order to do do this correctly, the suffix for a scale any other than 1 has to be set.
+By default this plugin parses the suffix with a regular expression that looks for numbers start with @ and ending by x. So an atlas file with a scale of 0.5 should have a suffix of @0.5x and the resultion file name would be spineBoy@0.5x.atlas.
+
+If you'd like a different setup you can do so by supplying a new RegExp object to the follow property:
+```javascript
+Fabrique.Plugins.Spine.RESOLUTION_REGEXP = /#(.+)r/;
+```
+Now the Spine plugin will look for suffixes that look like: #0.5r
+
+The next step is to tell the preloader which scaling variants are available for loading, by adding them as an array in the 3rd optional parameter:
+```javascript
+game.load.spine('shooter', "shooter.json", ['@0.7x', '@0.5x']);
+```
+The preloader will load 1 json (with all the skeleton/animation data), and 2 images and 2 atlas files.
+
+Later in your game, when you create a new spine object, you again need to add the scaling variant you would like to have for your game. This way you can conditionally load different assets.
+If you pass no scaling variant to the object, it will just get the first variant from the array supplied when you preload the spine object.
+```javascript
+shooter = game.add.spine(400, 300, "shooter", '@0.7x');
+//the above is equal to:
+shooter = game.add.spine(400, 300, "shooter");
+//because @0.7x is the first element of the array supplied to the preloader
+```
+
 
 Todo
 ----

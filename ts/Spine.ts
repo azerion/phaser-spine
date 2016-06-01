@@ -1,6 +1,7 @@
 (<any>PIXI.Strip).prototype.postUpdate = function () {};
 
 module Fabrique {
+    import SpineCacheData = Fabrique.Plugins.SpineCacheData;
     export class Spine extends Phaser.Group
     {
         private skeleton: spine.Skeleton;
@@ -9,6 +10,7 @@ module Fabrique {
         private state: spine.AnimationState;
         private slotContainers: Phaser.Group[];
         private lastTime: number;
+        private imageScale: number = 1;
 
         public game: Fabrique.Plugins.SpineGame;
 
@@ -19,11 +21,17 @@ module Fabrique {
          * @param game {Phaser.Game} the game reference to add this object
          * @param key {String} the key to find the assets for this object
          */
-        constructor(game: Fabrique.Plugins.SpineGame, key: string)
+        constructor(game: Fabrique.Plugins.SpineGame, key: string, scalingVariant?: string)
         {
             super(game);
 
-            var data = this.game.cache.getSpine(key);
+            let data: SpineCacheData = this.game.cache.getSpine(key);
+
+            if (undefined !== scalingVariant && data.variants.indexOf(scalingVariant) !== -1) {
+                this.imageScale = this.getScaleFromVariant(scalingVariant);
+            } else if (data.variants && data.variants.length >= 1) {
+                this.imageScale = this.getScaleFromVariant(data.variants[0]);
+            }
 
             var textureLoader = new Fabrique.SpineTextureLoader(game, key);
             // create a spine atlas using the loaded text and a spine texture loader instance //
@@ -80,6 +88,14 @@ module Fabrique {
             this.updateTransform = value ? Fabrique.Spine.prototype.autoUpdateTransform : PIXI.DisplayObjectContainer.prototype.updateTransform;
         };
 
+
+        private getScaleFromVariant(variant: string): number {
+            let scale: RegExpExecArray = Plugins.Spine.RESOLUTION_REGEXP.exec(variant);
+            if (scale) {
+                return parseFloat(<string>scale[1]);
+            }
+            return 1;
+        }
 
         /**
          * Update the spine skeleton and its animations by delta time (dt)
@@ -213,8 +229,8 @@ module Fabrique {
             var sprite = new Phaser.Sprite(this.game, 0, 0, spriteTexture);
 
             var baseRotation = descriptor.rotate ? Math.PI * 0.5 : 0.0;
-            sprite.scale.x = descriptor.width / descriptor.originalWidth * attachment.scaleX;
-            sprite.scale.y = descriptor.height / descriptor.originalHeight * attachment.scaleY;
+            sprite.scale.x = descriptor.width / descriptor.originalWidth * attachment.scaleX / this.imageScale;
+            sprite.scale.y = descriptor.height / descriptor.originalHeight * attachment.scaleY / this.imageScale;
 
             sprite.rotation = baseRotation;
 ;

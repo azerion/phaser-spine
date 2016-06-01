@@ -1,13 +1,13 @@
 module Fabrique {
     export module Plugins {
         export interface SpineObjectFactory extends Phaser.GameObjectFactory {
-            spine: (x: number, y: number, key: string, group?: Phaser.Group) => Fabrique.Spine;
+            spine: (x: number, y: number, key: string, scalingVariant?: string, group?: Phaser.Group) => Fabrique.Spine;
         }
 
         export interface SpineCache extends Phaser.Cache {
             addSpine: (key: string, data: any) => void;
             getSpine: (key: string) => any;
-            spine: {[key: string]: any};
+            spine: {[key: string]: SpineCacheData};
         }
 
         export interface SpineLoader extends Phaser.Loader {
@@ -21,7 +21,15 @@ module Fabrique {
             cache: SpineCache;
         }
 
+        export interface SpineCacheData {
+            atlas: string;
+            basePath: string;
+            variants: string[];
+        }
+
         export class Spine extends Phaser.Plugin {
+
+            public static RESOLUTION_REGEXP: RegExp = /@(.+)x/;
 
             constructor(game: SpineGame, parent: PIXI.DisplayObject) {
                 super(game, parent);
@@ -30,20 +38,30 @@ module Fabrique {
                 this.addSpineFactory();
                 this.addSpineLoader();
             }
-
+            
             private addSpineLoader() {
-                (<Fabrique.Plugins.SpineLoader>Phaser.Loader.prototype).spine = function(key: string, url: string) {
+                (<Fabrique.Plugins.SpineLoader>Phaser.Loader.prototype).spine = function(key: string, url: string, scalingVariants?: string[]) {
 
-                    var atlasKey = key+"Atlas";
+                    let atlasKey: string = key+"Atlas";
 
-                    var cacheData = {
+                    let cacheData: SpineCacheData = <SpineCacheData>{
                         atlas: atlasKey,
-                        basePath: (url.substring(0, url.lastIndexOf('/')) === '') ? '.' : url.substring(0, url.lastIndexOf('/'))
+                        basePath: (url.substring(0, url.lastIndexOf('/')) === '') ? '.' : url.substring(0, url.lastIndexOf('/')),
+                        variants: undefined
                     };
 
+                    if (undefined === scalingVariants) {
+                        scalingVariants = [''];
+                    } else {
+                        cacheData.variants = scalingVariants;
+                    }
+
                     this.json(key, url);
-                    this.text(atlasKey, url.substr(0, url.lastIndexOf('.')) + '.atlas');
-                    this.image(key, url.substr(0, url.lastIndexOf('.')) + '.png');
+
+                    scalingVariants.forEach((variant: string) => {
+                        (<Fabrique.Plugins.SpineLoader>this).text(atlasKey, url.substr(0, url.lastIndexOf('.')) + variant + '.atlas');
+                        (<Fabrique.Plugins.SpineLoader>this).image(key, url.substr(0, url.lastIndexOf('.')) + variant + '.png');
+                    });
 
                     this.game.cache.addSpine(key, cacheData);
                 };
@@ -54,11 +72,11 @@ module Fabrique {
              * game.add.spine();
              */
             private addSpineFactory() {
-                (<Fabrique.Plugins.SpineObjectFactory>Phaser.GameObjectFactory.prototype).spine = function(x: number, y: number, key: string, group?: Phaser.Group): Fabrique.Spine
+                (<Fabrique.Plugins.SpineObjectFactory>Phaser.GameObjectFactory.prototype).spine = function(x: number, y: number, key: string, scalingVariant?: string, group?: Phaser.Group): Fabrique.Spine
                 {
                     if (group === undefined) { group = this.world; }
 
-                    var spineObject = new Fabrique.Spine(this.game, key);
+                    var spineObject = new Fabrique.Spine(this.game, key, scalingVariant);
 
                     spineObject.setToSetupPose();
                     spineObject.position.x = x;
@@ -76,13 +94,13 @@ module Fabrique {
                 (<Fabrique.Plugins.SpineCache>Phaser.Cache.prototype).spine = {};
 
                 //Method for adding a spine dict to the cache space
-                (<Fabrique.Plugins.SpineCache>Phaser.Cache.prototype).addSpine = function(key: string, data: any)
+                (<Fabrique.Plugins.SpineCache>Phaser.Cache.prototype).addSpine = function(key: string, data: SpineCacheData)
                 {
                     this.spine[key] = data;
                 };
 
                 //Method for fetching a spine dict from the cache space
-                (<Fabrique.Plugins.SpineCache>Phaser.Cache.prototype).getSpine = function(key: string): any
+                (<Fabrique.Plugins.SpineCache>Phaser.Cache.prototype).getSpine = function(key: string): SpineCacheData
                 {
                     return this.spine[key];
                 };
