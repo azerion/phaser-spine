@@ -56,8 +56,8 @@ module Fabrique {
 
             this.slotContainers = [];
 
-            for (var i = 0, n = this.skeleton.drawOrder.length; i < n; i++) {
-                var slot = this.skeleton.drawOrder[i];
+            for (var i = 0, n = this.skeleton.slots.length; i < n; i++) {
+                var slot = this.skeleton.slots[i];
                 var attachment = slot.attachment;
                 var slotContainer = new Phaser.Group(game);
                 this.slotContainers.push(slotContainer);
@@ -112,12 +112,18 @@ module Fabrique {
             this.state.apply(this.skeleton);
             this.skeleton.updateWorldTransform();
 
-            var drawOrder = this.skeleton.drawOrder;
+            var drawOrder: spine.Slot[] = this.skeleton.drawOrder;
+            var slots = this.skeleton.slots;
             for (var i = 0, n = drawOrder.length; i < n; i++) {
+                if (drawOrder[i].currentSprite !== undefined) {
+                    this.children[i] = drawOrder[i].currentSprite.parent
+                }
+            }
 
-                var slot = this.skeleton.drawOrder[i];
-                var attachment = slot.attachment;
-                var slotContainer = this.slotContainers[i];
+            for (var i = 0, n = slots.length; i < n; i++) {
+                var slot: any = slots[i];
+                var attachment: any = slot.attachment;
+                var slotContainer: any = this.slotContainers[i];
 
                 if (!attachment) {
                     slotContainer.visible = false;

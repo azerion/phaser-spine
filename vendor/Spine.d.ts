@@ -113,6 +113,11 @@ declare module spine {
         public data: SlotData;
         public bone: Bone;
         public attachmentVertices: Float32Array;
+        public currentSpriteName: string;
+        public currentSprite: Phaser.Sprite;
+        public currentMeshName: string;
+        public currentMesh: PIXI.Strip;
+        public sprites: {[spriteName: string]: Phaser.Sprite};
 
         public r: number;
         public g: number;

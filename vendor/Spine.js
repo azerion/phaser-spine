@@ -1,3 +1,4 @@
+
 /******************************************************************************
  * Spine Runtimes Software License
  * Version 2.3
@@ -979,7 +980,8 @@ spine.FfdTimeline.prototype = {
 	apply: function (skeleton, lastTime, time, firedEvents, alpha) {
 		var slot = skeleton.slots[this.slotIndex];
 		var slotAttachment = slot.attachment;
-		if (slotAttachment != this.attachment && (!slotAttachment.inheritFFD || slotAttachment.parentMesh != sourceAttachment)) return;
+		if (!slotAttachment) return;
+		if (slotAttachment != this.attachment && (!slotAttachment.inheritFFD || slotAttachment.parentMesh != this.attachment)) return;
 
 		var frames = this.frames;
 		if (time < frames[0]) return; // Time is before first frame.
@@ -988,8 +990,10 @@ spine.FfdTimeline.prototype = {
 		var vertexCount = frameVertices[0].length;
 
 		var vertices = slot.attachmentVertices;
-		if (vertices.length != vertexCount) alpha = 1;
-		vertices.length = vertexCount;
+		if (vertices.length != vertexCount) {
+			slot.attachmentVertices = vertices = new spine.Float32Array(vertexCount);
+			alpha = 1;
+		}
 
 		if (time >= frames[frames.length - 1]) { // Time is after last frame.
 			var lastVertices = frameVertices[frames.length - 1];
@@ -2116,14 +2120,14 @@ spine.SkeletonJson.prototype = {
 					var vertices = this.getFloatArray(map, "vertices", 1);
 					var weights = new spine.Float32Array(uvs.length * 3 * 3);
 					var bones = new spine.Uint32Array(uvs.length * 3);
-					for (var i = 0, n = vertices.length; i < n; ) {
+					for (var i = 0, b = 0, w = 0, n = vertices.length; i < n; ) {
 						var boneCount = vertices[i++] | 0;
-						bones[bones.length] = boneCount;
+						bones[b++] = boneCount;
 						for (var nn = i + boneCount * 4; i < nn; ) {
-							bones[bones.length] = vertices[i];
-							weights[weights.length] = vertices[i + 1] * scale;
-							weights[weights.length] = vertices[i + 2] * scale;
-							weights[weights.length] = vertices[i + 3];
+							bones[b++] = vertices[i];
+							weights[w++] = vertices[i + 1] * scale;
+							weights[w++] = vertices[i + 2] * scale;
+							weights[w++] = vertices[i + 3];
 							i += 4;
 						}
 					}
@@ -2346,7 +2350,7 @@ spine.SkeletonJson.prototype = {
 					drawOrder = new spine.Uint32Array(slotCount);
 					drawOrder.length = slotCount;
 					for (var ii = slotCount - 1; ii >= 0; ii--)
-						drawOrder[ii] = -1;
+						drawOrder[ii] = 4294967295;
 					var offsets = drawOrderMap["offsets"];
 					var unchanged = new spine.Uint32Array(slotCount - offsets.length);
 					unchanged.length = slotCount - offsets.length;
@@ -2366,7 +2370,7 @@ spine.SkeletonJson.prototype = {
 						unchanged[unchangedIndex++] = originalIndex++;
 					// Fill in unchanged items.
 					for (var ii = slotCount - 1; ii >= 0; ii--)
-						if (drawOrder[ii] == -1) drawOrder[ii] = unchanged[--unchangedIndex];
+						if (drawOrder[ii] == 4294967295) drawOrder[ii] = unchanged[--unchangedIndex];
 				}
 				timeline.setFrame(frameIndex++, drawOrderMap["time"], drawOrder);
 			}
