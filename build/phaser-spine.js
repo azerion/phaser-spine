@@ -1,9 +1,9 @@
 /*!
- * phaser-spine - version 2.1.2 
+ * phaser-spine - version 2.1.3-alpha1 
  * Spine plugin for Phaser.io!
  *
  * OrangeGames
- * Build at 16-06-2016
+ * Build at 28-06-2016
  * Released under MIT License 
  */
 
@@ -2871,8 +2871,6 @@ spine.SkeletonBounds.prototype = {
 	}
 };
 
-spine.Bone.yDown = true;
-
 var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
@@ -2951,6 +2949,7 @@ var Fabrique;
     })(Plugins = Fabrique.Plugins || (Fabrique.Plugins = {}));
 })(Fabrique || (Fabrique = {}));
 PIXI.Strip.prototype.postUpdate = function () { };
+spine.Bone.yDown = true;
 var Fabrique;
 (function (Fabrique) {
     var Spine = (function (_super) {
@@ -3087,6 +3086,11 @@ var Fabrique;
                     slotContainer.scale.y = bone.getWorldScaleY();
                     //Update rotation
                     slotContainer.rotation = (bone.getWorldRotationX() - attachment.rotation) * Math.PI / 180;
+                    if (bone.getWorldScaleY() < 0 || bone.getWorldScaleX() < 0) {
+                        slotContainer.scale.y = -slotContainer.scale.y;
+                        slotContainer.scale.x = -slotContainer.scale.x;
+                        slotContainer.rotation = -slotContainer.rotation;
+                    }
                     slot.currentSprite.blendMode = slot.blendMode;
                     slot.currentSprite.tint = PIXI.rgb2hex([slot.r, slot.g, slot.b]);
                 }

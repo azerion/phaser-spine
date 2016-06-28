@@ -2861,5 +2861,3 @@ spine.SkeletonBounds.prototype = {
 		return this.maxY - this.minY;
 	}
 };
-
-spine.Bone.yDown = true;

@@ -1,5 +1,7 @@
 (<any>PIXI.Strip).prototype.postUpdate = function () {};
 
+spine.Bone.yDown = true;
+
 module Fabrique {
     import SpineCacheData = Fabrique.Plugins.SpineCacheData;
     export class Spine extends Phaser.Group
@@ -33,13 +35,13 @@ module Fabrique {
                 this.imageScale = this.getScaleFromVariant(data.variants[0]);
             }
 
-            var textureLoader = new Fabrique.SpineTextureLoader(game, key);
+            let textureLoader = new Fabrique.SpineTextureLoader(game, key);
             // create a spine atlas using the loaded text and a spine texture loader instance //
-            var spineAtlas = new spine.Atlas(game.cache.getText(data.atlas), textureLoader);
+            let spineAtlas = new spine.Atlas(game.cache.getText(data.atlas), textureLoader);
             // now we use an atlas attachment loader //
-            var attachmentLoader = new spine.AtlasAttachmentLoader(spineAtlas);
+            let attachmentLoader = new spine.AtlasAttachmentLoader(spineAtlas);
             // spine animation
-            var spineJsonParser = new spine.SkeletonJson(attachmentLoader);
+            let spineJsonParser = new spine.SkeletonJson(attachmentLoader);
 
             //get the Skeleton Data
             this.skeletonData = spineJsonParser.readSkeletonData(game.cache.getJSON(key));
@@ -56,10 +58,11 @@ module Fabrique {
 
             this.slotContainers = [];
 
-            for (var i = 0, n = this.skeleton.slots.length; i < n; i++) {
-                var slot = this.skeleton.slots[i];
-                var attachment = slot.attachment;
-                var slotContainer = new Phaser.Group(game);
+            for (let i: number = 0, n = this.skeleton.slots.length; i < n; i++) {
+                let slot: spine.Slot = this.skeleton.slots[i];
+                let attachment: spine.Attachment = slot.attachment;
+
+                let slotContainer = new Phaser.Group(game);
                 this.slotContainers.push(slotContainer);
                 this.add(slotContainer);
 
@@ -112,8 +115,8 @@ module Fabrique {
             this.state.apply(this.skeleton);
             this.skeleton.updateWorldTransform();
 
-            var drawOrder: spine.Slot[] = this.skeleton.drawOrder;
-            var slots = this.skeleton.slots;
+            let drawOrder: spine.Slot[] = this.skeleton.drawOrder;
+            let slots: spine.Slot[] = this.skeleton.slots;
             for (var i = 0, n = drawOrder.length; i < n; i++) {
                 if (drawOrder[i].currentSprite !== undefined) {
                     this.children[i] = drawOrder[i].currentSprite.parent
@@ -146,6 +149,7 @@ module Fabrique {
                                 var sprite = this.createSprite(slot, attachment);
                                 slotContainer.add(sprite);
                             }
+
                             slot.currentSprite = slot.sprites[spriteName];
                             slot.currentSpriteName = spriteName;
                         }
@@ -160,10 +164,16 @@ module Fabrique {
                     //Update scaling
                     slotContainer.scale.x = bone.getWorldScaleX();
                     slotContainer.scale.y = bone.getWorldScaleY();
-
                     //Update rotation
                     slotContainer.rotation = (bone.getWorldRotationX() - attachment.rotation) * Math.PI / 180;
 
+                    if (bone.getWorldScaleY() < 0 || bone.getWorldScaleX() < 0) {
+                        slotContainer.scale.y = -slotContainer.scale.y;
+                        slotContainer.scale.x = -slotContainer.scale.x;
+                        slotContainer.rotation = -slotContainer.rotation;
+
+                    }
+                    
                     slot.currentSprite.blendMode = slot.blendMode;
                     slot.currentSprite.tint = PIXI.rgb2hex([slot.r,slot.g,slot.b]);
                 } else if (type === spine.AttachmentType.weightedmesh) {
