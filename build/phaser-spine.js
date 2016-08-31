@@ -2892,11 +2892,12 @@ var Fabrique;
                 this.addSpineLoader();
             }
             Spine.prototype.addSpineLoader = function () {
-                Phaser.Loader.prototype.spine = function (key, url, scalingVariants) {
+                Phaser.Loader.prototype.spine = function (key, url, scalingVariants, texturePageTotal) {
                     var _this = this;
                     var atlasKey = key + "Atlas";
                     var cacheData = {
                         atlas: atlasKey,
+                        texturePageTotal: texturePageTotal,
                         basePath: (url.substring(0, url.lastIndexOf('/')) === '') ? '.' : url.substring(0, url.lastIndexOf('/')),
                         variants: undefined
                     };
@@ -2912,11 +2913,12 @@ var Fabrique;
                         _this.image(key, url.substr(0, url.lastIndexOf('.')) + variant + '.png');
                         
                         //Load up multi-page textures
-                        //Assumes a fixed number of pages. 
-                        //Need help with turning this to something dynamic, like looking at the number of image filename extensions found in the atlas file.
-                        for (var texPages = 2; texPages < 10; texPages++) {
-                            _this.image(key + '_p' + texPages, url.substr(0, url.lastIndexOf('.')) + texPages + variant + '.png');
-                        }
+                        //Assumes a fixed number passed on as a paramter.
+                        if (texturePageTotal > 0) {
+	                    for (var texPages = 2; texPages <= texturePageTotal; texPages++) {
+		                _this.image(key + '_p' + texPages, url.substr(0, url.lastIndexOf('.')) + texPages + variant + '.png');
+		            }
+			}
 
                     });
                     this.game.cache.addSpine(key, cacheData);
