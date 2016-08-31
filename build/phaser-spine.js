@@ -2489,8 +2489,11 @@ spine.Atlas = function (atlasText, textureLoader) {
 			else if (direction == "xy")
 				page.uWrap = page.vWrap = spine.Atlas.TextureWrap.repeat;
 
-			textureLoader.load(page, line, this);
+			//textureLoader.load(page, line, this);
 
+			//Pass texture image page number
+			textureLoader.load(page, line, (this.pages.length + 1));
+			
 			this.pages[this.pages.length] = page;
 
 		} else {
@@ -2889,11 +2892,12 @@ var Fabrique;
                 this.addSpineLoader();
             }
             Spine.prototype.addSpineLoader = function () {
-                Phaser.Loader.prototype.spine = function (key, url, scalingVariants) {
+                Phaser.Loader.prototype.spine = function (key, url, scalingVariants, texturePageTotal) {
                     var _this = this;
                     var atlasKey = key + "Atlas";
                     var cacheData = {
                         atlas: atlasKey,
+                        texturePageTotal: texturePageTotal,
                         basePath: (url.substring(0, url.lastIndexOf('/')) === '') ? '.' : url.substring(0, url.lastIndexOf('/')),
                         variants: undefined
                     };
@@ -2907,6 +2911,15 @@ var Fabrique;
                     scalingVariants.forEach(function (variant) {
                         _this.text(atlasKey, url.substr(0, url.lastIndexOf('.')) + variant + '.atlas');
                         _this.image(key, url.substr(0, url.lastIndexOf('.')) + variant + '.png');
+                        
+                        //Load up multi-page textures
+                        //Assumes a fixed number passed on as a paramter.
+                        if (texturePageTotal > 0) {
+	                    for (var texPages = 2; texPages <= texturePageTotal; texPages++) {
+		                _this.image(key + '_p' + texPages, url.substr(0, url.lastIndexOf('.')) + texPages + variant + '.png');
+		            }
+			}
+
                     });
                     this.game.cache.addSpine(key, cacheData);
                 };
@@ -3330,8 +3343,18 @@ var Fabrique;
              * @param page {spine.AtlasPage} Atlas page to which texture belongs
              * @param file {String} The file to load, this is just the file path relative to the base path configured in the constructor
              */
-            this.load = function (page, file) {
-                var image = this.game.make.image(0, 0, this.key);
+            this.load = function (page, file, pageno) {
+            	//Loads a single texture image
+                //var image = this.game.make.image(0, 0, this.key);
+
+		//Loads multiple texture images
+		//Need help with turning this to a dynamic one, like reading atlas file and counting the number of image file extensions found.
+                if (pageno < 2) {
+                  var image = this.game.make.image(0, 0, this.key);
+                } else {
+                  var image = this.game.make.image(0, 0, this.key + '_p' + pageno);
+                }
+
                 page.rendererObject = image.texture.baseTexture;
             };
             /**
