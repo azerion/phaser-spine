@@ -4,6 +4,7 @@ spine.Bone.yDown = true;
 
 module Fabrique {
     import SpineCacheData = Fabrique.Plugins.SpineCacheData;
+    import Skin = spine.Skin;
     export class Spine extends Phaser.Group
     {
         private skeleton: spine.Skeleton;
@@ -35,7 +36,7 @@ module Fabrique {
                 this.imageScale = this.getScaleFromVariant(data.variants[0]);
             }
 
-            let textureLoader = new Fabrique.SpineTextureLoader(game, key);
+            let textureLoader = new Fabrique.SpineTextureLoader(game);
             // create a spine atlas using the loaded text and a spine texture loader instance //
             let spineAtlas = new spine.Atlas(game.cache.getText(data.atlas), textureLoader);
             // now we use an atlas attachment loader //
@@ -67,16 +68,18 @@ module Fabrique {
                 this.add(slotContainer);
 
                 if (attachment instanceof spine.RegionAttachment) {
-                    var spriteName = attachment.rendererObject.name;
-                    var sprite = this.createSprite(slot, attachment);
+                    let spriteName: string = attachment.rendererObject.name;
+                    let sprite: Phaser.Sprite = this.createSprite(slot, attachment);
                     slot.currentSprite = sprite;
                     slot.currentSpriteName = spriteName;
                     slotContainer.add(sprite);
                 } else if (attachment instanceof spine.WeightedMeshAttachment) {
-                    var mesh = this.createMesh(slot, attachment);
+                    let mesh: PIXI.Strip = this.createMesh(slot, attachment);
                     slot.currentMesh = mesh;
                     slot.currentMeshName = attachment.name;
                     slotContainer.add(mesh);
+                } else {
+                    continue;
                 }
             }
 
@@ -106,7 +109,7 @@ module Fabrique {
          * @method update
          * @param dt {Number} Delta time. Time by which the animation should be updated
          */
-        public update(dt?: number) {
+        public update(dt?: number): void {
             if (dt === undefined) {
                 return;
             }
@@ -176,7 +179,7 @@ module Fabrique {
                     
                     slot.currentSprite.blendMode = slot.blendMode;
                     slot.currentSprite.tint = PIXI.rgb2hex([slot.r,slot.g,slot.b]);
-                } else if (type === spine.AttachmentType.weightedmesh) {
+                } else if (type === spine.AttachmentType.weightedmesh || type === spine.AttachmentType.weightedlinkedmesh) {
                     if (!slot.currentMeshName || slot.currentMeshName !== attachment.name) {
                         var meshName = attachment.name;
                         if (slot.currentMesh !== undefined) {
@@ -206,7 +209,17 @@ module Fabrique {
 
                 slotContainer.alpha = slot.a;
             }
-        };
+        }
+
+        /**
+         * Children should always be destroyed
+         *
+         * @param destroyChildren
+         * @param soft
+         */
+        public destroy(destroyChildren?: boolean, soft?: boolean): void {
+            super.destroy(true, soft)
+        }
 
         /**
          * When autoupdate is set to yes this function is used as pixi's updateTransform function
@@ -232,19 +245,19 @@ module Fabrique {
          * @param attachment {spine.RegionAttachment} The attachment that the sprite will represent
          * @private
          */
-        public createSprite(slot: any, attachment: any) {
+        public createSprite(slot: any, attachment: any): Phaser.Sprite {
 
-            var descriptor = attachment.rendererObject;
-            var baseTexture = descriptor.page.rendererObject;
-            var spriteRect = new PIXI.Rectangle(descriptor.x,
+            let descriptor: any = attachment.rendererObject;
+            let baseTexture: any = descriptor.page.rendererObject;
+            let spriteRect: PIXI.Rectangle = new PIXI.Rectangle(descriptor.x,
                 descriptor.y,
                 descriptor.rotate ? descriptor.height : descriptor.width,
                 descriptor.rotate ? descriptor.width : descriptor.height);
 
-            var spriteTexture = new PIXI.Texture(baseTexture, spriteRect);
-            var sprite = new Phaser.Sprite(this.game, 0, 0, spriteTexture);
+            let spriteTexture: PIXI.Texture = new PIXI.Texture(baseTexture, spriteRect);
+            let sprite: Phaser.Sprite = new Phaser.Sprite(this.game, 0, 0, spriteTexture);
 
-            var baseRotation = descriptor.rotate ? Math.PI * 0.5 : 0.0;
+            let baseRotation: number = descriptor.rotate ? Math.PI * 0.5 : 0.0;
             sprite.scale.x = descriptor.width / descriptor.originalWidth * attachment.scaleX / this.imageScale;
             sprite.scale.y = descriptor.height / descriptor.originalHeight * attachment.scaleY / this.imageScale;
 
@@ -254,9 +267,9 @@ module Fabrique {
             sprite.anchor.y = 1.0 - ((0.5 * descriptor.originalHeight - descriptor.offsetY) / descriptor.height);
 
             sprite.alpha = attachment.a;
-            
+
             if (descriptor.rotate) {
-                var x1 = sprite.scale.x;
+                let x1: number = sprite.scale.x;
                 sprite.scale.x = sprite.scale.y;
                 sprite.scale.y = x1;
             }
@@ -267,12 +280,13 @@ module Fabrique {
             return sprite;
         };
 
-        public createMesh(slot: any, attachment: any) {
-            var descriptor = attachment.rendererObject;
-            var baseTexture = descriptor.page.rendererObject;
-            var texture = new PIXI.Texture(baseTexture);
+        public createMesh(slot: any, attachment: any): PIXI.Strip {
+            let descriptor: any = attachment.rendererObject;
+            let baseTexture: any = descriptor.page.rendererObject;
+            let texture: PIXI.Texture = new PIXI.Texture(baseTexture);
 
-            var strip = new PIXI.Strip(texture);
+            let strip: PIXI.Strip = new PIXI.Strip(texture);
+            (<any>strip).drawMode = 1;
             strip.canvasPadding = 1.5;
 
             (<any>strip).vertices = new spine.Float32Array(attachment.uvs.length);
@@ -292,7 +306,7 @@ module Fabrique {
          * @param {String} toName   [target animation name]
          * @param {Float} duration [Duration in the transition of the animations]
          */
-        public setMixByName(fromName: string, toName: string, duration: number) {
+        public setMixByName(fromName: string, toName: string, duration: number): void {
             this.stateData.setMixByName(fromName, toName, duration);
         };
 
@@ -306,12 +320,13 @@ module Fabrique {
          * @param {number}  delay
          * @returns {any}
          */
-        public setAnimationByName(trackIndex: number, animationName: string, loop: boolean = false) {
-            var animation = this.state.data.skeletonData.findAnimation(animationName);
+        public setAnimationByName(trackIndex: number, animationName: string, loop: boolean = false): spine.TrackEntry {
+            let animation: spine.Animation = this.state.data.skeletonData.findAnimation(animationName);
             if (!animation) {
                 console.warn("Animation not found: " + animationName);
                 return null;
             }
+
             return this.state.setAnimation(trackIndex, animation, loop);
         };
 
@@ -325,8 +340,8 @@ module Fabrique {
          * @param {number}  delay
          * @returns {any}
          */
-        public addAnimationByName(trackIndex: number, animationName: string, loop: boolean = false, delay: number = 0) {
-            var animation = this.state.data.skeletonData.findAnimation(animationName);
+        public addAnimationByName(trackIndex: number, animationName: string, loop: boolean = false, delay: number = 0): spine.TrackEntry {
+            let animation: spine.Animation = this.state.data.skeletonData.findAnimation(animationName);
             if (!animation) {
                 console.warn("Animation not found: " + animationName);
                 return null;
@@ -340,8 +355,8 @@ module Fabrique {
          *
          * @param {string}  skinName  The name of the skin we'd like to set
          */
-        public setSkinByName(skinName: string) {
-            var skin = this.skeleton.data.findSkin(skinName);
+        public setSkinByName(skinName: string): void {
+            let skin: spine.Skin = this.skeleton.data.findSkin(skinName);
             if (!skin) {
                 console.warn("Skin not found: " + skinName);
                 return;
@@ -354,14 +369,14 @@ module Fabrique {
          *
          * @param skin
          */
-        public setSkin(skin: spine.Skin) {
+        public setSkin(skin: spine.Skin): void {
             this.skeleton.setSkin(skin);
         }
 
         /**
          * Set to initial setup pose
          */
-        public setToSetupPose() {
+        public setToSetupPose(): void {
             this.skeleton.setToSetupPose();
         }
 

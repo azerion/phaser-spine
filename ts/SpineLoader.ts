@@ -10,11 +10,9 @@ module Fabrique {
      */
     export class SpineTextureLoader {
         private game: Phaser.Game;
-        private key: string;
 
-        constructor(game: Phaser.Game, key: string) {
-            this.game = game
-            this.key = key;
+        constructor(game: Phaser.Game) {
+            this.game = game;
         }
 
         /**
@@ -24,8 +22,8 @@ module Fabrique {
          * @param page {spine.AtlasPage} Atlas page to which texture belongs
          * @param file {String} The file to load, this is just the file path relative to the base path configured in the constructor
          */
-        public load = function (page:any, file:string) {
-            var image = this.game.make.image(0, 0, this.key);
+        public load = function (page: any, file: string, atlas: spine.Atlas) {
+            var image = this.game.make.image(0, 0, file);
 
             page.rendererObject = image.texture.baseTexture;
         };
@@ -36,7 +34,7 @@ module Fabrique {
          * @method unload
          * @param texture {BaseTexture} Texture object to destroy
          */
-        public unload = function (texture:PIXI.BaseTexture) {
+        public unload = function (texture: PIXI.BaseTexture) {
             texture.destroy();
         };
     }

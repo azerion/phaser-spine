@@ -781,7 +781,7 @@ declare module Fabrique {
         }
         class Spine extends Phaser.Plugin {
             static RESOLUTION_REGEXP: RegExp;
-            constructor(game: SpineGame, parent: PIXI.DisplayObject);
+            constructor(game: SpineGame, parent: Phaser.PluginManager);
             private addSpineLoader();
             /**
              * Extends the GameObjectFactory prototype with the support of adding spine. this allows us to add spine methods to the game just like any other object:
@@ -822,6 +822,13 @@ declare module Fabrique {
          * @param dt {Number} Delta time. Time by which the animation should be updated
          */
         update(dt?: number): void;
+        /**
+         * Children should always be destroyed
+         *
+         * @param destroyChildren
+         * @param soft
+         */
+        destroy(destroyChildren?: boolean, soft?: boolean): void;
         /**
          * When autoupdate is set to yes this function is used as pixi's updateTransform function
          *
@@ -908,8 +915,7 @@ declare module Fabrique {
      */
     class SpineTextureLoader {
         private game;
-        private key;
-        constructor(game: Phaser.Game, key: string);
+        constructor(game: Phaser.Game);
         /**
          * Starts loading a base texture as per spine specification
          *
@@ -917,7 +923,7 @@ declare module Fabrique {
          * @param page {spine.AtlasPage} Atlas page to which texture belongs
          * @param file {String} The file to load, this is just the file path relative to the base path configured in the constructor
          */
-        load: (page: any, file: string) => void;
+        load: (page: any, file: string, atlas: spine.Atlas) => void;
         /**
          * Unloads a previously loaded texture as per spine specification
          *

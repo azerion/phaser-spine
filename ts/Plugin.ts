@@ -31,7 +31,7 @@ module Fabrique {
 
             public static RESOLUTION_REGEXP: RegExp = /@(.+)x/;
 
-            constructor(game: SpineGame, parent: PIXI.DisplayObject) {
+            constructor(game: SpineGame, parent: Phaser.PluginManager) {
                 super(game, parent);
 
                 this.addSpineCache();
@@ -56,12 +56,25 @@ module Fabrique {
                         cacheData.variants = scalingVariants;
                     }
 
-                    this.json(key, url);
-
                     scalingVariants.forEach((variant: string) => {
+                        //Check if an atlas file was loaded
+                        (<Fabrique.Plugins.SpineLoader>this).onFileComplete.add((progress: any, cacheKey: string) => {
+                            if (cacheKey === atlasKey) {
+                                let atlas = new spine.Atlas(this.game.cache.getText(cacheKey), {
+                                    load: (page: any, file: string, atlas: spine.Atlas) => {
+                                        // console.log(page, file, atlas);
+                                        (<Fabrique.Plugins.SpineLoader>this).image(file, cacheData.basePath + '/' + file.substr(0, file.lastIndexOf('.')) + variant + '.png');
+                                    }
+                                });
+                            }
+                        });
+
+                        //Load the atlas file
                         (<Fabrique.Plugins.SpineLoader>this).text(atlasKey, url.substr(0, url.lastIndexOf('.')) + variant + '.atlas');
-                        (<Fabrique.Plugins.SpineLoader>this).image(key, url.substr(0, url.lastIndexOf('.')) + variant + '.png');
                     });
+
+
+                    (<Fabrique.Plugins.SpineLoader>this).json(key, url);
 
                     this.game.cache.addSpine(key, cacheData);
                 };
@@ -102,6 +115,10 @@ module Fabrique {
                 //Method for fetching a spine dict from the cache space
                 (<Fabrique.Plugins.SpineCache>Phaser.Cache.prototype).getSpine = function(key: string): SpineCacheData
                 {
+                    if (!this.spine.hasOwnProperty(key)) {
+                        console.warn('Phaser.Cache.getSpine: Key "' + key + '" not found in Cache.')
+                    }
+
                     return this.spine[key];
                 };
             }

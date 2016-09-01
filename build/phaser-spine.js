@@ -1,9 +1,9 @@
 /*!
- * phaser-spine - version 2.1.3 
+ * phaser-spine - version 2.2.0 
  * Spine plugin for Phaser.io!
  *
  * OrangeGames
- * Build at 29-06-2016
+ * Build at 01-09-2016
  * Released under MIT License 
  */
 
@@ -2903,11 +2903,22 @@ var Fabrique;
                     else {
                         cacheData.variants = scalingVariants;
                     }
-                    this.json(key, url);
                     scalingVariants.forEach(function (variant) {
+                        //Check if an atlas file was loaded
+                        _this.onFileComplete.add(function (progress, cacheKey) {
+                            if (cacheKey === atlasKey) {
+                                var atlas = new spine.Atlas(_this.game.cache.getText(cacheKey), {
+                                    load: function (page, file, atlas) {
+                                        // console.log(page, file, atlas);
+                                        _this.image(file, cacheData.basePath + '/' + file.substr(0, file.lastIndexOf('.')) + variant + '.png');
+                                    }
+                                });
+                            }
+                        });
+                        //Load the atlas file
                         _this.text(atlasKey, url.substr(0, url.lastIndexOf('.')) + variant + '.atlas');
-                        _this.image(key, url.substr(0, url.lastIndexOf('.')) + variant + '.png');
                     });
+                    this.json(key, url);
                     this.game.cache.addSpine(key, cacheData);
                 };
             };
@@ -2939,6 +2950,9 @@ var Fabrique;
                 };
                 //Method for fetching a spine dict from the cache space
                 Phaser.Cache.prototype.getSpine = function (key) {
+                    if (!this.spine.hasOwnProperty(key)) {
+                        console.warn('Phaser.Cache.getSpine: Key "' + key + '" not found in Cache.');
+                    }
                     return this.spine[key];
                 };
             };
@@ -2971,7 +2985,7 @@ var Fabrique;
             else if (data.variants && data.variants.length >= 1) {
                 this.imageScale = this.getScaleFromVariant(data.variants[0]);
             }
-            var textureLoader = new Fabrique.SpineTextureLoader(game, key);
+            var textureLoader = new Fabrique.SpineTextureLoader(game);
             // create a spine atlas using the loaded text and a spine texture loader instance //
             var spineAtlas = new spine.Atlas(game.cache.getText(data.atlas), textureLoader);
             // now we use an atlas attachment loader //
@@ -3006,6 +3020,9 @@ var Fabrique;
                     slot.currentMesh = mesh;
                     slot.currentMeshName = attachment.name;
                     slotContainer.add(mesh);
+                }
+                else {
+                    continue;
                 }
             }
             this.autoUpdate = true;
@@ -3094,7 +3111,7 @@ var Fabrique;
                     slot.currentSprite.blendMode = slot.blendMode;
                     slot.currentSprite.tint = PIXI.rgb2hex([slot.r, slot.g, slot.b]);
                 }
-                else if (type === spine.AttachmentType.weightedmesh) {
+                else if (type === spine.AttachmentType.weightedmesh || type === spine.AttachmentType.weightedlinkedmesh) {
                     if (!slot.currentMeshName || slot.currentMeshName !== attachment.name) {
                         var meshName = attachment.name;
                         if (slot.currentMesh !== undefined) {
@@ -3121,7 +3138,15 @@ var Fabrique;
                 slotContainer.alpha = slot.a;
             }
         };
-        ;
+        /**
+         * Children should always be destroyed
+         *
+         * @param destroyChildren
+         * @param soft
+         */
+        Spine.prototype.destroy = function (destroyChildren, soft) {
+            _super.prototype.destroy.call(this, true, soft);
+        };
         /**
          * When autoupdate is set to yes this function is used as pixi's updateTransform function
          *
@@ -3173,6 +3198,7 @@ var Fabrique;
             var baseTexture = descriptor.page.rendererObject;
             var texture = new PIXI.Texture(baseTexture);
             var strip = new PIXI.Strip(texture);
+            strip.drawMode = 1;
             strip.canvasPadding = 1.5;
             strip.vertices = new spine.Float32Array(attachment.uvs.length);
             strip.uvs = attachment.uvs;
@@ -3322,7 +3348,7 @@ var Fabrique;
      * @param crossorigin {Boolean} Whether requests should be treated as crossorigin
      */
     var SpineTextureLoader = (function () {
-        function SpineTextureLoader(game, key) {
+        function SpineTextureLoader(game) {
             /**
              * Starts loading a base texture as per spine specification
              *
@@ -3330,8 +3356,8 @@ var Fabrique;
              * @param page {spine.AtlasPage} Atlas page to which texture belongs
              * @param file {String} The file to load, this is just the file path relative to the base path configured in the constructor
              */
-            this.load = function (page, file) {
-                var image = this.game.make.image(0, 0, this.key);
+            this.load = function (page, file, atlas) {
+                var image = this.game.make.image(0, 0, file);
                 page.rendererObject = image.texture.baseTexture;
             };
             /**
@@ -3344,7 +3370,6 @@ var Fabrique;
                 texture.destroy();
             };
             this.game = game;
-            this.key = key;
         }
         return SpineTextureLoader;
     })();
