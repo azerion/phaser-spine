@@ -86,7 +86,7 @@ buddy.setToSetupPose();
 ### Combining skins
 Now the last final awesome part is that you can also create skins in code yourself by simply grouping other existing skins.
 ```javascript
-var newSkin = buddy.getCombinedSkin(
+var newSkin = buddy.createCombinedSkin(
     'outfit02',     //The name of the new skin, will be automaticly added to the skeleton data
     'vest',         //One of the skins we want to combine
     'mask'          //The other skin we want to combine
