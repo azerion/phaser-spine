@@ -1,7 +1,7 @@
 {
   "name": "phaser-spine",
   "author": "OrangeGames",
-  "version": "2.2.0",
+  "version": "3.0.0-alpha1",
   "description": "Spine plugin for Phaser.io!",
   "contributors": [
     {
@@ -26,7 +26,7 @@
     "grunt-contrib-uglify": "^0.11.0",
     "grunt-typescript": "0.8.0",
     "phaser": "2.6.2",
-    "typescript": "1.6.x"
+    "typescript": "1.8.x"
   },
   "engines": {
     "node": "5.x.x"

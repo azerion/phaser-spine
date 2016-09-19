@@ -32,7 +32,8 @@ module.exports = function (grunt) {
                 declaration: true,
                 references: [
                     'node_modules/phaser/typescript/pixi.d.ts',
-                    'node_modules/phaser/typescript/phaser.d.ts'
+                    'node_modules/phaser/typescript/phaser.d.ts',
+                    'vendor/*.d.ts'
                 ],
                 noImplicitAny: true
             },
