@@ -758,6 +758,9 @@ declare module Fabrique {
         interface SpineObjectFactory extends Phaser.GameObjectFactory {
             spine: (x: number, y: number, key: string, scalingVariant?: string, group?: Phaser.Group) => Fabrique.Spine;
         }
+        interface SpineObjectCreator extends Phaser.GameObjectCreator {
+            spine: (x: number, y: number, key: string, scalingVariant?: string, group?: Phaser.Group) => Fabrique.Spine;
+        }
         interface SpineCache extends Phaser.Cache {
             addSpine: (key: string, data: any) => void;
             getSpine: (key: string) => any;
@@ -845,7 +848,7 @@ declare module Fabrique {
          * @private
          */
         createSprite(slot: any, attachment: any): Phaser.Sprite;
-        createMesh(slot: any, attachment: any): PIXI.Strip;
+        createMesh(slot: any, attachment: any): Phaser.Rope;
         /**
          * [setMixByName wrap to stateData.setMixByName]
          * @param {String} fromName [source animation name]

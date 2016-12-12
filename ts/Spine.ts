@@ -1,4 +1,4 @@
-(<any>PIXI.Strip).prototype.postUpdate = function () {};
+(<any>Phaser.Rope).prototype.postUpdate = function () {};
 
 spine.Bone.yDown = true;
 
@@ -74,7 +74,7 @@ module Fabrique {
                     slot.currentSpriteName = spriteName;
                     slotContainer.add(sprite);
                 } else if (attachment instanceof spine.WeightedMeshAttachment) {
-                    let mesh: PIXI.Strip = this.createMesh(slot, attachment);
+                    let mesh: Phaser.Rope = this.createMesh(slot, attachment);
                     slot.currentMesh = mesh;
                     slot.currentMeshName = attachment.name;
                     slotContainer.add(mesh);
@@ -178,7 +178,7 @@ module Fabrique {
                     }
                     
                     slot.currentSprite.blendMode = slot.blendMode;
-                    slot.currentSprite.tint = PIXI.rgb2hex([slot.r,slot.g,slot.b]);
+                    slot.currentSprite.tint =  parseInt(Phaser.Color.componentToHex(255*slot.r) + Phaser.Color.componentToHex(255*slot.g) + Phaser.Color.componentToHex(255*slot.b), 16);
                 } else if (type === spine.AttachmentType.weightedmesh || type === spine.AttachmentType.weightedlinkedmesh) {
                     if (!slot.currentMeshName || slot.currentMeshName !== attachment.name) {
                         var meshName = attachment.name;
@@ -280,12 +280,13 @@ module Fabrique {
             return sprite;
         };
 
-        public createMesh(slot: any, attachment: any): PIXI.Strip {
+        public createMesh(slot: any, attachment: any): Phaser.Rope {
             let descriptor: any = attachment.rendererObject;
             let baseTexture: any = descriptor.page.rendererObject;
             let texture: PIXI.Texture = new PIXI.Texture(baseTexture);
 
-            let strip: PIXI.Strip = new PIXI.Strip(texture);
+            
+            let strip: Phaser.Rope = new Phaser.Rope(this.game, 0, 0, texture);
             (<any>strip).drawMode = 1;
             strip.canvasPadding = 1.5;
 
