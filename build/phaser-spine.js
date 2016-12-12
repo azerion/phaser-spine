@@ -3,7 +3,7 @@
  * Spine plugin for Phaser.io!
  *
  * OrangeGames
- * Build at 01-09-2016
+ * Build at 12-12-2016
  * Released under MIT License 
  */
 
@@ -2937,6 +2937,9 @@ var Fabrique;
                     spineObject.position.y = y;
                     return group.add(spineObject);
                 };
+                Phaser.GameObjectCreator.prototype.spine = function (x, y, key, scalingVariant, group) {
+                    return new Fabrique.Spine(this.game, key, scalingVariant);
+                };
             };
             /**
              * Extends the Phaser.Cache prototype with spine properties
@@ -2962,7 +2965,7 @@ var Fabrique;
         Plugins.Spine = Spine;
     })(Plugins = Fabrique.Plugins || (Fabrique.Plugins = {}));
 })(Fabrique || (Fabrique = {}));
-PIXI.Strip.prototype.postUpdate = function () { };
+Phaser.Rope.prototype.postUpdate = function () { };
 spine.Bone.yDown = true;
 var Fabrique;
 (function (Fabrique) {
@@ -3109,7 +3112,7 @@ var Fabrique;
                         slotContainer.rotation = -slotContainer.rotation;
                     }
                     slot.currentSprite.blendMode = slot.blendMode;
-                    slot.currentSprite.tint = PIXI.rgb2hex([slot.r, slot.g, slot.b]);
+                    slot.currentSprite.tint = parseInt(Phaser.Color.componentToHex(255 * slot.r) + Phaser.Color.componentToHex(255 * slot.g) + Phaser.Color.componentToHex(255 * slot.b), 16);
                 }
                 else if (type === spine.AttachmentType.weightedmesh || type === spine.AttachmentType.weightedlinkedmesh) {
                     if (!slot.currentMeshName || slot.currentMeshName !== attachment.name) {
@@ -3197,7 +3200,7 @@ var Fabrique;
             var descriptor = attachment.rendererObject;
             var baseTexture = descriptor.page.rendererObject;
             var texture = new PIXI.Texture(baseTexture);
-            var strip = new PIXI.Strip(texture);
+            var strip = new Phaser.Rope(this.game, 0, 0, texture);
             strip.drawMode = 1;
             strip.canvasPadding = 1.5;
             strip.vertices = new spine.Float32Array(attachment.uvs.length);

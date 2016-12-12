@@ -1,6 +1,11 @@
+
 module Fabrique {
     export module Plugins {
         export interface SpineObjectFactory extends Phaser.GameObjectFactory {
+            spine: (x: number, y: number, key: string, scalingVariant?: string, group?: Phaser.Group) => Fabrique.Spine;
+        }
+
+        export interface SpineObjectCreator extends Phaser.GameObjectCreator {
             spine: (x: number, y: number, key: string, scalingVariant?: string, group?: Phaser.Group) => Fabrique.Spine;
         }
 
@@ -77,7 +82,7 @@ module Fabrique {
                     (<Fabrique.Plugins.SpineLoader>this).json(key, url);
 
                     this.game.cache.addSpine(key, cacheData);
-                };
+                }; 
             }
 
             /**
@@ -96,6 +101,11 @@ module Fabrique {
                     spineObject.position.y = y;
 
                     return group.add(spineObject);
+                };
+
+                (<Fabrique.Plugins.SpineObjectCreator>Phaser.GameObjectCreator.prototype).spine = function(x: number, y: number, key: string, scalingVariant?: string, group?: Phaser.Group): Fabrique.Spine
+                {
+                    return new Fabrique.Spine(this.game, key, scalingVariant);
                 };
             }
 
