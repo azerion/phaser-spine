@@ -283,7 +283,7 @@ module Fabrique {
         public createMesh(slot: any, attachment: any): Phaser.Rope {
             let descriptor: any = attachment.rendererObject;
             let baseTexture: any = descriptor.page.rendererObject;
-            let texture: any = new PIXI.Texture(baseTexture);
+            let texture: PIXI.Texture = new PIXI.Texture(baseTexture);
 
             
             let strip: Phaser.Rope = new Phaser.Rope(this.game, 0, 0, texture);
