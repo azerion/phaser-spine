@@ -1,9 +1,9 @@
 /*!
- * phaser-spine - version 2.2.0 
+ * phaser-spine - version 3.0.0 
  * Spine plugin for Phaser.io!
  *
  * OrangeGames
- * Build at 01-09-2016
+ * Build at 19-12-2016
  * Released under MIT License 
  */
 
@@ -2876,147 +2876,124 @@ var __extends = (this && this.__extends) || function (d, b) {
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-var Fabrique;
-(function (Fabrique) {
-    var Plugins;
-    (function (Plugins) {
-        var Spine = (function (_super) {
-            __extends(Spine, _super);
-            function Spine(game, parent) {
-                _super.call(this, game, parent);
-                this.addSpineCache();
-                this.addSpineFactory();
-                this.addSpineLoader();
-            }
-            Spine.prototype.addSpineLoader = function () {
-                Phaser.Loader.prototype.spine = function (key, url, scalingVariants) {
-                    var _this = this;
-                    var atlasKey = key + "Atlas";
-                    var cacheData = {
-                        atlas: atlasKey,
-                        basePath: (url.substring(0, url.lastIndexOf('/')) === '') ? '.' : url.substring(0, url.lastIndexOf('/')),
-                        variants: undefined
-                    };
-                    if (undefined === scalingVariants) {
-                        scalingVariants = [''];
-                    }
-                    else {
-                        cacheData.variants = scalingVariants;
-                    }
-                    scalingVariants.forEach(function (variant) {
-                        //Check if an atlas file was loaded
-                        _this.onFileComplete.add(function (progress, cacheKey) {
-                            if (cacheKey === atlasKey) {
-                                var atlas = new spine.Atlas(_this.game.cache.getText(cacheKey), {
-                                    load: function (page, file, atlas) {
-                                        // console.log(page, file, atlas);
-                                        _this.image(file, cacheData.basePath + '/' + file.substr(0, file.lastIndexOf('.')) + variant + '.png');
-                                    }
-                                });
-                            }
-                        });
-                        //Load the atlas file
-                        _this.text(atlasKey, url.substr(0, url.lastIndexOf('.')) + variant + '.atlas');
+var PhaserSpine;
+(function (PhaserSpine) {
+    var SpinePlugin = (function (_super) {
+        __extends(SpinePlugin, _super);
+        function SpinePlugin(game, parent) {
+            var _this = _super.call(this, game, parent) || this;
+            _this.addSpineCache();
+            _this.addSpineFactory();
+            _this.addSpineLoader();
+            return _this;
+        }
+        SpinePlugin.prototype.addSpineLoader = function () {
+            Phaser.Loader.prototype.spine = function (key, url, scalingVariants) {
+                var _this = this;
+                var atlasKey = key + "Atlas";
+                var cacheData = {
+                    atlas: atlasKey,
+                    basePath: (url.substring(0, url.lastIndexOf('/')) === '') ? '.' : url.substring(0, url.lastIndexOf('/')),
+                    variants: undefined
+                };
+                if (undefined === scalingVariants) {
+                    scalingVariants = [''];
+                }
+                else {
+                    cacheData.variants = scalingVariants;
+                }
+                scalingVariants.forEach(function (variant) {
+                    _this.onFileComplete.add(function (progress, cacheKey) {
+                        if (cacheKey === atlasKey) {
+                            var atlas = new spine.Atlas(_this.game.cache.getText(cacheKey), {
+                                load: function (page, file, atlas) {
+                                    _this.image(file, cacheData.basePath + '/' + file.substr(0, file.lastIndexOf('.')) + variant + '.png');
+                                }
+                            });
+                        }
                     });
-                    this.json(key, url);
-                    this.game.cache.addSpine(key, cacheData);
-                };
+                    _this.text(atlasKey, url.substr(0, url.lastIndexOf('.')) + variant + '.atlas');
+                });
+                this.json(key, url);
+                this.game.cache.addSpine(key, cacheData);
             };
-            /**
-             * Extends the GameObjectFactory prototype with the support of adding spine. this allows us to add spine methods to the game just like any other object:
-             * game.add.spine();
-             */
-            Spine.prototype.addSpineFactory = function () {
-                Phaser.GameObjectFactory.prototype.spine = function (x, y, key, scalingVariant, group) {
-                    if (group === undefined) {
-                        group = this.world;
-                    }
-                    var spineObject = new Fabrique.Spine(this.game, key, scalingVariant);
-                    spineObject.setToSetupPose();
-                    spineObject.position.x = x;
-                    spineObject.position.y = y;
-                    return group.add(spineObject);
-                };
+        };
+        SpinePlugin.prototype.addSpineFactory = function () {
+            Phaser.GameObjectFactory.prototype.spine = function (x, y, key, scalingVariant, group) {
+                if (group === undefined) {
+                    group = this.world;
+                }
+                var spineObject = new PhaserSpine.Spine(this.game, key, scalingVariant);
+                spineObject.setToSetupPose();
+                spineObject.position.x = x;
+                spineObject.position.y = y;
+                return group.add(spineObject);
             };
-            /**
-             * Extends the Phaser.Cache prototype with spine properties
-             */
-            Spine.prototype.addSpineCache = function () {
-                //Create the cache space
-                Phaser.Cache.prototype.spine = {};
-                //Method for adding a spine dict to the cache space
-                Phaser.Cache.prototype.addSpine = function (key, data) {
-                    this.spine[key] = data;
-                };
-                //Method for fetching a spine dict from the cache space
-                Phaser.Cache.prototype.getSpine = function (key) {
-                    if (!this.spine.hasOwnProperty(key)) {
-                        console.warn('Phaser.Cache.getSpine: Key "' + key + '" not found in Cache.');
-                    }
-                    return this.spine[key];
-                };
+            Phaser.GameObjectCreator.prototype.spine = function (x, y, key, scalingVariant, group) {
+                return new PhaserSpine.Spine(this.game, key, scalingVariant);
             };
-            Spine.RESOLUTION_REGEXP = /@(.+)x/;
-            return Spine;
-        })(Phaser.Plugin);
-        Plugins.Spine = Spine;
-    })(Plugins = Fabrique.Plugins || (Fabrique.Plugins = {}));
-})(Fabrique || (Fabrique = {}));
-PIXI.Strip.prototype.postUpdate = function () { };
+        };
+        SpinePlugin.prototype.addSpineCache = function () {
+            Phaser.Cache.prototype.spine = {};
+            Phaser.Cache.prototype.addSpine = function (key, data) {
+                this.spine[key] = data;
+            };
+            Phaser.Cache.prototype.getSpine = function (key) {
+                if (!this.spine.hasOwnProperty(key)) {
+                    console.warn('Phaser.Cache.getSpine: Key "' + key + '" not found in Cache.');
+                }
+                return this.spine[key];
+            };
+        };
+        return SpinePlugin;
+    }(Phaser.Plugin));
+    SpinePlugin.RESOLUTION_REGEXP = /@(.+)x/;
+    PhaserSpine.SpinePlugin = SpinePlugin;
+})(PhaserSpine || (PhaserSpine = {}));
+Phaser.Rope.prototype.postUpdate = function () { };
 spine.Bone.yDown = true;
-var Fabrique;
-(function (Fabrique) {
+var PhaserSpine;
+(function (PhaserSpine) {
     var Spine = (function (_super) {
         __extends(Spine, _super);
-        /**
-         * @class Spine
-         * @extends Phaser.Group
-         * @constructor
-         * @param game {Phaser.Game} the game reference to add this object
-         * @param key {String} the key to find the assets for this object
-         */
         function Spine(game, key, scalingVariant) {
-            _super.call(this, game);
-            this.imageScale = 1;
-            var data = this.game.cache.getSpine(key);
+            var _this = _super.call(this, game) || this;
+            _this.imageScale = 1;
+            var data = _this.game.cache.getSpine(key);
             if (undefined !== scalingVariant && data.variants.indexOf(scalingVariant) !== -1) {
-                this.imageScale = this.getScaleFromVariant(scalingVariant);
+                _this.imageScale = _this.getScaleFromVariant(scalingVariant);
             }
             else if (data.variants && data.variants.length >= 1) {
-                this.imageScale = this.getScaleFromVariant(data.variants[0]);
+                _this.imageScale = _this.getScaleFromVariant(data.variants[0]);
             }
-            var textureLoader = new Fabrique.SpineTextureLoader(game);
-            // create a spine atlas using the loaded text and a spine texture loader instance //
+            var textureLoader = new PhaserSpine.SpineTextureLoader(game);
             var spineAtlas = new spine.Atlas(game.cache.getText(data.atlas), textureLoader);
-            // now we use an atlas attachment loader //
             var attachmentLoader = new spine.AtlasAttachmentLoader(spineAtlas);
-            // spine animation
             var spineJsonParser = new spine.SkeletonJson(attachmentLoader);
-            //get the Skeleton Data
-            this.skeletonData = spineJsonParser.readSkeletonData(game.cache.getJSON(key));
-            if (!this.skeletonData) {
+            _this.skeletonData = spineJsonParser.readSkeletonData(game.cache.getJSON(key));
+            if (!_this.skeletonData) {
                 throw new Error('Spine data must be preloaded using Loader.spine');
             }
-            this.skeleton = new spine.Skeleton(this.skeletonData);
-            this.skeleton.updateWorldTransform();
-            this.stateData = new spine.AnimationStateData(this.skeletonData);
-            this.state = new spine.AnimationState(this.stateData);
-            this.slotContainers = [];
-            for (var i = 0, n = this.skeleton.slots.length; i < n; i++) {
-                var slot = this.skeleton.slots[i];
+            _this.skeleton = new spine.Skeleton(_this.skeletonData);
+            _this.skeleton.updateWorldTransform();
+            _this.stateData = new spine.AnimationStateData(_this.skeletonData);
+            _this.state = new spine.AnimationState(_this.stateData);
+            _this.slotContainers = [];
+            for (var i = 0, n = _this.skeleton.slots.length; i < n; i++) {
+                var slot = _this.skeleton.slots[i];
                 var attachment = slot.attachment;
                 var slotContainer = new Phaser.Group(game);
-                this.slotContainers.push(slotContainer);
-                this.add(slotContainer);
+                _this.slotContainers.push(slotContainer);
+                _this.add(slotContainer);
                 if (attachment instanceof spine.RegionAttachment) {
                     var spriteName = attachment.rendererObject.name;
-                    var sprite = this.createSprite(slot, attachment);
+                    var sprite = _this.createSprite(slot, attachment);
                     slot.currentSprite = sprite;
                     slot.currentSpriteName = spriteName;
                     slotContainer.add(sprite);
                 }
                 else if (attachment instanceof spine.WeightedMeshAttachment) {
-                    var mesh = this.createMesh(slot, attachment);
+                    var mesh = _this.createMesh(slot, attachment);
                     slot.currentMesh = mesh;
                     slot.currentMeshName = attachment.name;
                     slotContainer.add(mesh);
@@ -3025,14 +3002,15 @@ var Fabrique;
                     continue;
                 }
             }
-            this.autoUpdate = true;
+            _this.autoUpdate = true;
+            return _this;
         }
         Object.defineProperty(Spine.prototype, "autoUpdate", {
             get: function () {
-                return (this.updateTransform === Fabrique.Spine.prototype.autoUpdateTransform);
+                return (this.updateTransform === PhaserSpine.Spine.prototype.autoUpdateTransform);
             },
             set: function (value) {
-                this.updateTransform = value ? Fabrique.Spine.prototype.autoUpdateTransform : PIXI.DisplayObjectContainer.prototype.updateTransform;
+                this.updateTransform = value ? PhaserSpine.Spine.prototype.autoUpdateTransform : PIXI.DisplayObjectContainer.prototype.updateTransform;
             },
             enumerable: true,
             configurable: true
@@ -3040,18 +3018,12 @@ var Fabrique;
         ;
         ;
         Spine.prototype.getScaleFromVariant = function (variant) {
-            var scale = Fabrique.Plugins.Spine.RESOLUTION_REGEXP.exec(variant);
+            var scale = PhaserSpine.SpinePlugin.RESOLUTION_REGEXP.exec(variant);
             if (scale) {
                 return parseFloat(scale[1]);
             }
             return 1;
         };
-        /**
-         * Update the spine skeleton and its animations by delta time (dt)
-         *
-         * @method update
-         * @param dt {Number} Delta time. Time by which the animation should be updated
-         */
         Spine.prototype.update = function (dt) {
             if (dt === undefined) {
                 return;
@@ -3095,13 +3067,10 @@ var Fabrique;
                         }
                     }
                     var bone = slot.bone;
-                    //Update positions
                     slotContainer.position.x = attachment.x * bone.a + attachment.y * bone.b + bone.worldX;
                     slotContainer.position.y = attachment.x * bone.c + attachment.y * bone.d + bone.worldY;
-                    //Update scaling
                     slotContainer.scale.x = bone.getWorldScaleX();
                     slotContainer.scale.y = bone.getWorldScaleY();
-                    //Update rotation
                     slotContainer.rotation = (bone.getWorldRotationX() - attachment.rotation) * Math.PI / 180;
                     if (bone.getWorldScaleY() < 0 || bone.getWorldScaleX() < 0) {
                         slotContainer.scale.y = -slotContainer.scale.y;
@@ -3109,7 +3078,7 @@ var Fabrique;
                         slotContainer.rotation = -slotContainer.rotation;
                     }
                     slot.currentSprite.blendMode = slot.blendMode;
-                    slot.currentSprite.tint = PIXI.rgb2hex([slot.r, slot.g, slot.b]);
+                    slot.currentSprite.tint = parseInt(Phaser.Color.componentToHex(255 * slot.r) + Phaser.Color.componentToHex(255 * slot.g) + Phaser.Color.componentToHex(255 * slot.b), 16);
                 }
                 else if (type === spine.AttachmentType.weightedmesh || type === spine.AttachmentType.weightedlinkedmesh) {
                     if (!slot.currentMeshName || slot.currentMeshName !== attachment.name) {
@@ -3138,21 +3107,9 @@ var Fabrique;
                 slotContainer.alpha = slot.a;
             }
         };
-        /**
-         * Children should always be destroyed
-         *
-         * @param destroyChildren
-         * @param soft
-         */
         Spine.prototype.destroy = function (destroyChildren, soft) {
             _super.prototype.destroy.call(this, true, soft);
         };
-        /**
-         * When autoupdate is set to yes this function is used as pixi's updateTransform function
-         *
-         * @method autoUpdateTransform
-         * @private
-         */
         Spine.prototype.autoUpdateTransform = function () {
             this.lastTime = this.lastTime || Date.now();
             var timeDelta = (Date.now() - this.lastTime) * 0.001;
@@ -3161,14 +3118,6 @@ var Fabrique;
             PIXI.DisplayObjectContainer.prototype.updateTransform.call(this);
         };
         ;
-        /**
-         * Create a new sprite to be used with spine.RegionAttachment
-         *
-         * @method createSprite
-         * @param slot {spine.Slot} The slot to which the attachment is parented
-         * @param attachment {spine.RegionAttachment} The attachment that the sprite will represent
-         * @private
-         */
         Spine.prototype.createSprite = function (slot, attachment) {
             var descriptor = attachment.rendererObject;
             var baseTexture = descriptor.page.rendererObject;
@@ -3197,7 +3146,7 @@ var Fabrique;
             var descriptor = attachment.rendererObject;
             var baseTexture = descriptor.page.rendererObject;
             var texture = new PIXI.Texture(baseTexture);
-            var strip = new PIXI.Strip(texture);
+            var strip = new Phaser.Rope(this.game, 0, 0, texture);
             strip.drawMode = 1;
             strip.canvasPadding = 1.5;
             strip.vertices = new spine.Float32Array(attachment.uvs.length);
@@ -3209,26 +3158,10 @@ var Fabrique;
             return strip;
         };
         ;
-        /**
-         * [setMixByName wrap to stateData.setMixByName]
-         * @param {String} fromName [source animation name]
-         * @param {String} toName   [target animation name]
-         * @param {Float} duration [Duration in the transition of the animations]
-         */
         Spine.prototype.setMixByName = function (fromName, toName, duration) {
             this.stateData.setMixByName(fromName, toName, duration);
         };
         ;
-        /**
-         * exposing the state's setAnimation
-         * We override the original runtime's error because warnings dont stop the VM
-         *
-         * @param {number}  trackIndex
-         * @param {string}  animationName
-         * @param {boolean} loop
-         * @param {number}  delay
-         * @returns {any}
-         */
         Spine.prototype.setAnimationByName = function (trackIndex, animationName, loop) {
             if (loop === void 0) { loop = false; }
             var animation = this.state.data.skeletonData.findAnimation(animationName);
@@ -3239,16 +3172,6 @@ var Fabrique;
             return this.state.setAnimation(trackIndex, animation, loop);
         };
         ;
-        /**
-         * exposing the state's addAnimation
-         * We override the original runtime's error because warnings dont stop the VM
-         *
-         * @param {number}  trackIndex
-         * @param {string}  animationName
-         * @param {boolean} loop
-         * @param {number}  delay
-         * @returns {any}
-         */
         Spine.prototype.addAnimationByName = function (trackIndex, animationName, loop, delay) {
             if (loop === void 0) { loop = false; }
             if (delay === void 0) { delay = 0; }
@@ -3260,12 +3183,6 @@ var Fabrique;
             return this.state.addAnimation(trackIndex, animation, loop, delay);
         };
         ;
-        /**
-         * Exposing the skeleton's method to change the skin by skinName
-         * We override the original runtime's error because warnings dont stop the VM
-         *
-         * @param {string}  skinName  The name of the skin we'd like to set
-         */
         Spine.prototype.setSkinByName = function (skinName) {
             var skin = this.skeleton.data.findSkin(skinName);
             if (!skin) {
@@ -3274,28 +3191,12 @@ var Fabrique;
             }
             this.skeleton.setSkin(skin);
         };
-        /**
-         * Exposing the skeleton's method to change the skin
-         *
-         * @param skin
-         */
         Spine.prototype.setSkin = function (skin) {
             this.skeleton.setSkin(skin);
         };
-        /**
-         * Set to initial setup pose
-         */
         Spine.prototype.setToSetupPose = function () {
             this.skeleton.setToSetupPose();
         };
-        /**
-         * You can combine skins here by supplying a name for the new skin, and then a nummer of existing skins names that needed to be combined in the new skin
-         * If the skins that will be combined contain any double attachment, only the first attachment will be added to the newskin.
-         * any subsequent attachment that is double will not be added!
-         *
-         * @param newSkinName
-         * @param skinNames
-         */
         Spine.prototype.createCombinedSkin = function (newSkinName) {
             var skinNames = [];
             for (var _i = 1; _i < arguments.length; _i++) {
@@ -3333,46 +3234,24 @@ var Fabrique;
             return newSkin;
         };
         return Spine;
-    })(Phaser.Group);
-    Fabrique.Spine = Spine;
-})(Fabrique || (Fabrique = {}));
-var Fabrique;
-(function (Fabrique) {
-    /**
-     * Supporting class to load images from spine atlases as per spine spec.
-     *
-     * @class SpineTextureLoader
-     * @uses EventTarget
-     * @constructor
-     * @param basePath {String} Tha base path where to look for the images to be loaded
-     * @param crossorigin {Boolean} Whether requests should be treated as crossorigin
-     */
+    }(Phaser.Group));
+    PhaserSpine.Spine = Spine;
+})(PhaserSpine || (PhaserSpine = {}));
+var PhaserSpine;
+(function (PhaserSpine) {
     var SpineTextureLoader = (function () {
         function SpineTextureLoader(game) {
-            /**
-             * Starts loading a base texture as per spine specification
-             *
-             * @method load
-             * @param page {spine.AtlasPage} Atlas page to which texture belongs
-             * @param file {String} The file to load, this is just the file path relative to the base path configured in the constructor
-             */
             this.load = function (page, file, atlas) {
                 var image = this.game.make.image(0, 0, file);
                 page.rendererObject = image.texture.baseTexture;
             };
-            /**
-             * Unloads a previously loaded texture as per spine specification
-             *
-             * @method unload
-             * @param texture {BaseTexture} Texture object to destroy
-             */
             this.unload = function (texture) {
                 texture.destroy();
             };
             this.game = game;
         }
         return SpineTextureLoader;
-    })();
-    Fabrique.SpineTextureLoader = SpineTextureLoader;
-})(Fabrique || (Fabrique = {}));
+    }());
+    PhaserSpine.SpineTextureLoader = SpineTextureLoader;
+})(PhaserSpine || (PhaserSpine = {}));
 //# sourceMappingURL=phaser-spine.js.map

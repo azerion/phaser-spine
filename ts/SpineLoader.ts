@@ -1,4 +1,4 @@
-module Fabrique {
+module PhaserSpine {
     /**
      * Supporting class to load images from spine atlases as per spine spec.
      *

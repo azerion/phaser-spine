@@ -1,7 +1,11 @@
-module Fabrique {
-    export module Plugins {
+
+module PhaserSpine {
         export interface SpineObjectFactory extends Phaser.GameObjectFactory {
-            spine: (x: number, y: number, key: string, scalingVariant?: string, group?: Phaser.Group) => Fabrique.Spine;
+            spine: (x: number, y: number, key: string, scalingVariant?: string, group?: Phaser.Group) => PhaserSpine.Spine;
+        }
+
+        export interface SpineObjectCreator extends Phaser.GameObjectCreator {
+            spine: (x: number, y: number, key: string, scalingVariant?: string, group?: Phaser.Group) => PhaserSpine.Spine;
         }
 
         export interface SpineCache extends Phaser.Cache {
@@ -27,7 +31,7 @@ module Fabrique {
             variants: string[];
         }
 
-        export class Spine extends Phaser.Plugin {
+        export class SpinePlugin extends Phaser.Plugin {
 
             public static RESOLUTION_REGEXP: RegExp = /@(.+)x/;
 
@@ -40,7 +44,7 @@ module Fabrique {
             }
             
             private addSpineLoader() {
-                (<Fabrique.Plugins.SpineLoader>Phaser.Loader.prototype).spine = function(key: string, url: string, scalingVariants?: string[]) {
+                (<PhaserSpine.SpineLoader>Phaser.Loader.prototype).spine = function(key: string, url: string, scalingVariants?: string[]) {
 
                     let atlasKey: string = key+"Atlas";
 
@@ -58,26 +62,26 @@ module Fabrique {
 
                     scalingVariants.forEach((variant: string) => {
                         //Check if an atlas file was loaded
-                        (<Fabrique.Plugins.SpineLoader>this).onFileComplete.add((progress: any, cacheKey: string) => {
+                        (<PhaserSpine.SpineLoader>this).onFileComplete.add((progress: any, cacheKey: string) => {
                             if (cacheKey === atlasKey) {
                                 let atlas = new spine.Atlas(this.game.cache.getText(cacheKey), {
                                     load: (page: any, file: string, atlas: spine.Atlas) => {
                                         // console.log(page, file, atlas);
-                                        (<Fabrique.Plugins.SpineLoader>this).image(file, cacheData.basePath + '/' + file.substr(0, file.lastIndexOf('.')) + variant + '.png');
+                                        (<PhaserSpine.SpineLoader>this).image(file, cacheData.basePath + '/' + file.substr(0, file.lastIndexOf('.')) + variant + '.png');
                                     }
                                 });
                             }
                         });
 
                         //Load the atlas file
-                        (<Fabrique.Plugins.SpineLoader>this).text(atlasKey, url.substr(0, url.lastIndexOf('.')) + variant + '.atlas');
+                        (<PhaserSpine.SpineLoader>this).text(atlasKey, url.substr(0, url.lastIndexOf('.')) + variant + '.atlas');
                     });
 
 
-                    (<Fabrique.Plugins.SpineLoader>this).json(key, url);
+                    (<PhaserSpine.SpineLoader>this).json(key, url);
 
                     this.game.cache.addSpine(key, cacheData);
-                };
+                }; 
             }
 
             /**
@@ -85,17 +89,22 @@ module Fabrique {
              * game.add.spine();
              */
             private addSpineFactory() {
-                (<Fabrique.Plugins.SpineObjectFactory>Phaser.GameObjectFactory.prototype).spine = function(x: number, y: number, key: string, scalingVariant?: string, group?: Phaser.Group): Fabrique.Spine
+                (<PhaserSpine.SpineObjectFactory>Phaser.GameObjectFactory.prototype).spine = function(x: number, y: number, key: string, scalingVariant?: string, group?: Phaser.Group): PhaserSpine.Spine
                 {
                     if (group === undefined) { group = this.world; }
 
-                    var spineObject = new Fabrique.Spine(this.game, key, scalingVariant);
+                    var spineObject = new PhaserSpine.Spine(this.game, key, scalingVariant);
 
                     spineObject.setToSetupPose();
                     spineObject.position.x = x;
                     spineObject.position.y = y;
 
                     return group.add(spineObject);
+                };
+
+                (<PhaserSpine.SpineObjectCreator>Phaser.GameObjectCreator.prototype).spine = function(x: number, y: number, key: string, scalingVariant?: string, group?: Phaser.Group): PhaserSpine.Spine
+                {
+                    return new PhaserSpine.Spine(this.game, key, scalingVariant);
                 };
             }
 
@@ -104,16 +113,16 @@ module Fabrique {
              */
             private addSpineCache(): void {
                 //Create the cache space
-                (<Fabrique.Plugins.SpineCache>Phaser.Cache.prototype).spine = {};
+                (<PhaserSpine.SpineCache>Phaser.Cache.prototype).spine = {};
 
                 //Method for adding a spine dict to the cache space
-                (<Fabrique.Plugins.SpineCache>Phaser.Cache.prototype).addSpine = function(key: string, data: SpineCacheData)
+                (<PhaserSpine.SpineCache>Phaser.Cache.prototype).addSpine = function(key: string, data: SpineCacheData)
                 {
                     this.spine[key] = data;
                 };
 
                 //Method for fetching a spine dict from the cache space
-                (<Fabrique.Plugins.SpineCache>Phaser.Cache.prototype).getSpine = function(key: string): SpineCacheData
+                (<PhaserSpine.SpineCache>Phaser.Cache.prototype).getSpine = function(key: string): SpineCacheData
                 {
                     if (!this.spine.hasOwnProperty(key)) {
                         console.warn('Phaser.Cache.getSpine: Key "' + key + '" not found in Cache.')
@@ -123,5 +132,4 @@ module Fabrique {
                 };
             }
         }
-    }
 }
