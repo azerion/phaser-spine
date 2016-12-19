@@ -1,7 +1,7 @@
 {
   "name": "@orange-games/phaser-spine",
   "author": "OrangeGames",
-  "version": "2.2.0",
+  "version": "3.0.0",
   "description": "Spine plugin for Phaser.io!",
   "contributors": [
     {
@@ -19,16 +19,25 @@
       "url": "https://raw.githubusercontent.com/orange-games/phaser-spine/master/LICENSE"
     }
   ],
+  "bugs": [
+    {
+      "url": "https://github.com/orange-games/phaser-spine/issues"
+    }
+  ],
+  "config": {
+    "name": "phaser-spine"
+  },
   "devDependencies": {
     "grunt": "0.4.x",
     "grunt-banner": "^0.6.0",
     "grunt-contrib-clean": "0.6.0",
+    "grunt-contrib-concat": "^1.0.1",
+    "grunt-contrib-connect": "^1.0.2",
     "grunt-contrib-uglify": "^0.11.0",
-    "grunt-typescript": "0.8.0",
+    "grunt-contrib-watch": "^1.0.0",
+    "grunt-ts": "^6.0.0-beta.3",
     "phaser": "2.6.2",
-    "typescript": "1.6.x"
+    "typescript": "2.1.x"
   },
-  "engines": {
-    "node": "5.x.x"
-  }
+  "typings": "./config/typings.json"
 }
