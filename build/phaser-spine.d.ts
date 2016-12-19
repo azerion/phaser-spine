@@ -1,3 +1,78 @@
+declare module PhaserSpine {
+    interface SpineObjectFactory extends Phaser.GameObjectFactory {
+        spine: (x: number, y: number, key: string, scalingVariant?: string, group?: Phaser.Group) => PhaserSpine.Spine;
+    }
+    interface SpineObjectCreator extends Phaser.GameObjectCreator {
+        spine: (x: number, y: number, key: string, scalingVariant?: string, group?: Phaser.Group) => PhaserSpine.Spine;
+    }
+    interface SpineCache extends Phaser.Cache {
+        addSpine: (key: string, data: any) => void;
+        getSpine: (key: string) => any;
+        spine: {
+            [key: string]: SpineCacheData;
+        };
+    }
+    interface SpineLoader extends Phaser.Loader {
+        spine: (key: string, url: string, scalingVariants?: string[]) => void;
+        cache: SpineCache;
+    }
+    interface SpineGame extends Phaser.Game {
+        add: SpineObjectFactory;
+        load: SpineLoader;
+        cache: SpineCache;
+    }
+    interface SpineCacheData {
+        atlas: string;
+        basePath: string;
+        variants: string[];
+    }
+    class SpinePlugin extends Phaser.Plugin {
+        static RESOLUTION_REGEXP: RegExp;
+        constructor(game: SpineGame, parent: Phaser.PluginManager);
+        private addSpineLoader();
+        private addSpineFactory();
+        private addSpineCache();
+    }
+}
+declare module "phaser-spine" {
+    export = PhaserSpine;
+}
+declare module PhaserSpine {
+    class Spine extends Phaser.Group {
+        private skeleton;
+        private skeletonData;
+        private stateData;
+        private state;
+        private slotContainers;
+        private lastTime;
+        private imageScale;
+        game: PhaserSpine.SpineGame;
+        constructor(game: PhaserSpine.SpineGame, key: string, scalingVariant?: string);
+        autoUpdate: boolean;
+        private getScaleFromVariant(variant);
+        update(dt?: number): void;
+        destroy(destroyChildren?: boolean, soft?: boolean): void;
+        autoUpdateTransform(): void;
+        createSprite(slot: any, attachment: any): Phaser.Sprite;
+        createMesh(slot: any, attachment: any): Phaser.Rope;
+        setMixByName(fromName: string, toName: string, duration: number): void;
+        setAnimationByName(trackIndex: number, animationName: string, loop?: boolean): spine.TrackEntry;
+        addAnimationByName(trackIndex: number, animationName: string, loop?: boolean, delay?: number): spine.TrackEntry;
+        setSkinByName(skinName: string): void;
+        setSkin(skin: spine.Skin): void;
+        setToSetupPose(): void;
+        createCombinedSkin(newSkinName: string, ...skinNames: string[]): spine.Skin;
+    }
+}
+declare module PhaserSpine {
+    class SpineTextureLoader {
+        private game;
+        constructor(game: Phaser.Game);
+        load: (page: any, file: string, atlas: spine.Atlas) => void;
+        unload: (texture: PIXI.BaseTexture) => void;
+    }
+}
+
 declare module spine {
     var degRad: number;
     var radDeg: number;
@@ -751,79 +826,5 @@ declare module spine {
         public getPolygon(attachment: any): any;
         public getWidth(): number;
         public getHeight(): number;
-    }
-}
-declare module PhaserSpine {
-    interface SpineObjectFactory extends Phaser.GameObjectFactory {
-        spine: (x: number, y: number, key: string, scalingVariant?: string, group?: Phaser.Group) => PhaserSpine.Spine;
-    }
-    interface SpineObjectCreator extends Phaser.GameObjectCreator {
-        spine: (x: number, y: number, key: string, scalingVariant?: string, group?: Phaser.Group) => PhaserSpine.Spine;
-    }
-    interface SpineCache extends Phaser.Cache {
-        addSpine: (key: string, data: any) => void;
-        getSpine: (key: string) => any;
-        spine: {
-            [key: string]: SpineCacheData;
-        };
-    }
-    interface SpineLoader extends Phaser.Loader {
-        spine: (key: string, url: string, scalingVariants?: string[]) => void;
-        cache: SpineCache;
-    }
-    interface SpineGame extends Phaser.Game {
-        add: SpineObjectFactory;
-        load: SpineLoader;
-        cache: SpineCache;
-    }
-    interface SpineCacheData {
-        atlas: string;
-        basePath: string;
-        variants: string[];
-    }
-    class SpinePlugin extends Phaser.Plugin {
-        static RESOLUTION_REGEXP: RegExp;
-        constructor(game: SpineGame, parent: Phaser.PluginManager);
-        private addSpineLoader();
-        private addSpineFactory();
-        private addSpineCache();
-    }
-}
-declare module "phaser-spine" {
-    export = PhaserSpine;
-}
-declare module PhaserSpine {
-    class Spine extends Phaser.Group {
-        private skeleton;
-        private skeletonData;
-        private stateData;
-        private state;
-        private slotContainers;
-        private lastTime;
-        private imageScale;
-        game: PhaserSpine.SpineGame;
-        constructor(game: PhaserSpine.SpineGame, key: string, scalingVariant?: string);
-        autoUpdate: boolean;
-        private getScaleFromVariant(variant);
-        update(dt?: number): void;
-        destroy(destroyChildren?: boolean, soft?: boolean): void;
-        autoUpdateTransform(): void;
-        createSprite(slot: any, attachment: any): Phaser.Sprite;
-        createMesh(slot: any, attachment: any): Phaser.Rope;
-        setMixByName(fromName: string, toName: string, duration: number): void;
-        setAnimationByName(trackIndex: number, animationName: string, loop?: boolean): spine.TrackEntry;
-        addAnimationByName(trackIndex: number, animationName: string, loop?: boolean, delay?: number): spine.TrackEntry;
-        setSkinByName(skinName: string): void;
-        setSkin(skin: spine.Skin): void;
-        setToSetupPose(): void;
-        createCombinedSkin(newSkinName: string, ...skinNames: string[]): spine.Skin;
-    }
-}
-declare module PhaserSpine {
-    class SpineTextureLoader {
-        private game;
-        constructor(game: Phaser.Game);
-        load: (page: any, file: string, atlas: spine.Atlas) => void;
-        unload: (texture: PIXI.BaseTexture) => void;
     }
 }

@@ -1,6 +1,5 @@
 {
-    "name": "phaser",
-    "main": "phaser.comments.d.ts",
-    "files": ["pixi.comments.d.ts", "p2.d.ts"],
+    "name": "phaser-spine",
+    "main": "build/phaser-spine.d.ts",
     "global": true
 }

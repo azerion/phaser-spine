@@ -77,7 +77,7 @@ module.exports = function (grunt) {
         },
         concat: {
             definitions: {
-                src: ['vendor/Spine.d.ts', 'build/phaser-spine.d.ts'],
+                src: ['build/phaser-spine.d.ts', 'vendor/Spine.d.ts'],
                 dest: 'build/phaser-spine.d.ts'
             },
             dist: {
