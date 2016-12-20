@@ -25,7 +25,7 @@ Next up you'd want to add it to your list of js sources you load into your game
 
 After adding the script to the page you can activate it by enabling the plugin:
 ```javascript
-game.add.plugin(Fabrique.Plugins.Spine);
+game.add.plugin(PhaserSpine.SpinePlugin);
 ```
 
 
@@ -110,7 +110,7 @@ By default this plugin parses the suffix with a regular expression that looks fo
 
 If you'd like a different setup you can do so by supplying a new RegExp object to the follow property:
 ```javascript
-Fabrique.Plugins.Spine.RESOLUTION_REGEXP = /#(.+)r/;
+PhaserSpine.SpinePlugin.RESOLUTION_REGEXP = /#(.+)r/;
 ```
 Now the Spine plugin will look for suffixes that look like: #0.5r
 

@@ -28,13 +28,13 @@
     "name": "phaser-spine"
   },
   "devDependencies": {
-    "grunt": "0.4.x",
+    "grunt": "1.0.x",
     "grunt-banner": "^0.6.0",
-    "grunt-contrib-clean": "0.6.0",
-    "grunt-contrib-concat": "^1.0.1",
-    "grunt-contrib-connect": "^1.0.2",
-    "grunt-contrib-uglify": "^0.11.0",
-    "grunt-contrib-watch": "^1.0.0",
+    "grunt-contrib-clean": "1.0.x",
+    "grunt-contrib-concat": "1.0.x",
+    "grunt-contrib-connect": "1.0.x",
+    "grunt-contrib-uglify": "2.0.x",
+    "grunt-contrib-watch": "1.0.x",
     "grunt-ts": "^6.0.0-beta.3",
     "phaser": "2.6.2",
     "typescript": "2.1.x"

@@ -3,7 +3,7 @@
  * Spine plugin for Phaser.io!
  *
  * OrangeGames
- * Build at 19-12-2016
+ * Build at 20-12-2016
  * Released under MIT License 
  */
 
