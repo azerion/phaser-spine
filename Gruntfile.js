@@ -39,7 +39,7 @@ module.exports = function (grunt) {
         },
         watch: {
             files: ['ts/**/*.ts'],
-            tasks: ['ts'],
+            tasks: ['dist'],
             options: {
                 livereload: true
             }
@@ -108,7 +108,7 @@ module.exports = function (grunt) {
     ]);
 
     grunt.registerTask('dev', [
-        'ts:dist',
+        'dist',
         'connect',
         'watch'
     ]);

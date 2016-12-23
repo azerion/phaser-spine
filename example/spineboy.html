@@ -4,7 +4,7 @@
     <title>Phaser Spine Example</title>
 
     <script src="../node_modules/phaser/build/phaser.js"></script>
-    <script src="../build/phaser-spine.js"></script>
+    <script src="../build/phaser-spine.min.js"></script>
 
     <style>
         body {
@@ -25,7 +25,7 @@
     }
 
     function preload() {
-        game.plugins.add(Fabrique.Plugins.Spine);
+        game.plugins.add(PhaserSpine.SpinePlugin);
         game.stage.disableVisibilityChange = true;
 
         game.load.spine('spineboy', "assets/spineboy.json");
