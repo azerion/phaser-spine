@@ -1,11 +1,11 @@
 
 module PhaserSpine {
         export interface SpineObjectFactory extends Phaser.GameObjectFactory {
-            spine: (x: number, y: number, key: string, scalingVariant?: string, group?: Phaser.Group) => PhaserSpine.Spine;
+            spine: (x: number, y: number, key: string, scalingVariant?: string, group?: Phaser.Group) => any;
         }
 
         export interface SpineObjectCreator extends Phaser.GameObjectCreator {
-            spine: (x: number, y: number, key: string, scalingVariant?: string, group?: Phaser.Group) => PhaserSpine.Spine;
+            spine: (x: number, y: number, key: string, scalingVariant?: string, group?: Phaser.Group) => any
         }
 
         export interface SpineCache extends Phaser.Cache {
@@ -42,7 +42,7 @@ module PhaserSpine {
                 this.addSpineFactory();
                 this.addSpineLoader();
             }
-            
+
             private addSpineLoader() {
                 (<PhaserSpine.SpineLoader>Phaser.Loader.prototype).spine = function(key: string, url: string, scalingVariants?: string[]) {
 
@@ -51,37 +51,14 @@ module PhaserSpine {
                     let cacheData: SpineCacheData = <SpineCacheData>{
                         atlas: atlasKey,
                         basePath: (url.substring(0, url.lastIndexOf('/')) === '') ? '.' : url.substring(0, url.lastIndexOf('/')),
-                        variants: undefined
                     };
 
-                    if (undefined === scalingVariants) {
-                        scalingVariants = [''];
-                    } else {
-                        cacheData.variants = scalingVariants;
-                    }
-
-                    scalingVariants.forEach((variant: string) => {
-                        //Check if an atlas file was loaded
-                        (<PhaserSpine.SpineLoader>this).onFileComplete.add((progress: any, cacheKey: string) => {
-                            if (cacheKey === atlasKey) {
-                                let atlas = new spine.Atlas(this.game.cache.getText(cacheKey), {
-                                    load: (page: any, file: string, atlas: spine.Atlas) => {
-                                        // console.log(page, file, atlas);
-                                        (<PhaserSpine.SpineLoader>this).image(file, cacheData.basePath + '/' + file.substr(0, file.lastIndexOf('.')) + variant + '.png');
-                                    }
-                                });
-                            }
-                        });
-
-                        //Load the atlas file
-                        (<PhaserSpine.SpineLoader>this).text(atlasKey, url.substr(0, url.lastIndexOf('.')) + variant + '.atlas');
-                    });
-
-
+                    (<PhaserSpine.SpineLoader>this).text(key, url.substr(0, url.lastIndexOf('.')) + '.atlas');
                     (<PhaserSpine.SpineLoader>this).json(key, url);
+                    (<PhaserSpine.SpineLoader>this).image(key, url.substr(0, url.lastIndexOf('.')) + '.png');
 
                     this.game.cache.addSpine(key, cacheData);
-                }; 
+                };
             }
 
             /**
@@ -89,22 +66,22 @@ module PhaserSpine {
              * game.add.spine();
              */
             private addSpineFactory() {
-                (<PhaserSpine.SpineObjectFactory>Phaser.GameObjectFactory.prototype).spine = function(x: number, y: number, key: string, scalingVariant?: string, group?: Phaser.Group): PhaserSpine.Spine
+                (<PhaserSpine.SpineObjectFactory>Phaser.GameObjectFactory.prototype).spine = function(x: number, y: number, key: string, scalingVariant?: string, group?: Phaser.Group): any
                 {
                     if (group === undefined) { group = this.world; }
 
-                    var spineObject = new PhaserSpine.Spine(this.game, key, scalingVariant);
+                    var spineObject = null;//new PhaserSpine.Spine(this.game, key, scalingVariant);
 
-                    spineObject.setToSetupPose();
-                    spineObject.position.x = x;
-                    spineObject.position.y = y;
+                    //spineObject.setToSetupPose();
+                    //spineObject.position.x = x;
+                    //spineObject.position.y = y;
 
                     return group.add(spineObject);
                 };
 
-                (<PhaserSpine.SpineObjectCreator>Phaser.GameObjectCreator.prototype).spine = function(x: number, y: number, key: string, scalingVariant?: string, group?: Phaser.Group): PhaserSpine.Spine
+                (<PhaserSpine.SpineObjectCreator>Phaser.GameObjectCreator.prototype).spine = function(x: number, y: number, key: string, scalingVariant?: string, group?: Phaser.Group): any
                 {
-                    return new PhaserSpine.Spine(this.game, key, scalingVariant);
+                    return null;//new PhaserSpine.Spine(this.game, key, scalingVariant);
                 };
             }
 

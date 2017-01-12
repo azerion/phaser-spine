@@ -33,7 +33,7 @@ module.exports = function (grunt) {
                 noImplicitAny: true
             },
             dist: {
-                src: ['ts/**/*.ts'],
+                src: ['ts/**/*.ts', '!ts/Spine.ts'],
                 dest: 'build/<%= pkg.config.name %>.js'
             }
         },
