@@ -5,7 +5,7 @@ module.exports = function (grunt) {
         //Get some details from the package.json
         pkg: grunt.file.readJSON('package.json'),
         banner: '/*!\n' +
-        ' * <%= pkg.name %> - version <%= pkg.version %> \n' +
+        ' * <%= pkg.config.name %> - version <%= pkg.version %> \n' +
         ' * <%= pkg.description %>\n' +
         ' *\n' +
         ' * <%= pkg.author %>\n' +
@@ -24,32 +24,31 @@ module.exports = function (grunt) {
             }
         },
         //Typescript settings per build
-        typescript: {
+        ts: {
             options: {
                 module: 'amd',
                 target: 'es5',
                 sourceMap: true,
                 declaration: true,
-                references: [
-                    'node_modules/phaser/typescript/pixi.d.ts',
-                    'node_modules/phaser/typescript/phaser.d.ts',
-                    'vendor/*.d.ts'
-                ],
                 noImplicitAny: true
             },
             dist: {
                 src: ['ts/**/*.ts'],
-                dest: 'build/<%= pkg.name %>.js'
+                dest: 'build/<%= pkg.config.name %>.js'
             }
         },
-        concat: {
-            definitions: {
-                src: ['vendor/Spine.d.ts', 'build/phaser-spine.d.ts'],
-                dest: 'build/phaser-spine.d.ts'
-            },
-            dist: {
-                src: ['vendor/Spine.js', 'build/phaser-spine.js'],
-                dest: 'build/phaser-spine.js'
+        watch: {
+            files: ['ts/**/*.ts'],
+            tasks: ['dist'],
+            options: {
+                livereload: true
+            }
+        },
+        connect: {
+            server: {
+                options: {
+                    port: 8080
+                }
             }
         },
         uglify: {
@@ -69,11 +68,21 @@ module.exports = function (grunt) {
             },
             dist: {
                 files: {
-                    'build/<%= pkg.name %>.min.js': [
+                    'build/<%= pkg.config.name %>.min.js': [
                         'vendor/Spine.js',
-                        'build/<%= pkg.name %>.js'
+                        'build/<%= pkg.config.name %>.js'
                     ]
                 }
+            }
+        },
+        concat: {
+            definitions: {
+                src: ['build/phaser-spine.d.ts', 'vendor/Spine.d.ts'],
+                dest: 'build/phaser-spine.d.ts'
+            },
+            dist: {
+                src: ['vendor/Spine.js', 'build/phaser-spine.js'],
+                dest: 'build/phaser-spine.js'
             }
         },
         clean: {
@@ -85,15 +94,23 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-banner');
-    grunt.loadNpmTasks('grunt-typescript');
+    grunt.loadNpmTasks('grunt-ts');
+    grunt.loadNpmTasks('grunt-contrib-connect');
+    grunt.loadNpmTasks('grunt-contrib-watch');
 
     //dist Build
     grunt.registerTask('dist', [
-        'clean:dist',
-        'typescript:dist',
-        'uglify:dist',
+        'clean:dist',     //Clean the dist folder
+        'ts:dist',//Run typescript on the preprocessed files, for dist (client)
+        'uglify:dist',    //Minify everything
         'concat',
-        'usebanner:dist'
+        'usebanner:dist'    //Minify everything
+    ]);
+
+    grunt.registerTask('dev', [
+        'dist',
+        'connect',
+        'watch'
     ]);
 
 };

@@ -1,9 +1,13 @@
-(<any>PIXI.Strip).prototype.postUpdate = function () {};
+declare module "phaser-spine" {
+    export = PhaserSpine;
+}
+
+(<any>Phaser.Rope).prototype.postUpdate = function () {};
 
 spine.Bone.yDown = true;
 
-module Fabrique {
-    import SpineCacheData = Fabrique.Plugins.SpineCacheData;
+module PhaserSpine {
+    import SpineCacheData = PhaserSpine.SpineCacheData;
     import Skin = spine.Skin;
     export class Spine extends Phaser.Group
     {
@@ -15,7 +19,7 @@ module Fabrique {
         private lastTime: number;
         private imageScale: number = 1;
 
-        public game: Fabrique.Plugins.SpineGame;
+        public game: PhaserSpine.SpineGame;
 
         /**
          * @class Spine
@@ -24,7 +28,7 @@ module Fabrique {
          * @param game {Phaser.Game} the game reference to add this object
          * @param key {String} the key to find the assets for this object
          */
-        constructor(game: Fabrique.Plugins.SpineGame, key: string, scalingVariant?: string)
+        constructor(game: PhaserSpine.SpineGame, key: string, scalingVariant?: string)
         {
             super(game);
 
@@ -36,7 +40,7 @@ module Fabrique {
                 this.imageScale = this.getScaleFromVariant(data.variants[0]);
             }
 
-            let textureLoader = new Fabrique.SpineTextureLoader(game);
+            let textureLoader = new PhaserSpine.SpineTextureLoader(game);
             // create a spine atlas using the loaded text and a spine texture loader instance //
             let spineAtlas = new spine.Atlas(game.cache.getText(data.atlas), textureLoader);
             // now we use an atlas attachment loader //
@@ -74,7 +78,7 @@ module Fabrique {
                     slot.currentSpriteName = spriteName;
                     slotContainer.add(sprite);
                 } else if (attachment instanceof spine.WeightedMeshAttachment) {
-                    let mesh: PIXI.Strip = this.createMesh(slot, attachment);
+                    let mesh: Phaser.Rope = this.createMesh(slot, attachment);
                     slot.currentMesh = mesh;
                     slot.currentMeshName = attachment.name;
                     slotContainer.add(mesh);
@@ -87,16 +91,16 @@ module Fabrique {
         }
 
         get autoUpdate(): boolean {
-            return (this.updateTransform === Fabrique.Spine.prototype.autoUpdateTransform);
+            return (this.updateTransform === PhaserSpine.Spine.prototype.autoUpdateTransform);
         };
 
         set autoUpdate(value: boolean) {
-            this.updateTransform = value ? Fabrique.Spine.prototype.autoUpdateTransform : PIXI.DisplayObjectContainer.prototype.updateTransform;
+            this.updateTransform = value ? PhaserSpine.Spine.prototype.autoUpdateTransform : PIXI.DisplayObjectContainer.prototype.updateTransform;
         };
 
 
         private getScaleFromVariant(variant: string): number {
-            let scale: RegExpExecArray = Plugins.Spine.RESOLUTION_REGEXP.exec(variant);
+            let scale: RegExpExecArray = SpinePlugin.RESOLUTION_REGEXP.exec(variant);
             if (scale) {
                 return parseFloat(<string>scale[1]);
             }
@@ -178,7 +182,7 @@ module Fabrique {
                     }
                     
                     slot.currentSprite.blendMode = slot.blendMode;
-                    slot.currentSprite.tint = PIXI.rgb2hex([slot.r,slot.g,slot.b]);
+                    slot.currentSprite.tint =  parseInt(Phaser.Color.componentToHex(255*slot.r) + Phaser.Color.componentToHex(255*slot.g) + Phaser.Color.componentToHex(255*slot.b), 16);
                 } else if (type === spine.AttachmentType.weightedmesh || type === spine.AttachmentType.weightedlinkedmesh) {
                     if (!slot.currentMeshName || slot.currentMeshName !== attachment.name) {
                         var meshName = attachment.name;
@@ -280,12 +284,13 @@ module Fabrique {
             return sprite;
         };
 
-        public createMesh(slot: any, attachment: any): PIXI.Strip {
+        public createMesh(slot: any, attachment: any): Phaser.Rope {
             let descriptor: any = attachment.rendererObject;
             let baseTexture: any = descriptor.page.rendererObject;
             let texture: PIXI.Texture = new PIXI.Texture(baseTexture);
 
-            let strip: PIXI.Strip = new PIXI.Strip(texture);
+            
+            let strip: Phaser.Rope = new Phaser.Rope(this.game, 0, 0, texture);
             (<any>strip).drawMode = 1;
             strip.canvasPadding = 1.5;
 

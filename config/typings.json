@@ -1,0 +1,5 @@
+{
+    "name": "phaser-spine",
+    "main": "build/phaser-spine.d.ts",
+    "global": true
+}
