@@ -31,12 +31,36 @@ module PhaserSpine {
             variants: string[];
         }
 
+        export interface Config {
+            debugRendering: boolean;
+            triangleRendering: boolean;
+        }
+
         export class SpinePlugin extends Phaser.Plugin {
 
             public static RESOLUTION_REGEXP: RegExp = /@(.+)x/;
 
+            public static SPINE_NAMESPACE: string = 'spine';
+
+            private renderer: Canvas.Renderer;
+
             constructor(game: SpineGame, parent: Phaser.PluginManager) {
                 super(game, parent);
+            }
+
+            public init(config?: Config): void {
+                if (!config) {
+                    config = <Config>{
+                        debugRendering: false,
+                        triangleRendering: true
+                    }
+                }
+
+                this.renderer = new PhaserSpine.Canvas.Renderer(this.game);
+                // enable debug rendering
+                this.renderer.debugRendering = config.debugRendering;
+                // enable the triangle renderer, supports meshes, but may produce artifacts in some browsers
+                this.renderer.triangleRendering = config.triangleRendering;
 
                 this.addSpineCache();
                 this.addSpineFactory();
@@ -45,20 +69,17 @@ module PhaserSpine {
 
             private addSpineLoader() {
                 (<PhaserSpine.SpineLoader>Phaser.Loader.prototype).spine = function(key: string, url: string, scalingVariants?: string[]) {
+                    let path: string = url.substr(0, url.lastIndexOf('.'));
 
-                    let atlasKey: string = key+"Atlas";
-
-                    let cacheData: SpineCacheData = <SpineCacheData>{
-                        atlas: atlasKey,
-                        basePath: (url.substring(0, url.lastIndexOf('/')) === '') ? '.' : url.substring(0, url.lastIndexOf('/')),
-                    };
-
-                    (<PhaserSpine.SpineLoader>this).text(key, url.substr(0, url.lastIndexOf('.')) + '.atlas');
-                    (<PhaserSpine.SpineLoader>this).json(key, url);
-                    (<PhaserSpine.SpineLoader>this).image(key, url.substr(0, url.lastIndexOf('.')) + '.png');
-
-                    this.game.cache.addSpine(key, cacheData);
+                    (<PhaserSpine.SpineLoader>this).text(SpinePlugin.SPINE_NAMESPACE + key, path +'.atlas');
+                    (<PhaserSpine.SpineLoader>this).json(SpinePlugin.SPINE_NAMESPACE + key, path + '.json');
+                    (<PhaserSpine.SpineLoader>this).image(SpinePlugin.SPINE_NAMESPACE + key, path +'.png');
                 };
+            }
+
+            public render(): void {
+                console.log('drawing!');
+                this.renderer.draw();
             }
 
             /**
@@ -66,22 +87,69 @@ module PhaserSpine {
              * game.add.spine();
              */
             private addSpineFactory() {
-                (<PhaserSpine.SpineObjectFactory>Phaser.GameObjectFactory.prototype).spine = function(x: number, y: number, key: string, scalingVariant?: string, group?: Phaser.Group): any
+                let renderer = this.renderer;
+                (<PhaserSpine.SpineObjectFactory>Phaser.GameObjectFactory.prototype).spine = function(x: number, y: number, key: string, scalingVariant?: string, group?: Phaser.Group): Spine
                 {
                     if (group === undefined) { group = this.world; }
 
-                    var spineObject = null;//new PhaserSpine.Spine(this.game, key, scalingVariant);
+                    let skin: string = "default";
 
-                    //spineObject.setToSetupPose();
-                    //spineObject.position.x = x;
-                    //spineObject.position.y = y;
+                    // Load the texture atlas using name.atlas and name.png from the AssetManager.
+                    // The function passed to TextureAtlas is used to resolve relative paths.
+                    let atlas: spine.TextureAtlas = new spine.TextureAtlas(this.game.cache.getText(SpinePlugin.SPINE_NAMESPACE +key), function(path) {
+                        return new PhaserSpine.Canvas.Texture(this.game.cache.getImage(SpinePlugin.SPINE_NAMESPACE +key));
+                    });
 
+                    // Create a AtlasAttachmentLoader, which is specific to the WebGL backend.
+                    let atlasLoader: spine.AtlasAttachmentLoader = new spine.AtlasAttachmentLoader(atlas);
+
+                    // Create a SkeletonJson instance for parsing the .json file.
+                    var skeletonJson = new spine.SkeletonJson(atlasLoader);
+
+                    function calculateBounds(skeleton: spine.Skeleton) {
+                        var data = skeleton.data;
+                        skeleton.setToSetupPose();
+                        skeleton.updateWorldTransform();
+                        var offset = new spine.Vector2();
+                        var size = new spine.Vector2();
+                        skeleton.getBounds(offset, size);
+                        return new Phaser.Rectangle(offset.x, offset.y, size.x, size.y);
+                    }
+
+
+                    // Set the scale to apply during parsing, parse the file, and create a new skeleton.
+                    var skeletonData = skeletonJson.readSkeletonData(this.game.cache.getJSON(SpinePlugin.SPINE_NAMESPACE +key));
+                    var skeleton = new spine.Skeleton(skeletonData);
+                    skeleton.flipY = true;
+                    var bounds = calculateBounds(skeleton);
+                    //	skeleton.setSkinByName(skin);
+
+                    // Create an AnimationState, and set the initial animation in looping mode.
+                    var animationState = new spine.AnimationState(new spine.AnimationStateData(skeleton.data));
+                    	animationState.setAnimation(0, 'walk', true);
+                    //animationState.addListener({
+                    //    event: function(trackIndex, event) {
+                    //        // console.log("Event on track " + trackIndex + ": " + JSON.stringify(event));
+                    //    },
+                    //    complete: function(trackIndex, loopCount) {
+                    //        // console.log("Animation on track " + trackIndex + " completed, loop count: " + loopCount);
+                    //    },
+                    //    start: function(trackIndex) {
+                    //        // console.log("Animation on track " + trackIndex + " started");
+                    //    },
+                    //    end: function(trackIndex) {
+                    //        // console.log("Animation on track " + trackIndex + " ended");
+                    //    }
+                    //})
+
+                    var spineObject = new Spine(this.game, skeleton, bounds, animationState);
+                    renderer.add(spineObject);
                     return group.add(spineObject);
                 };
 
-                (<PhaserSpine.SpineObjectCreator>Phaser.GameObjectCreator.prototype).spine = function(x: number, y: number, key: string, scalingVariant?: string, group?: Phaser.Group): any
+                (<PhaserSpine.SpineObjectCreator>Phaser.GameObjectCreator.prototype).spine = function(x: number, y: number, key: string, scalingVariant?: string, group?: Phaser.Group): Spine
                 {
-                    return null;//new PhaserSpine.Spine(this.game, key, scalingVariant);
+                    return null;//new Spine(this.game, key, scalingVariant);
                 };
             }
 

@@ -3,7 +3,7 @@
  * https://github.com/EsotericSoftware/spine-runtimes/blob/master/spine-ts/canvas/src/CanvasTexture.ts
  */
 module PhaserSpine {
-    module Canvas {
+    export module Canvas {
         export class Texture extends spine.Texture {
             constructor (image: HTMLImageElement) {
                 super(image);

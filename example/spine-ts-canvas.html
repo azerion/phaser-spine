@@ -1,7 +1,7 @@
 <html>
-<script src="../../spine-ts/spine-canvas.js"></script>
 <script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
 <script src="../node_modules/phaser/build/phaser.js"></script>
+<script src="../build/phaser-spine.js"></script>
 <style>
 	* { margin: 0; padding: 0; }
 	body, html { height: 100% }
@@ -11,132 +11,22 @@
 </body>
 <script>
 
-var skeleton, state, bounds;
-var skeletonRenderer;
 var game = new Phaser.Game(window.innerWidth, window.innerHeight, Phaser.CANVAS, '', {
-	init: init,
 	preload: preload,
-	create: create,
-	update: update,
-	render: render
+	create: create
 });
 
-function init () {
-	game.clearBeforeRender = true;
-	skeletonRenderer = new spine.canvas.SkeletonRenderer(game.context);
-	// enable debug rendering
-	skeletonRenderer.debugRendering = false;
-	// enable the triangle renderer, supports meshes, but may produce artifacts in some browsers
-	skeletonRenderer.triangleRendering = true;
-
-//	requestAnimationFrame(load);
-}
-
 function preload() {
-	game.load.json('raptor', 'assets/raptor.json');
-	game.load.text('raptor', 'assets/raptor.atlas');
-	game.load.image('raptor', 'assets/raptor.png');
+	game.plugins.add(PhaserSpine.SpinePlugin, {
+		debugRendering: false,
+		triangleRendering: true
+	});
+
+	game.load.spine('raptor', 'assets/raptor.json');
 }
 
 function create() {
-	var data = loadSkeleton("raptor", "walk", "default");
-	skeleton = data.skeleton;
-	state = data.state;
-	bounds = data.bounds;
+	game.add.spine(0, 0, 'raptor');
 }
-
-function update() {
-	state.update(game.time.elapsed / 1000);
-	state.apply(skeleton);
-	skeleton.updateWorldTransform();
-}
-function render() {
-	resize();
-	skeletonRenderer.draw(skeleton);
-}
-
-function loadSkeleton (name, initialAnimation, skin) {
-	if (skin === undefined) skin = "default";
-
-	// Load the texture atlas using name.atlas and name.png from the AssetManager.
-	// The function passed to TextureAtlas is used to resolve relative paths.
-	atlas = new spine.TextureAtlas(game.cache.getText(name), function(path) {
-		return new spine.canvas.CanvasTexture(game.cache.getImage(name));
-	});
-
-	// Create a AtlasAttachmentLoader, which is specific to the WebGL backend.
-	atlasLoader = new spine.AtlasAttachmentLoader(atlas);
-
-	// Create a SkeletonJson instance for parsing the .json file.
-	var skeletonJson = new spine.SkeletonJson(atlasLoader);
-	
-	// Set the scale to apply during parsing, parse the file, and create a new skeleton.	
-	var skeletonData = skeletonJson.readSkeletonData(game.cache.getJSON(name));
-	var skeleton = new spine.Skeleton(skeletonData);
-	skeleton.flipY = true;		
-	var bounds = calculateBounds(skeleton);	
-	skeleton.setSkinByName(skin);
-
-	// Create an AnimationState, and set the initial animation in looping mode.
-	var animationState = new spine.AnimationState(new spine.AnimationStateData(skeleton.data));
-	animationState.setAnimation(0, initialAnimation, true);
-	animationState.addListener({
-		event: function(trackIndex, event) {
-			// console.log("Event on track " + trackIndex + ": " + JSON.stringify(event));
-		},
-		complete: function(trackIndex, loopCount) {
-			// console.log("Animation on track " + trackIndex + " completed, loop count: " + loopCount);
-		},
-		start: function(trackIndex) {
-			// console.log("Animation on track " + trackIndex + " started");
-		},
-		end: function(trackIndex) {
-			// console.log("Animation on track " + trackIndex + " ended");
-		}
-	})
-
-	// Pack everything up and return to caller.
-	return { skeleton: skeleton, state: animationState, bounds: bounds };
-}
-
-function calculateBounds(skeleton) {
-	var data = skeleton.data;
-	skeleton.setToSetupPose();
-	skeleton.updateWorldTransform();
-	var offset = new spine.Vector2();
-	var size = new spine.Vector2();
-	skeleton.getBounds(offset, size);	
-	return { offset: offset, size: size };
-}
-
-
-function resize () {
-	var w = game.width;
-	var h = game.height;
-//	if (canvas.width != w || canvas.height != h) {
-//		canvas.width = w;
-//		canvas.height = h;
-//	}
-
-	// magic
-	var centerX = bounds.offset.x + bounds.size.x / 2;
-	var centerY = bounds.offset.y + bounds.size.y / 2;
-	var scaleX = bounds.size.x / game.width;
-	var scaleY = bounds.size.y / game.height;
-	var scale = Math.max(scaleX, scaleY) * 1.2;
-	if (scale < 1) scale = 1;
-	var width = game.width * scale;
-	var height = game.height * scale;
-
-	game.context.resetTransform();
-	game.context.scale(1 / scale, 1 / scale);
-	game.context.translate(-centerX, -centerY);
-	game.context.translate(width / 2, height / 2);
-}
-
-(function() {
-	init();
-}());
-
 </script>
 </html>
