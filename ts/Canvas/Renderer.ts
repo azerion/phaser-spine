@@ -3,18 +3,13 @@ module PhaserSpine {
         export class Renderer {
             static QUAD_TRIANGLES = [0, 1, 2, 2, 3, 0];
 
-            public triangleRendering = false;
-            public debugRendering = false;
-
-            private spines: Spine[] = [];
-
             private game: Phaser.Game;
 
             constructor (game: Phaser.Game) {
                 this.game = game;
             }
 
-            public resize(bounds: Phaser.Rectangle): void {
+            public resize(bounds: Phaser.Rectangle, renderSession: PIXI.RenderSession): void {
                     var w = this.game.width;
                 var h = this.game.height;
 
@@ -27,17 +22,17 @@ module PhaserSpine {
                 var width = this.game.width * scale;
                 var height = this.game.height * scale;
 
-                //(<any>this.game.context).resetTransform();
-                this.game.context.scale(1 / scale, 1 / scale);
-                this.game.context.translate(-centerX, -centerY);
-                this.game.context.translate(width / 2, height / 2);
+                (<any>renderSession.context).resetTransform();
+                renderSession.context.scale(1 / scale, 1 / scale);
+                renderSession.context.translate(-centerX, -centerY);
+                renderSession.context.translate(width / 2, height / 2);
             }
 
             public drawImages (skeleton: spine.Skeleton, renderSession: PIXI.RenderSession) {
                 let ctx = renderSession.context;
                 let drawOrder = skeleton.drawOrder;
 
-                if (this.debugRendering) ctx.strokeStyle = "green";
+                if (SpinePlugin.DEBUG) ctx.strokeStyle = "green";
 
                 for (let i = 0, n = drawOrder.length; i < n; i++) {
                     let slot = drawOrder[i];

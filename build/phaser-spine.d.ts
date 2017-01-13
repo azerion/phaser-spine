@@ -2,12 +2,9 @@ declare module PhaserSpine {
     module Canvas {
         class Renderer {
             static QUAD_TRIANGLES: number[];
-            triangleRendering: boolean;
-            debugRendering: boolean;
-            private spines;
             private game;
             constructor(game: Phaser.Game);
-            resize(bounds: Phaser.Rectangle): void;
+            resize(bounds: Phaser.Rectangle, renderSession: PIXI.RenderSession): void;
             drawImages(skeleton: spine.Skeleton, renderSession: PIXI.RenderSession): void;
             drawTriangles(skeleton: spine.Skeleton, renderSession: PIXI.RenderSession): void;
             private drawTriangle(renderSession, img, x0, y0, u0, v0, x1, y1, u1, v1, x2, y2, u2, v2);

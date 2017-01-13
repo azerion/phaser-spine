@@ -5376,12 +5376,9 @@ var PhaserSpine;
     (function (Canvas) {
         var Renderer = (function () {
             function Renderer(game) {
-                this.triangleRendering = false;
-                this.debugRendering = false;
-                this.spines = [];
                 this.game = game;
             }
-            Renderer.prototype.resize = function (bounds) {
+            Renderer.prototype.resize = function (bounds, renderSession) {
                 var w = this.game.width;
                 var h = this.game.height;
                 var centerX = bounds.x + bounds.width / 2;
@@ -5391,14 +5388,15 @@ var PhaserSpine;
                 var scale = Math.max(scaleX, scaleY) * 1.2;
                 var width = this.game.width * scale;
                 var height = this.game.height * scale;
-                this.game.context.scale(1 / scale, 1 / scale);
-                this.game.context.translate(-centerX, -centerY);
-                this.game.context.translate(width / 2, height / 2);
+                renderSession.context.resetTransform();
+                renderSession.context.scale(1 / scale, 1 / scale);
+                renderSession.context.translate(-centerX, -centerY);
+                renderSession.context.translate(width / 2, height / 2);
             };
             Renderer.prototype.drawImages = function (skeleton, renderSession) {
                 var ctx = renderSession.context;
                 var drawOrder = skeleton.drawOrder;
-                if (this.debugRendering)
+                if (PhaserSpine.SpinePlugin.DEBUG)
                     ctx.strokeStyle = "green";
                 for (var i = 0, n = drawOrder.length; i < n; i++) {
                     var slot = drawOrder[i];
@@ -5641,7 +5639,7 @@ var PhaserSpine;
             this.skeleton.updateWorldTransform();
         };
         Spine.prototype._renderCanvas = function (renderSession, matrix) {
-            this.renderer.resize(this.bounds);
+            this.renderer.resize(this.bounds, renderSession);
             if (PhaserSpine.SpinePlugin.TRIANGLE) {
                 this.renderer.drawTriangles(this.skeleton, renderSession);
             }

@@ -33,7 +33,7 @@ module PhaserSpine {
         }
 
         public _renderCanvas(renderSession: PIXI.RenderSession, matrix?: PIXI.Matrix): void {
-            (<Canvas.Renderer>this.renderer).resize(this.bounds);
+            (<Canvas.Renderer>this.renderer).resize(this.bounds, renderSession);
             if (SpinePlugin.TRIANGLE) {
                 (<Canvas.Renderer>this.renderer).drawTriangles(this.skeleton, renderSession);
             } else {

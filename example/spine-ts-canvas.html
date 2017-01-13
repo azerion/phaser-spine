@@ -23,10 +23,13 @@ function preload() {
 	});
 
 	game.load.spine('raptor', 'assets/raptor.json');
+	game.load.image('btn', 'assets/btn_01.png');
 }
 
 function create() {
+	game.add.image(game.width / 2, game.height / 2, 'btn');
 	game.add.spine(0, 0, 'raptor');
+	game.add.image(game.width / 2 + 100, game.height / 2, 'btn');
 }
 </script>
 </html>
