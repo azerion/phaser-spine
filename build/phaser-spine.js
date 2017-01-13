@@ -5379,22 +5379,8 @@ var PhaserSpine;
                 this.triangleRendering = false;
                 this.debugRendering = false;
                 this.spines = [];
-                this.ctx = game.context;
                 this.game = game;
             }
-            Renderer.prototype.add = function (spine) {
-                this.spines.push(spine);
-            };
-            Renderer.prototype.draw = function () {
-                var _this = this;
-                this.spines.forEach(function (spine) {
-                    _this.resize(spine.bounds);
-                    if (_this.triangleRendering)
-                        _this.drawTriangles(spine.skeleton);
-                    else
-                        _this.drawImages(spine.skeleton);
-                });
-            };
             Renderer.prototype.resize = function (bounds) {
                 var w = this.game.width;
                 var h = this.game.height;
@@ -5403,17 +5389,14 @@ var PhaserSpine;
                 var scaleX = bounds.width / this.game.width;
                 var scaleY = bounds.height / this.game.height;
                 var scale = Math.max(scaleX, scaleY) * 1.2;
-                if (scale < 1)
-                    scale = 1;
                 var width = this.game.width * scale;
                 var height = this.game.height * scale;
-                this.game.context.resetTransform();
                 this.game.context.scale(1 / scale, 1 / scale);
                 this.game.context.translate(-centerX, -centerY);
                 this.game.context.translate(width / 2, height / 2);
             };
-            Renderer.prototype.drawImages = function (skeleton) {
-                var ctx = this.ctx;
+            Renderer.prototype.drawImages = function (skeleton, renderSession) {
+                var ctx = renderSession.context;
                 var drawOrder = skeleton.drawOrder;
                 if (this.debugRendering)
                     ctx.strokeStyle = "green";
@@ -5451,13 +5434,13 @@ var PhaserSpine;
                     else {
                         ctx.drawImage(image, region.x, region.y, region.width, region.height, 0, 0, w, h);
                     }
-                    if (this.debugRendering)
+                    if (PhaserSpine.SpinePlugin.DEBUG)
                         ctx.strokeRect(0, 0, w, h);
                     ctx.rotate(-rotation);
                     ctx.translate(-x, -y);
                 }
             };
-            Renderer.prototype.drawTriangles = function (skeleton) {
+            Renderer.prototype.drawTriangles = function (skeleton, renderSession) {
                 var blendMode = null;
                 var vertices = null;
                 var triangles = null;
@@ -5487,14 +5470,14 @@ var PhaserSpine;
                         if (slotBlendMode != blendMode) {
                             blendMode = slotBlendMode;
                         }
-                        var ctx = this.ctx;
+                        var ctx = renderSession.context;
                         for (var j = 0; j < triangles.length; j += 3) {
                             var t1 = triangles[j] * 8, t2 = triangles[j + 1] * 8, t3 = triangles[j + 2] * 8;
                             var x0 = vertices[t1], y0 = vertices[t1 + 1], u0 = vertices[t1 + 6], v0 = vertices[t1 + 7];
                             var x1 = vertices[t2], y1 = vertices[t2 + 1], u1 = vertices[t2 + 6], v1 = vertices[t2 + 7];
                             var x2 = vertices[t3], y2 = vertices[t3 + 1], u2 = vertices[t3 + 6], v2 = vertices[t3 + 7];
-                            this.drawTriangle(texture, x0, y0, u0, v0, x1, y1, u1, v1, x2, y2, u2, v2);
-                            if (this.debugRendering) {
+                            this.drawTriangle(renderSession, texture, x0, y0, u0, v0, x1, y1, u1, v1, x2, y2, u2, v2);
+                            if (PhaserSpine.SpinePlugin.DEBUG) {
                                 ctx.strokeStyle = "green";
                                 ctx.beginPath();
                                 ctx.moveTo(x0, y0);
@@ -5507,8 +5490,8 @@ var PhaserSpine;
                     }
                 }
             };
-            Renderer.prototype.drawTriangle = function (img, x0, y0, u0, v0, x1, y1, u1, v1, x2, y2, u2, v2) {
-                var ctx = this.ctx;
+            Renderer.prototype.drawTriangle = function (renderSession, img, x0, y0, u0, v0, x1, y1, u1, v1, x2, y2, u2, v2) {
+                var ctx = renderSession.context;
                 u0 *= img.width;
                 v0 *= img.height;
                 u1 *= img.width;
@@ -5566,15 +5549,8 @@ var PhaserSpine;
             return _super.call(this, game, parent) || this;
         }
         SpinePlugin.prototype.init = function (config) {
-            if (!config) {
-                config = {
-                    debugRendering: false,
-                    triangleRendering: true
-                };
-            }
-            this.renderer = new PhaserSpine.Canvas.Renderer(this.game);
-            this.renderer.debugRendering = config.debugRendering;
-            this.renderer.triangleRendering = config.triangleRendering;
+            SpinePlugin.DEBUG = config.debugRendering || false;
+            SpinePlugin.TRIANGLE = config.triangleRendering || false;
             this.addSpineCache();
             this.addSpineFactory();
             this.addSpineLoader();
@@ -5587,12 +5563,7 @@ var PhaserSpine;
                 this.image(SpinePlugin.SPINE_NAMESPACE + key, path + '.png');
             };
         };
-        SpinePlugin.prototype.render = function () {
-            console.log('drawing!');
-            this.renderer.draw();
-        };
         SpinePlugin.prototype.addSpineFactory = function () {
-            var renderer = this.renderer;
             Phaser.GameObjectFactory.prototype.spine = function (x, y, key, scalingVariant, group) {
                 if (group === undefined) {
                     group = this.world;
@@ -5619,7 +5590,6 @@ var PhaserSpine;
                 var animationState = new spine.AnimationState(new spine.AnimationStateData(skeleton.data));
                 animationState.setAnimation(0, 'walk', true);
                 var spineObject = new PhaserSpine.Spine(this.game, skeleton, bounds, animationState);
-                renderer.add(spineObject);
                 return group.add(spineObject);
             };
             Phaser.GameObjectCreator.prototype.spine = function (x, y, key, scalingVariant, group) {
@@ -5642,28 +5612,61 @@ var PhaserSpine;
     }(Phaser.Plugin));
     SpinePlugin.RESOLUTION_REGEXP = /@(.+)x/;
     SpinePlugin.SPINE_NAMESPACE = 'spine';
+    SpinePlugin.DEBUG = false;
+    SpinePlugin.TRIANGLE = false;
     PhaserSpine.SpinePlugin = SpinePlugin;
 })(PhaserSpine || (PhaserSpine = {}));
 var PhaserSpine;
 (function (PhaserSpine) {
     var Spine = (function (_super) {
         __extends(Spine, _super);
-        function Spine(game, skeleton, bounds, state) {
+        function Spine(game, skeleton, bounds, state, config) {
             var _this = _super.call(this, game) || this;
             _this.skeleton = skeleton;
             _this.bounds = bounds;
             _this.state = state;
+            if (!config) {
+                config = {
+                    debugRendering: false,
+                    triangleRendering: true
+                };
+            }
+            _this.renderer = new PhaserSpine.Canvas.Renderer(_this.game);
             return _this;
         }
         Spine.prototype.update = function () {
             _super.prototype.update.call(this);
-            console.log('updating');
             this.state.update(this.game.time.elapsed / 1000);
             this.state.apply(this.skeleton);
             this.skeleton.updateWorldTransform();
         };
+        Spine.prototype._renderCanvas = function (renderSession, matrix) {
+            this.renderer.resize(this.bounds);
+            if (PhaserSpine.SpinePlugin.TRIANGLE) {
+                this.renderer.drawTriangles(this.skeleton, renderSession);
+            }
+            else {
+                this.renderer.drawImages(this.skeleton, renderSession);
+            }
+        };
+        Spine.prototype._renderWebGL = function (renderSession, matrix) {
+        };
         return Spine;
     }(Phaser.Group));
     PhaserSpine.Spine = Spine;
+})(PhaserSpine || (PhaserSpine = {}));
+var PhaserSpine;
+(function (PhaserSpine) {
+    var WebGL;
+    (function (WebGL) {
+        var Renderer = (function () {
+            function Renderer() {
+            }
+            Renderer.prototype.draw = function (spine, renderSession) {
+            };
+            return Renderer;
+        }());
+        WebGL.Renderer = Renderer;
+    })(WebGL = PhaserSpine.WebGL || (PhaserSpine.WebGL = {}));
 })(PhaserSpine || (PhaserSpine = {}));
 //# sourceMappingURL=phaser-spine.js.map

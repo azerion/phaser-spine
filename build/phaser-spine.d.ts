@@ -2,18 +2,15 @@ declare module PhaserSpine {
     module Canvas {
         class Renderer {
             static QUAD_TRIANGLES: number[];
-            private ctx;
             triangleRendering: boolean;
             debugRendering: boolean;
             private spines;
             private game;
             constructor(game: Phaser.Game);
-            add(spine: Spine): void;
-            draw(): void;
-            private resize(bounds);
-            private drawImages(skeleton);
-            private drawTriangles(skeleton);
-            private drawTriangle(img, x0, y0, u0, v0, x1, y1, u1, v1, x2, y2, u2, v2);
+            resize(bounds: Phaser.Rectangle): void;
+            drawImages(skeleton: spine.Skeleton, renderSession: PIXI.RenderSession): void;
+            drawTriangles(skeleton: spine.Skeleton, renderSession: PIXI.RenderSession): void;
+            private drawTriangle(renderSession, img, x0, y0, u0, v0, x1, y1, u1, v1, x2, y2, u2, v2);
         }
     }
 }
@@ -62,11 +59,11 @@ declare module PhaserSpine {
     class SpinePlugin extends Phaser.Plugin {
         static RESOLUTION_REGEXP: RegExp;
         static SPINE_NAMESPACE: string;
-        private renderer;
+        static DEBUG: boolean;
+        static TRIANGLE: boolean;
         constructor(game: SpineGame, parent: Phaser.PluginManager);
         init(config?: Config): void;
         private addSpineLoader();
-        render(): void;
         private addSpineFactory();
         private addSpineCache();
     }
@@ -76,8 +73,18 @@ declare module PhaserSpine {
         skeleton: spine.Skeleton;
         bounds: Phaser.Rectangle;
         state: spine.AnimationState;
-        constructor(game: Phaser.Game, skeleton: spine.Skeleton, bounds: Phaser.Rectangle, state: spine.AnimationState);
+        private renderer;
+        constructor(game: Phaser.Game, skeleton: spine.Skeleton, bounds: Phaser.Rectangle, state: spine.AnimationState, config?: Config);
         update(): void;
+        _renderCanvas(renderSession: PIXI.RenderSession, matrix?: PIXI.Matrix): void;
+        _renderWebGL(renderSession: PIXI.RenderSession, matrix?: PIXI.Matrix): void;
+    }
+}
+declare module PhaserSpine {
+    module WebGL {
+        class Renderer {
+            draw(spine: Spine, renderSession: PIXI.RenderSession): void;
+        }
     }
 }
 

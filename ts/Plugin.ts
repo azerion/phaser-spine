@@ -42,25 +42,17 @@ module PhaserSpine {
 
             public static SPINE_NAMESPACE: string = 'spine';
 
-            private renderer: Canvas.Renderer;
+            public static DEBUG: boolean = false;
+
+            public static TRIANGLE: boolean = false;
 
             constructor(game: SpineGame, parent: Phaser.PluginManager) {
                 super(game, parent);
             }
 
             public init(config?: Config): void {
-                if (!config) {
-                    config = <Config>{
-                        debugRendering: false,
-                        triangleRendering: true
-                    }
-                }
-
-                this.renderer = new PhaserSpine.Canvas.Renderer(this.game);
-                // enable debug rendering
-                this.renderer.debugRendering = config.debugRendering;
-                // enable the triangle renderer, supports meshes, but may produce artifacts in some browsers
-                this.renderer.triangleRendering = config.triangleRendering;
+                SpinePlugin.DEBUG = config.debugRendering || false;
+                SpinePlugin.TRIANGLE = config.triangleRendering || false;
 
                 this.addSpineCache();
                 this.addSpineFactory();
@@ -77,17 +69,11 @@ module PhaserSpine {
                 };
             }
 
-            public render(): void {
-                console.log('drawing!');
-                this.renderer.draw();
-            }
-
             /**
              * Extends the GameObjectFactory prototype with the support of adding spine. this allows us to add spine methods to the game just like any other object:
              * game.add.spine();
              */
             private addSpineFactory() {
-                let renderer = this.renderer;
                 (<PhaserSpine.SpineObjectFactory>Phaser.GameObjectFactory.prototype).spine = function(x: number, y: number, key: string, scalingVariant?: string, group?: Phaser.Group): Spine
                 {
                     if (group === undefined) { group = this.world; }
@@ -143,7 +129,7 @@ module PhaserSpine {
                     //})
 
                     var spineObject = new Spine(this.game, skeleton, bounds, animationState);
-                    renderer.add(spineObject);
+
                     return group.add(spineObject);
                 };
 

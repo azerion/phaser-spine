@@ -3,8 +3,6 @@ module PhaserSpine {
         export class Renderer {
             static QUAD_TRIANGLES = [0, 1, 2, 2, 3, 0];
 
-            private ctx: CanvasRenderingContext2D;
-
             public triangleRendering = false;
             public debugRendering = false;
 
@@ -13,23 +11,10 @@ module PhaserSpine {
             private game: Phaser.Game;
 
             constructor (game: Phaser.Game) {
-                this.ctx = game.context;
                 this.game = game;
             }
 
-            public add(spine: Spine) {
-                this.spines.push(spine);
-            }
-
-            public draw () {
-                this.spines.forEach((spine: Spine) => {
-                    this.resize(spine.bounds);
-                    if (this.triangleRendering) this.drawTriangles(spine.skeleton);
-                    else this.drawImages(spine.skeleton);
-                });
-            }
-
-            private resize(bounds: Phaser.Rectangle): void {
+            public resize(bounds: Phaser.Rectangle): void {
                     var w = this.game.width;
                 var h = this.game.height;
 
@@ -39,18 +24,17 @@ module PhaserSpine {
                 var scaleX = bounds.width / this.game.width;
                 var scaleY = bounds.height / this.game.height;
                 var scale = Math.max(scaleX, scaleY) * 1.2;
-                if (scale < 1) scale = 1;
                 var width = this.game.width * scale;
                 var height = this.game.height * scale;
 
-                (<any>this.game.context).resetTransform();
+                //(<any>this.game.context).resetTransform();
                 this.game.context.scale(1 / scale, 1 / scale);
                 this.game.context.translate(-centerX, -centerY);
                 this.game.context.translate(width / 2, height / 2);
             }
 
-            private drawImages (skeleton: spine.Skeleton) {
-                let ctx = this.ctx;
+            public drawImages (skeleton: spine.Skeleton, renderSession: PIXI.RenderSession) {
+                let ctx = renderSession.context;
                 let drawOrder = skeleton.drawOrder;
 
                 if (this.debugRendering) ctx.strokeStyle = "green";
@@ -88,13 +72,13 @@ module PhaserSpine {
                     } else {
                         ctx.drawImage(image, region.x, region.y, region.width, region.height, 0, 0, w, h);
                     }
-                    if (this.debugRendering) ctx.strokeRect(0, 0, w, h);
+                    if (SpinePlugin.DEBUG) ctx.strokeRect(0, 0, w, h);
                     ctx.rotate(-rotation);
                     ctx.translate(-x, -y);
                 }
             }
 
-            private drawTriangles (skeleton: spine.Skeleton) {
+            public drawTriangles (skeleton: spine.Skeleton, renderSession: PIXI.RenderSession) {
                 let blendMode: spine.BlendMode = null;
 
                 let vertices: ArrayLike<number> = null;
@@ -126,7 +110,7 @@ module PhaserSpine {
                             blendMode = slotBlendMode;
                         }
 
-                        let ctx = this.ctx;
+                        let ctx = renderSession.context;
 
                         for (var j = 0; j < triangles.length; j+=3) {
                             let t1 = triangles[j] * 8, t2 = triangles[j+1] * 8, t3 = triangles[j+2] * 8;
@@ -135,9 +119,9 @@ module PhaserSpine {
                             let x1 = vertices[t2], y1 = vertices[t2 + 1], u1 = vertices[t2 + 6], v1 = vertices[t2 + 7];
                             let x2 = vertices[t3], y2 = vertices[t3 + 1], u2 = vertices[t3 + 6], v2 = vertices[t3 + 7];
 
-                            this.drawTriangle(texture, x0, y0, u0, v0, x1, y1, u1, v1, x2, y2, u2, v2);
+                            this.drawTriangle(renderSession, texture, x0, y0, u0, v0, x1, y1, u1, v1, x2, y2, u2, v2);
 
-                            if (this.debugRendering) {
+                            if (SpinePlugin.DEBUG) {
                                 ctx.strokeStyle = "green";
                                 ctx.beginPath();
                                 ctx.moveTo(x0, y0);
@@ -153,10 +137,10 @@ module PhaserSpine {
 
             // Adapted from http://extremelysatisfactorytotalitarianism.com/blog/?p=2120
             // Apache 2 licensed
-            private drawTriangle(img: HTMLImageElement, x0: number, y0: number, u0: number, v0: number,
+            private drawTriangle(renderSession: PIXI.RenderSession, img: HTMLImageElement, x0: number, y0: number, u0: number, v0: number,
                                  x1: number, y1: number, u1: number, v1: number,
                                  x2: number, y2: number, u2: number, v2: number) {
-                let ctx = this.ctx;
+                let ctx = renderSession.context;
 
                 u0 *= img.width;
                 v0 *= img.height;
