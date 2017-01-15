@@ -9,8 +9,8 @@ module PhaserSpine {
                 this.game = game;
             }
 
-            public resize(bounds: Phaser.Rectangle, renderSession: PIXI.RenderSession): void {
-                    var w = this.game.width;
+            public resize(bounds: PIXI.Rectangle, renderSession: PIXI.RenderSession): void {
+                var w = this.game.width;
                 var h = this.game.height;
 
                 // magic
@@ -23,9 +23,12 @@ module PhaserSpine {
                 var height = this.game.height * scale;
 
                 (<any>renderSession.context).resetTransform();
+                //Scale the animation
                 renderSession.context.scale(1 / scale, 1 / scale);
-                renderSession.context.translate(-centerX, -centerY);
-                renderSession.context.translate(width / 2, height / 2);
+                //Offset to model's center
+                renderSession.context.translate(bounds.width / 2, bounds.height);
+                //Offset to center of screen
+                renderSession.context.translate(bounds.x, bounds.y);
             }
 
             public drawImages (skeleton: spine.Skeleton, renderSession: PIXI.RenderSession) {

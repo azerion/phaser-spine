@@ -3,7 +3,7 @@
  * Spine plugin for Phaser.io!
  *
  * OrangeGames
- * Build at 13-01-2017
+ * Build at 15-01-2017
  * Released under MIT License 
  */
 
@@ -5390,8 +5390,8 @@ var PhaserSpine;
                 var height = this.game.height * scale;
                 renderSession.context.resetTransform();
                 renderSession.context.scale(1 / scale, 1 / scale);
-                renderSession.context.translate(-centerX, -centerY);
-                renderSession.context.translate(width / 2, height / 2);
+                renderSession.context.translate(bounds.width / 2, bounds.height);
+                renderSession.context.translate(bounds.x, bounds.y);
             };
             Renderer.prototype.drawImages = function (skeleton, renderSession) {
                 var ctx = renderSession.context;
@@ -5579,7 +5579,7 @@ var PhaserSpine;
                     var offset = new spine.Vector2();
                     var size = new spine.Vector2();
                     skeleton.getBounds(offset, size);
-                    return new Phaser.Rectangle(offset.x, offset.y, size.x, size.y);
+                    return new PIXI.Rectangle(x, y, size.x, size.y);
                 }
                 var skeletonData = skeletonJson.readSkeletonData(this.game.cache.getJSON(SpinePlugin.SPINE_NAMESPACE + key));
                 var skeleton = new spine.Skeleton(skeletonData);
@@ -5587,7 +5587,7 @@ var PhaserSpine;
                 var bounds = calculateBounds(skeleton);
                 var animationState = new spine.AnimationState(new spine.AnimationStateData(skeleton.data));
                 animationState.setAnimation(0, 'walk', true);
-                var spineObject = new PhaserSpine.Spine(this.game, skeleton, bounds, animationState);
+                var spineObject = new PhaserSpine.Spine(this.game, x, y, skeleton, bounds, animationState);
                 return group.add(spineObject);
             };
             Phaser.GameObjectCreator.prototype.spine = function (x, y, key, scalingVariant, group) {
@@ -5618,8 +5618,8 @@ var PhaserSpine;
 (function (PhaserSpine) {
     var Spine = (function (_super) {
         __extends(Spine, _super);
-        function Spine(game, skeleton, bounds, state, config) {
-            var _this = _super.call(this, game) || this;
+        function Spine(game, x, y, skeleton, bounds, state, config) {
+            var _this = _super.call(this, game, x, y, null) || this;
             _this.skeleton = skeleton;
             _this.bounds = bounds;
             _this.state = state;
@@ -5632,6 +5632,9 @@ var PhaserSpine;
             _this.renderer = new PhaserSpine.Canvas.Renderer(_this.game);
             return _this;
         }
+        Spine.prototype.getBounds = function (targetCoordinateSpace) {
+            return this.bounds;
+        };
         Spine.prototype.update = function () {
             _super.prototype.update.call(this);
             this.state.update(this.game.time.elapsed / 1000);
@@ -5639,6 +5642,7 @@ var PhaserSpine;
             this.skeleton.updateWorldTransform();
         };
         Spine.prototype._renderCanvas = function (renderSession, matrix) {
+            console.log(this.bounds);
             this.renderer.resize(this.bounds, renderSession);
             if (PhaserSpine.SpinePlugin.TRIANGLE) {
                 this.renderer.drawTriangles(this.skeleton, renderSession);
@@ -5650,7 +5654,7 @@ var PhaserSpine;
         Spine.prototype._renderWebGL = function (renderSession, matrix) {
         };
         return Spine;
-    }(Phaser.Group));
+    }(Phaser.Sprite));
     PhaserSpine.Spine = Spine;
 })(PhaserSpine || (PhaserSpine = {}));
 var PhaserSpine;

@@ -99,7 +99,7 @@ module PhaserSpine {
                         var offset = new spine.Vector2();
                         var size = new spine.Vector2();
                         skeleton.getBounds(offset, size);
-                        return new Phaser.Rectangle(offset.x, offset.y, size.x, size.y);
+                        return new PIXI.Rectangle(x, y, size.x, size.y);
                     }
 
 
@@ -128,7 +128,7 @@ module PhaserSpine {
                     //    }
                     //})
 
-                    var spineObject = new Spine(this.game, skeleton, bounds, animationState);
+                    var spineObject = new Spine(this.game, x, y, skeleton, bounds, animationState);
 
                     return group.add(spineObject);
                 };
