@@ -99,7 +99,7 @@ module PhaserSpine {
                         var offset = new spine.Vector2();
                         var size = new spine.Vector2();
                         skeleton.getBounds(offset, size);
-                        return new PIXI.Rectangle(x, y, size.x, size.y);
+                        return new PIXI.Rectangle(0, 0, size.x, size.y);
                     }
 
 

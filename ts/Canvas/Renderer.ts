@@ -9,26 +9,14 @@ module PhaserSpine {
                 this.game = game;
             }
 
-            public resize(bounds: PIXI.Rectangle, renderSession: PIXI.RenderSession): void {
-                var w = this.game.width;
-                var h = this.game.height;
-
-                // magic
-                var centerX = bounds.x + bounds.width / 2;
-                var centerY = bounds.y + bounds.height / 2;
-                var scaleX = bounds.width / this.game.width;
-                var scaleY = bounds.height / this.game.height;
-                var scale = Math.max(scaleX, scaleY) * 1.2;
-                var width = this.game.width * scale;
-                var height = this.game.height * scale;
-
+            public resize(bounds: PIXI.Rectangle, scale: Phaser.Point, renderSession: PIXI.RenderSession): void {
                 (<any>renderSession.context).resetTransform();
                 //Scale the animation
-                renderSession.context.scale(1 / scale, 1 / scale);
+                renderSession.context.scale(scale.x, scale.y);
                 //Offset to model's center
-                renderSession.context.translate(bounds.width / 2, bounds.height);
+                renderSession.context.translate(bounds.width / 2 / scale.x, bounds.height/ scale.y);
                 //Offset to center of screen
-                renderSession.context.translate(bounds.x, bounds.y);
+                renderSession.context.translate(bounds.x / scale.x, bounds.y / scale.y);
             }
 
             public drawImages (skeleton: spine.Skeleton, renderSession: PIXI.RenderSession) {

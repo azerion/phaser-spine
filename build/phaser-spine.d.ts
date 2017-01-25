@@ -4,7 +4,7 @@ declare module PhaserSpine {
             static QUAD_TRIANGLES: number[];
             private game;
             constructor(game: Phaser.Game);
-            resize(bounds: PIXI.Rectangle, renderSession: PIXI.RenderSession): void;
+            resize(bounds: PIXI.Rectangle, scale: Phaser.Point, renderSession: PIXI.RenderSession): void;
             drawImages(skeleton: spine.Skeleton, renderSession: PIXI.RenderSession): void;
             drawTriangles(skeleton: spine.Skeleton, renderSession: PIXI.RenderSession): void;
             private drawTriangle(renderSession, img, x0, y0, u0, v0, x1, y1, u1, v1, x2, y2, u2, v2);
@@ -68,11 +68,9 @@ declare module PhaserSpine {
 declare module PhaserSpine {
     class Spine extends Phaser.Sprite {
         skeleton: spine.Skeleton;
-        bounds: PIXI.Rectangle;
         state: spine.AnimationState;
         private renderer;
         constructor(game: Phaser.Game, x: number, y: number, skeleton: spine.Skeleton, bounds: PIXI.Rectangle, state: spine.AnimationState, config?: Config);
-        getBounds(targetCoordinateSpace?: PIXI.Matrix | PIXI.DisplayObject): PIXI.Rectangle;
         update(): void;
         _renderCanvas(renderSession: PIXI.RenderSession, matrix?: PIXI.Matrix): void;
         _renderWebGL(renderSession: PIXI.RenderSession, matrix?: PIXI.Matrix): void;

@@ -11,7 +11,7 @@
 </body>
 <script>
 var sp;
-var game = new Phaser.Game(window.innerWidth, window.innerHeight, Phaser.CANVAS, '', {
+var game = new Phaser.Game(800, 600, Phaser.CANVAS, '', {
 	preload: preload,
 	create: create,
 	render: render
@@ -20,7 +20,7 @@ var game = new Phaser.Game(window.innerWidth, window.innerHeight, Phaser.CANVAS,
 function preload() {
 	game.plugins.add(PhaserSpine.SpinePlugin, {
 		debugRendering: true,
-		triangleRendering: false
+		triangleRendering: true
 	});
 
 	game.load.spine('spineboy', 'assets/spineboy.json');
@@ -28,13 +28,23 @@ function preload() {
 }
 
 function create() {
+	var g = game.add.graphics(0, 0);
+	g.lineStyle(2, 0xFFFFFF, 1)
+		.moveTo(this.game.width  / 2, 0)
+		.lineTo(this.game.width  / 2, this.game.height)
+		.moveTo(0, this.game.height / 2)
+		.lineTo(this.game.width, this.game.height / 2);
+
 	game.add.image(game.width / 2, game.height / 2, 'btn');
-	sp = game.add.spine(0, 0, 'spineboy');
+	sp = game.add.spine(game.width / 2, game.height / 2, 'spineboy');
+    sp.anchor.set(0.5);
+	sp.scale.set(0.5);
 	game.add.image(game.width / 2 + 100, game.height / 2, 'btn');
 }
 
 function render(){
 	game.debug.spriteBounds(sp);
+	game.debug.spriteInfo(sp);
 }
 </script>
 </html>
