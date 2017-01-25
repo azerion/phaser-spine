@@ -129,11 +129,31 @@ shooter = game.add.spine(400, 300, "shooter");
 //because @0.7x is the first element of the array supplied to the preloader
 ```
 
+Typescript
+----------
+In order to make this plugin work nicely with Phaser I usually create an interface that extends Phaser.Game like so:
+```typescript
+class IGame extends Phaser.Game {
+    add: PhaserSpine.SpineObjectFactory;
+    load: PhaserSpine.SpineLoader;
+}
+```
+
+Then in my state I overwrite the game property  with this interface and than Typescript should stop complaining!
+```typescript
+class MyState extends Phaser.State {
+    public game: IGame;
+    public preload(): void {
+        this.game.load.spine('myspine', 'assets/spine/spineboy.json');
+    }
+}
+```
 
 Todo
 ----
  - adding a body for physics
  - Handling input
+ - Finished Spine-ts WebGL renderer
 
 Credits
 -------
