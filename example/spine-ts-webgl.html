@@ -161,67 +161,6 @@ function calculateBounds(skeleton) {
 	return { offset: offset, size: size };
 }
 
-function setupUI () {
-	var skeletonList = $("#skeletonList");
-	for (var skeletonName in skeletons) {
-		var option = $("<option></option>");
-		option.attr("value", skeletonName).text(skeletonName);
-		if (skeletonName === activeSkeleton) option.attr("selected", "selected");
-		skeletonList.append(option);
-	}
-	var setupAnimationUI = function() {
-		var animationList = $("#animationList");
-		animationList.empty();
-		var skeleton = skeletons[activeSkeleton].skeleton;
-		var state = skeletons[activeSkeleton].state;
-		var activeAnimation = state.tracks[0].animation.name;
-		for (var i = 0; i < skeleton.data.animations.length; i++) {
-			var name = skeleton.data.animations[i].name;
-			var option = $("<option></option>");
-			option.attr("value", name).text(name);
-			if (name === activeAnimation) option.attr("selected", "selected");
-			animationList.append(option);
-		}
-
-		animationList.change(function() {
-			var state = skeletons[activeSkeleton].state;
-			var skeleton = skeletons[activeSkeleton].skeleton;
-			var animationName = $("#animationList option:selected").text();
-			skeleton.setToSetupPose();
-			state.setAnimation(0, animationName, true);
-		})
-	}
-
-	var setupSkinUI = function() {
-		var skinList = $("#skinList");
-		skinList.empty();
-		var skeleton = skeletons[activeSkeleton].skeleton;
-		var activeSkin = skeleton.skin == null ? "default" : skeleton.skin.name;
-		for (var i = 0; i < skeleton.data.skins.length; i++) {
-			var name = skeleton.data.skins[i].name;
-			var option = $("<option></option>");
-			option.attr("value", name).text(name);
-			if (name === activeSkin) option.attr("selected", "selected");
-			skinList.append(option);
-		}
-
-		skinList.change(function() {
-			var skeleton = skeletons[activeSkeleton].skeleton;
-			var skinName = $("#skinList option:selected").text();
-			skeleton.setSkinByName(skinName);
-			skeleton.setSlotsToSetupPose();
-		})
-	}
-
-	skeletonList.change(function() {
-		activeSkeleton = $("#skeletonList option:selected").text();
-		setupAnimationUI();
-		setupSkinUI();
-	})
-	setupAnimationUI();
-	setupSkinUI();
-}
-
 function render () {
 	var now = Date.now() / 1000;
 	var delta = now - lastFrameTime;

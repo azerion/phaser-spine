@@ -2,16 +2,32 @@
 <script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
 <script src="../node_modules/phaser/build/phaser.js"></script>
 <script src="../build/phaser-spine.js"></script>
+<script src="./ui.js"></script>
 <style>
 	* { margin: 0; padding: 0; }
-	body, html { height: 100% }
+	body, html {
+		height: 100%;
+		background-color: #000000;
+	}
 	canvas { position: absolute; width: 100% ;height: 100%; }
 </style>
 <body>
+<center>
+	<div style="color: #fff; position: fixed; top: 0; width: 100%">
+		<span>Skeleton:</span><select id="skeletonList"></select>
+		<span>Animation:</span><select id="animationList"></select>
+		<span>Skin:</span><select id="skinList"></select>
+		<span>Triangle Rendering:</span><select id="triangleList"><option selected>true</option><option>false</option></select>
+		<span>Debug:</span><select id="debugList"><option selected>true</option><option>false</option></select>
+	<div>
+		<div id="content"></div>
+</center>
 </body>
 <script>
-var sp;
-var game = new Phaser.Game(800, 600, Phaser.CANVAS, '', {
+var activeSpine;
+var spines = {};
+var names = ['spineboy', 'goblins', 'raptor', 'stretchyman', 'tank', 'vine', 'buddy'];
+var game = new Phaser.Game(window.innerWidth, window.innerWidth / 4 * 3, Phaser.CANVAS, 'content', {
 	preload: preload,
 	create: create,
 	render: render
@@ -22,8 +38,11 @@ function preload() {
 		debugRendering: true,
 		triangleRendering: true
 	});
+	game.stage.disableVisibilityChange = true;
 
-	game.load.spine('spineboy', 'assets/spineboy.json');
+	names.forEach(function (name) {
+		game.load.spine(name, 'assets/' + name + '.json');
+	});
 	game.load.image('btn', 'assets/btn_01.png');
 }
 
@@ -35,16 +54,33 @@ function create() {
 		.moveTo(0, this.game.height / 2)
 		.lineTo(this.game.width, this.game.height / 2);
 
+	//Add button BEFORE spine to show depth
+	game.add.image(game.width / 2 - 104, game.height / 2, 'btn');
+
+	names.forEach(function (name, index) {
+		let spine = game.add.spine(game.width / 2, game.height / 2, name);
+		spine.anchor.set(0.5);
+		spine.scale.set(0.5);
+		spine.visible = false;
+		spine.state.setAnimation(0, spine.state.data.skeletonData.animations[0].name, true);
+
+		spines[name] = spine;
+	});
+
+	activeSpine = 'spineboy';
+	spines[activeSpine].visible = true;
+
+	//Add button AFTER spine to show depth
 	game.add.image(game.width / 2, game.height / 2, 'btn');
-	sp = game.add.spine(game.width / 2, game.height / 2, 'spineboy');
-    sp.anchor.set(0.5);
-	sp.scale.set(0.5);
-	game.add.image(game.width / 2 + 100, game.height / 2, 'btn');
+
+	setupUI();
 }
 
-function render(){
-	game.debug.spriteBounds(sp);
-	game.debug.spriteInfo(sp);
+function render() {
+	if (activeSpine && PhaserSpine.SpinePlugin.DEBUG) {
+		game.debug.spriteBounds(spines[activeSpine]);
+		game.debug.spriteInfo(spines[activeSpine], 20, 20);
+	}
 }
 </script>
 </html>

@@ -70,7 +70,8 @@ declare module PhaserSpine {
         skeleton: spine.Skeleton;
         state: spine.AnimationState;
         private renderer;
-        constructor(game: Phaser.Game, x: number, y: number, skeleton: spine.Skeleton, bounds: PIXI.Rectangle, state: spine.AnimationState, config?: Config);
+        constructor(game: Phaser.Game, x: number, y: number, key: string);
+        private createSkeleton(key);
         update(): void;
         _renderCanvas(renderSession: PIXI.RenderSession, matrix?: PIXI.Matrix): void;
         _renderWebGL(renderSession: PIXI.RenderSession, matrix?: PIXI.Matrix): void;

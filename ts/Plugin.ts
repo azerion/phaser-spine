@@ -78,57 +78,7 @@ module PhaserSpine {
                 {
                     if (group === undefined) { group = this.world; }
 
-                    let skin: string = "default";
-
-                    // Load the texture atlas using name.atlas and name.png from the AssetManager.
-                    // The function passed to TextureAtlas is used to resolve relative paths.
-                    let atlas: spine.TextureAtlas = new spine.TextureAtlas(this.game.cache.getText(SpinePlugin.SPINE_NAMESPACE +key), function(path) {
-                        return new PhaserSpine.Canvas.Texture(this.game.cache.getImage(SpinePlugin.SPINE_NAMESPACE +key));
-                    });
-
-                    // Create a AtlasAttachmentLoader, which is specific to the WebGL backend.
-                    let atlasLoader: spine.AtlasAttachmentLoader = new spine.AtlasAttachmentLoader(atlas);
-
-                    // Create a SkeletonJson instance for parsing the .json file.
-                    var skeletonJson = new spine.SkeletonJson(atlasLoader);
-
-                    function calculateBounds(skeleton: spine.Skeleton) {
-                        var data = skeleton.data;
-                        skeleton.setToSetupPose();
-                        skeleton.updateWorldTransform();
-                        var offset = new spine.Vector2();
-                        var size = new spine.Vector2();
-                        skeleton.getBounds(offset, size);
-                        return new PIXI.Rectangle(0, 0, size.x, size.y);
-                    }
-
-
-                    // Set the scale to apply during parsing, parse the file, and create a new skeleton.
-                    var skeletonData = skeletonJson.readSkeletonData(this.game.cache.getJSON(SpinePlugin.SPINE_NAMESPACE +key));
-                    var skeleton = new spine.Skeleton(skeletonData);
-                    skeleton.flipY = true;
-                    var bounds = calculateBounds(skeleton);
-                    //	skeleton.setSkinByName(skin);
-
-                    // Create an AnimationState, and set the initial animation in looping mode.
-                    var animationState = new spine.AnimationState(new spine.AnimationStateData(skeleton.data));
-                    	animationState.setAnimation(0, 'walk', true);
-                    //animationState.addListener({
-                    //    event: function(trackIndex, event) {
-                    //        // console.log("Event on track " + trackIndex + ": " + JSON.stringify(event));
-                    //    },
-                    //    complete: function(trackIndex, loopCount) {
-                    //        // console.log("Animation on track " + trackIndex + " completed, loop count: " + loopCount);
-                    //    },
-                    //    start: function(trackIndex) {
-                    //        // console.log("Animation on track " + trackIndex + " started");
-                    //    },
-                    //    end: function(trackIndex) {
-                    //        // console.log("Animation on track " + trackIndex + " ended");
-                    //    }
-                    //})
-
-                    var spineObject = new Spine(this.game, x, y, skeleton, bounds, animationState);
+                    let spineObject = new Spine(this.game, x, y, key);
 
                     return group.add(spineObject);
                 };

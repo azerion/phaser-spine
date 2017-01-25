@@ -5557,28 +5557,7 @@ var PhaserSpine;
                 if (group === undefined) {
                     group = this.world;
                 }
-                var skin = "default";
-                var atlas = new spine.TextureAtlas(this.game.cache.getText(SpinePlugin.SPINE_NAMESPACE + key), function (path) {
-                    return new PhaserSpine.Canvas.Texture(this.game.cache.getImage(SpinePlugin.SPINE_NAMESPACE + key));
-                });
-                var atlasLoader = new spine.AtlasAttachmentLoader(atlas);
-                var skeletonJson = new spine.SkeletonJson(atlasLoader);
-                function calculateBounds(skeleton) {
-                    var data = skeleton.data;
-                    skeleton.setToSetupPose();
-                    skeleton.updateWorldTransform();
-                    var offset = new spine.Vector2();
-                    var size = new spine.Vector2();
-                    skeleton.getBounds(offset, size);
-                    return new PIXI.Rectangle(0, 0, size.x, size.y);
-                }
-                var skeletonData = skeletonJson.readSkeletonData(this.game.cache.getJSON(SpinePlugin.SPINE_NAMESPACE + key));
-                var skeleton = new spine.Skeleton(skeletonData);
-                skeleton.flipY = true;
-                var bounds = calculateBounds(skeleton);
-                var animationState = new spine.AnimationState(new spine.AnimationStateData(skeleton.data));
-                animationState.setAnimation(0, 'walk', true);
-                var spineObject = new PhaserSpine.Spine(this.game, x, y, skeleton, bounds, animationState);
+                var spineObject = new PhaserSpine.Spine(this.game, x, y, key);
                 return group.add(spineObject);
             };
             Phaser.GameObjectCreator.prototype.spine = function (x, y, key, scalingVariant, group) {
@@ -5609,22 +5588,28 @@ var PhaserSpine;
 (function (PhaserSpine) {
     var Spine = (function (_super) {
         __extends(Spine, _super);
-        function Spine(game, x, y, skeleton, bounds, state, config) {
-            var _this = _super.call(this, game, x, y, null) || this;
-            _this.skeleton = skeleton;
-            console.log(bounds);
-            _this.texture.setFrame(bounds);
-            _this.state = state;
-            if (!config) {
-                config = {
-                    debugRendering: false,
-                    triangleRendering: true
-                };
-            }
-            console.log(_this.getBounds());
+        function Spine(game, x, y, key) {
+            var _this = _super.call(this, game, x, y, PhaserSpine.SpinePlugin.SPINE_NAMESPACE + key) || this;
+            _this.skeleton = _this.createSkeleton(key);
+            _this.skeleton.flipY = true;
+            _this.skeleton.setToSetupPose();
+            _this.skeleton.updateWorldTransform();
+            var size = new spine.Vector2();
+            _this.skeleton.getBounds(new spine.Vector2(), size);
+            _this.texture.setFrame(new PIXI.Rectangle(0, 0, size.x, size.y));
+            _this.state = new spine.AnimationState(new spine.AnimationStateData(_this.skeleton.data));
             _this.renderer = new PhaserSpine.Canvas.Renderer(_this.game);
             return _this;
         }
+        Spine.prototype.createSkeleton = function (key) {
+            var atlas = new spine.TextureAtlas(this.game.cache.getText(PhaserSpine.SpinePlugin.SPINE_NAMESPACE + key), function (path) {
+                return new PhaserSpine.Canvas.Texture(this.game.cache.getImage(PhaserSpine.SpinePlugin.SPINE_NAMESPACE + key));
+            });
+            var atlasLoader = new spine.AtlasAttachmentLoader(atlas);
+            var skeletonJson = new spine.SkeletonJson(atlasLoader);
+            var skeletonData = skeletonJson.readSkeletonData(this.game.cache.getJSON(PhaserSpine.SpinePlugin.SPINE_NAMESPACE + key));
+            return new spine.Skeleton(skeletonData);
+        };
         Spine.prototype.update = function () {
             _super.prototype.update.call(this);
             this.state.update(this.game.time.elapsed / 1000);
@@ -5632,6 +5617,9 @@ var PhaserSpine;
             this.skeleton.updateWorldTransform();
         };
         Spine.prototype._renderCanvas = function (renderSession, matrix) {
+            if (!this.visible || !this.alive) {
+                return;
+            }
             this.renderer.resize(this.getBounds(), this.scale, renderSession);
             if (PhaserSpine.SpinePlugin.TRIANGLE) {
                 this.renderer.drawTriangles(this.skeleton, renderSession);
