@@ -6,29 +6,46 @@ module PhaserSpine {
 
             private renderer: Canvas.Renderer | WebGL.Renderer;
 
+            private specialBounds: PIXI.Rectangle;
+
             constructor(game: Phaser.Game, x: number, y: number, key: string) {
                 super(game, x, y, SpinePlugin.SPINE_NAMESPACE + key);
 
                 this.skeleton = this.createSkeleton(key);
-                this.skeleton.flipY = true; //Appearantly we always FlipY
+                this.skeleton.flipY = (this.game.renderType === Phaser.CANVAS); //In Canvas we always FlipY
                 this.skeleton.setToSetupPose(); //Update everything to get correct bounds
                 this.skeleton.updateWorldTransform(); //Update everything to get correct bounds
 
-                let size = new spine.Vector2();
+                var size = new spine.Vector2();
                 this.skeleton.getBounds(new spine.Vector2(), size);
                 this.texture.setFrame(new PIXI.Rectangle(0, 0, size.x, size.y));
+
+                this.skeleton.setToSetupPose();
+                this.skeleton.updateWorldTransform();
+                var offset = new spine.Vector2();
+                var size = new spine.Vector2();
+                this.skeleton.getBounds(offset, size);
+                this.specialBounds = new PIXI.Rectangle(offset.x, offset.y, size.x, size.y);
 
                 // Create an AnimationState.
                 this.state = new spine.AnimationState(new spine.AnimationStateData(this.skeleton.data));
 
-                this.renderer = new PhaserSpine.Canvas.Renderer(this.game);
+                if (this.game.renderType === Phaser.CANVAS) {
+                    this.renderer = new PhaserSpine.Canvas.Renderer(this.game);
+                } else {
+                    this.renderer = new PhaserSpine.WebGL.Renderer(this.game);
+                }
             }
 
             private createSkeleton(key: string): spine.Skeleton {
                 // Load the texture atlas using name.atlas and name.png from the AssetManager.
                 // The function passed to TextureAtlas is used to resolve relative paths.
-                let atlas: spine.TextureAtlas = new spine.TextureAtlas(this.game.cache.getText(SpinePlugin.SPINE_NAMESPACE + key), function(path) {
-                    return new PhaserSpine.Canvas.Texture(this.game.cache.getImage(SpinePlugin.SPINE_NAMESPACE + key));
+                let atlas: spine.TextureAtlas = new spine.TextureAtlas(this.game.cache.getText(SpinePlugin.SPINE_NAMESPACE + key), (path) => {
+                    if (this.game.renderType === Phaser.CANVAS) {
+                        return new PhaserSpine.Canvas.Texture(this.game.cache.getImage(SpinePlugin.SPINE_NAMESPACE + key));
+                    }
+
+                    return new PhaserSpine.WebGL.Texture(<WebGLRenderingContext>(<any>this.game.renderer).gl, this.game.cache.getImage(SpinePlugin.SPINE_NAMESPACE + key));
                 });
 
                 // Create a AtlasAttachmentLoader, which is specific to the WebGL backend.
@@ -70,8 +87,13 @@ module PhaserSpine {
                 }
             }
 
-            public _renderWebGL(renderSession: PIXI.RenderSession, matrix?: PIXI.Matrix): void {
+            public _renderWebGL(renderSession: WebGL.IRenderSession, matrix?: PIXI.Matrix): void {
+                if (!this.visible || !this.alive) {
+                    return;
+                }
 
+                (<WebGL.Renderer>this.renderer).resize(this.specialBounds, this.scale, renderSession);
+                (<WebGL.Renderer>this.renderer).draw(this.skeleton, renderSession);
             }
         }
 }

@@ -5591,19 +5591,34 @@ var PhaserSpine;
         function Spine(game, x, y, key) {
             var _this = _super.call(this, game, x, y, PhaserSpine.SpinePlugin.SPINE_NAMESPACE + key) || this;
             _this.skeleton = _this.createSkeleton(key);
-            _this.skeleton.flipY = true;
+            _this.skeleton.flipY = (_this.game.renderType === Phaser.CANVAS);
             _this.skeleton.setToSetupPose();
             _this.skeleton.updateWorldTransform();
             var size = new spine.Vector2();
             _this.skeleton.getBounds(new spine.Vector2(), size);
             _this.texture.setFrame(new PIXI.Rectangle(0, 0, size.x, size.y));
+            _this.skeleton.setToSetupPose();
+            _this.skeleton.updateWorldTransform();
+            var offset = new spine.Vector2();
+            var size = new spine.Vector2();
+            _this.skeleton.getBounds(offset, size);
+            _this.specialBounds = new PIXI.Rectangle(offset.x, offset.y, size.x, size.y);
             _this.state = new spine.AnimationState(new spine.AnimationStateData(_this.skeleton.data));
-            _this.renderer = new PhaserSpine.Canvas.Renderer(_this.game);
+            if (_this.game.renderType === Phaser.CANVAS) {
+                _this.renderer = new PhaserSpine.Canvas.Renderer(_this.game);
+            }
+            else {
+                _this.renderer = new PhaserSpine.WebGL.Renderer(_this.game);
+            }
             return _this;
         }
         Spine.prototype.createSkeleton = function (key) {
+            var _this = this;
             var atlas = new spine.TextureAtlas(this.game.cache.getText(PhaserSpine.SpinePlugin.SPINE_NAMESPACE + key), function (path) {
-                return new PhaserSpine.Canvas.Texture(this.game.cache.getImage(PhaserSpine.SpinePlugin.SPINE_NAMESPACE + key));
+                if (_this.game.renderType === Phaser.CANVAS) {
+                    return new PhaserSpine.Canvas.Texture(_this.game.cache.getImage(PhaserSpine.SpinePlugin.SPINE_NAMESPACE + key));
+                }
+                return new PhaserSpine.WebGL.Texture(_this.game.renderer.gl, _this.game.cache.getImage(PhaserSpine.SpinePlugin.SPINE_NAMESPACE + key));
             });
             var atlasLoader = new spine.AtlasAttachmentLoader(atlas);
             var skeletonJson = new spine.SkeletonJson(atlasLoader);
@@ -5629,6 +5644,11 @@ var PhaserSpine;
             }
         };
         Spine.prototype._renderWebGL = function (renderSession, matrix) {
+            if (!this.visible || !this.alive) {
+                return;
+            }
+            this.renderer.resize(this.specialBounds, this.scale, renderSession);
+            this.renderer.draw(this.skeleton, renderSession);
         };
         return Spine;
     }(Phaser.Sprite));
@@ -5639,13 +5659,118 @@ var PhaserSpine;
     var WebGL;
     (function (WebGL) {
         var Renderer = (function () {
-            function Renderer() {
+            function Renderer(game) {
+                this.mvp = new spine.webgl.Matrix4();
+                this.game = game;
+                var gl = this.game.renderer.renderSession.gl;
+                this.shader = spine.webgl.Shader.newColoredTextured(gl);
+                this.batcher = new spine.webgl.PolygonBatcher(gl);
+                this.mvp.ortho2d(0, 0, this.game.width - 1, this.game.height - 1);
+                this.skeletonRenderer = new spine.webgl.SkeletonRenderer(gl);
+                this.debugRenderer = new spine.webgl.SkeletonDebugRenderer(gl);
+                this.debugRenderer.drawRegionAttachments = false;
+                this.debugRenderer.drawBoundingBoxes = false;
+                this.debugRenderer.drawMeshHull = false;
+                this.debugRenderer.drawMeshTriangles = false;
+                this.debugRenderer.drawPaths = false;
+                this.debugShader = spine.webgl.Shader.newColored(gl);
+                this.shapes = new spine.webgl.ShapeRenderer(gl);
             }
-            Renderer.prototype.draw = function (spine, renderSession) {
+            Renderer.prototype.resize = function (bounds, scale2, renderSession) {
+                var w = this.game.width;
+                var h = this.game.height;
+                var centerX = bounds.x + bounds.width / 2;
+                var centerY = bounds.y + bounds.height / 2;
+                var scaleX = bounds.width / w;
+                var scaleY = bounds.height / h;
+                var scale = Math.max(scaleX, scaleY) * 1.2;
+                if (scale < 1)
+                    scale = 1;
+                var width = w * scale;
+                var height = h * scale;
+                this.mvp.ortho2d(centerX - width / 2, centerY - height / 2, width, height);
+                renderSession.gl.viewport(0, 0, w, h);
+            };
+            Renderer.prototype.draw = function (skeleton, renderSession) {
+                this.shader.bind();
+                this.shader.setUniformi(spine.webgl.Shader.SAMPLER, 0);
+                this.shader.setUniform4x4f(spine.webgl.Shader.MVP_MATRIX, this.mvp.values);
+                this.batcher.begin(this.shader);
+                this.skeletonRenderer.draw(this.batcher, skeleton);
+                this.batcher.end();
+                this.shader.unbind();
+                if (PhaserSpine.SpinePlugin.DEBUG) {
+                    this.debugShader.bind();
+                    this.debugShader.setUniform4x4f(spine.webgl.Shader.MVP_MATRIX, this.mvp.values);
+                    this.debugRenderer.premultipliedAlpha = false;
+                    this.shapes.begin(this.debugShader);
+                    this.debugRenderer.draw(this.shapes, skeleton);
+                    this.shapes.end();
+                    this.debugShader.unbind();
+                }
             };
             return Renderer;
         }());
         WebGL.Renderer = Renderer;
+    })(WebGL = PhaserSpine.WebGL || (PhaserSpine.WebGL = {}));
+})(PhaserSpine || (PhaserSpine = {}));
+var PhaserSpine;
+(function (PhaserSpine) {
+    var WebGL;
+    (function (WebGL) {
+        var Texture = (function (_super) {
+            __extends(Texture, _super);
+            function Texture(gl, image, useMipMaps) {
+                if (useMipMaps === void 0) { useMipMaps = false; }
+                var _this = _super.call(this, image) || this;
+                _this.boundUnit = 0;
+                _this.gl = gl;
+                _this.texture = gl.createTexture();
+                _this.update(useMipMaps);
+                return _this;
+            }
+            Texture.prototype.setFilters = function (minFilter, magFilter) {
+                var gl = this.gl;
+                this.bind();
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, minFilter);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, magFilter);
+            };
+            Texture.prototype.setWraps = function (uWrap, vWrap) {
+                var gl = this.gl;
+                this.bind();
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, uWrap);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, vWrap);
+            };
+            Texture.prototype.update = function (useMipMaps) {
+                var gl = this.gl;
+                this.bind();
+                gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this._image);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, useMipMaps ? gl.LINEAR_MIPMAP_LINEAR : gl.LINEAR);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+                if (useMipMaps)
+                    gl.generateMipmap(gl.TEXTURE_2D);
+            };
+            Texture.prototype.bind = function (unit) {
+                if (unit === void 0) { unit = 0; }
+                var gl = this.gl;
+                this.boundUnit = unit;
+                gl.activeTexture(gl.TEXTURE0 + unit);
+                gl.bindTexture(gl.TEXTURE_2D, this.texture);
+            };
+            Texture.prototype.unbind = function () {
+                var gl = this.gl;
+                gl.activeTexture(gl.TEXTURE0 + this.boundUnit);
+                gl.bindTexture(gl.TEXTURE_2D, null);
+            };
+            Texture.prototype.dispose = function () {
+                var gl = this.gl;
+                gl.deleteTexture(this.texture);
+            };
+            return Texture;
+        }(spine.Texture));
+        WebGL.Texture = Texture;
     })(WebGL = PhaserSpine.WebGL || (PhaserSpine.WebGL = {}));
 })(PhaserSpine || (PhaserSpine = {}));
 //# sourceMappingURL=phaser-spine.js.map

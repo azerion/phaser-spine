@@ -1,6 +1,7 @@
 <html>
 <script src="../spine-ts/spine-webgl.js"></script>
 <script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
+<script src="./ui.js"></script>
 <style>
 	* { margin: 0; padding: 0; }
 	body, html { height: 100% }
@@ -13,6 +14,8 @@
 <span>Skeleton:</span><select id="skeletonList"></select>
 <span>Animation:</span><select id="animationList"></select>
 <span>Skin:</span><select id="skinList"></select>
+<span>Triangle Rendering:</span><select id="triangleList"><option selected>true</option><option>false</option></select>
+<span>Debug:</span><select id="debugList"><option selected>true</option><option>false</option></select>
 <div>
 </center>
 </body>
@@ -28,8 +31,8 @@ var assetManager;
 var skeletonRenderer;
 var debugRenderer;
 var shapes;
-var skeletons = {};
-var activeSkeleton = "raptor";
+var spines = {};
+var activeSpine = "raptor";
 
 function init () {
 	// Setup canvas and WebGL context. We pass alpha: false to canvas.getContext() so we don't use premultiplied alpha when
@@ -81,12 +84,12 @@ function init () {
 function load () {
 	// Wait until the AssetManager has loaded all resources, then load the skeletons.
 	if (assetManager.isLoadingComplete()) {
-		skeletons["raptor"] = loadSkeleton("raptor", "walk", false);
-		skeletons["spineboy"] = loadSkeleton("spineboy", "run", false);
-		skeletons["tank"] = loadSkeleton("tank", "drive", false);
-		skeletons["goblins"] = loadSkeleton("goblins", "walk", false, "goblin");
-		skeletons["vine"] = loadSkeleton("vine", "animation", false);
-		skeletons["stretchyman"] = loadSkeleton("stretchyman", "sneak", false);
+		spines["raptor"] = loadSkeleton("raptor", "walk", false);
+		spines["spineboy"] = loadSkeleton("spineboy", "run", false);
+		spines["tank"] = loadSkeleton("tank", "drive", false);
+		spines["goblins"] = loadSkeleton("goblins", "walk", false, "goblin");
+		spines["vine"] = loadSkeleton("vine", "animation", false);
+		spines["stretchyman"] = loadSkeleton("stretchyman", "sneak", false);
 		setupUI();
 		requestAnimationFrame(render);
 	} else {
@@ -119,7 +122,7 @@ function loadSkeleton (name, initialAnimation, premultipliedAlpha, skin) {
 	animationStateData = new spine.AnimationStateData(skeleton.data);
 	var animationState = new spine.AnimationState(animationStateData);
 	if (name == "spineboy") {
-		animationStateData.setMix("walk", "jump", 0.4)		
+		animationStateData.setMix("walk", "jump", 0.4)
 		animationStateData.setMix("jump", "run", 0.4);
 		animationState.setAnimation(0, "walk", true);
 		var jumpEntry = animationState.addAnimation(0, "jump", false, 3);
@@ -173,9 +176,9 @@ function render () {
 	gl.clear(gl.COLOR_BUFFER_BIT);
 
 	// Apply the animation state based on the delta time.
-	var state = skeletons[activeSkeleton].state;
-	var skeleton = skeletons[activeSkeleton].skeleton;
-	var premultipliedAlpha = skeletons[activeSkeleton].premultipliedAlpha;
+	var state = spines[activeSpine].state;
+	var skeleton = spines[activeSpine].skeleton;
+	var premultipliedAlpha = spines[activeSpine].premultipliedAlpha;
 	state.update(delta);
 	state.apply(skeleton);
 	skeleton.updateWorldTransform();
@@ -208,7 +211,7 @@ function render () {
 function resize () {
 	var w = canvas.clientWidth;
 	var h = canvas.clientHeight;
-	var bounds = skeletons[activeSkeleton].bounds;
+	var bounds = spines[activeSpine].bounds;
 	if (canvas.width != w || canvas.height != h) {
 		canvas.width = w;
 		canvas.height = h;

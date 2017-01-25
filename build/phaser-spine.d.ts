@@ -70,17 +70,51 @@ declare module PhaserSpine {
         skeleton: spine.Skeleton;
         state: spine.AnimationState;
         private renderer;
+        private specialBounds;
         constructor(game: Phaser.Game, x: number, y: number, key: string);
         private createSkeleton(key);
         update(): void;
         _renderCanvas(renderSession: PIXI.RenderSession, matrix?: PIXI.Matrix): void;
-        _renderWebGL(renderSession: PIXI.RenderSession, matrix?: PIXI.Matrix): void;
+        _renderWebGL(renderSession: WebGL.IRenderSession, matrix?: PIXI.Matrix): void;
+    }
+}
+declare module PhaserSpine {
+    module WebGL {
+        interface IRenderSession extends PIXI.RenderSession {
+            gl: WebGLRenderingContext;
+        }
     }
 }
 declare module PhaserSpine {
     module WebGL {
         class Renderer {
-            draw(spine: Spine, renderSession: PIXI.RenderSession): void;
+            game: Phaser.Game;
+            private shader;
+            private batcher;
+            private mvp;
+            private skeletonRenderer;
+            private debugRenderer;
+            private debugShader;
+            private shapes;
+            constructor(game: Phaser.Game);
+            resize(bounds: PIXI.Rectangle, scale2: Phaser.Point, renderSession: IRenderSession): void;
+            draw(skeleton: spine.Skeleton, renderSession: PIXI.RenderSession): void;
+        }
+    }
+}
+declare module PhaserSpine {
+    module WebGL {
+        class Texture extends spine.Texture implements spine.Disposable {
+            private gl;
+            private texture;
+            private boundUnit;
+            constructor(gl: WebGLRenderingContext, image: HTMLImageElement, useMipMaps?: boolean);
+            setFilters(minFilter: spine.TextureFilter, magFilter: spine.TextureFilter): void;
+            setWraps(uWrap: spine.TextureWrap, vWrap: spine.TextureWrap): void;
+            update(useMipMaps: boolean): void;
+            bind(unit?: number): void;
+            unbind(): void;
+            dispose(): void;
         }
     }
 }
