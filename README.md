@@ -61,6 +61,16 @@ buddy.setAnimationByName(
 );
 ```
 
+### Handling events
+You can handle Spine events, just add your callback to Spine.onEvent, it's regular [Phaser.Signal](https://phaser.io/docs/2.6.2/Phaser.Signal.html) object. Your callback should be defined with two arguments: event index (number) and event object (Spine.Event):
+
+```javascript
+spineboy.onEvent.add(function (i,e) {
+    console.log('name=' + e.data.name + ' int=' + e.intValue + ' float=' + e.floatValue + ' string=' + e.stringValue);
+}
+```
+
+
 ### Crossfading animations
 Stacking animations in spine is rather simple, you just add non-looping animations on top of eachother:
 ```javascript

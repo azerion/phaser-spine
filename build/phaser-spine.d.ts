@@ -47,6 +47,7 @@ declare module PhaserSpine {
         private lastTime;
         private imageScale;
         game: PhaserSpine.SpineGame;
+        onEvent: Phaser.Signal;
         constructor(game: PhaserSpine.SpineGame, key: string, scalingVariant?: string);
         autoUpdate: boolean;
         private getScaleFromVariant(variant);
