@@ -20,6 +20,7 @@ module PhaserSpine {
         private imageScale: number = 1;
 
         public game: PhaserSpine.SpineGame;
+        public onEvent: Phaser.Signal;
 
         /**
          * @class Spine
@@ -55,11 +56,14 @@ module PhaserSpine {
                 throw new Error('Spine data must be preloaded using Loader.spine');
             }
 
+            this.onEvent = new Phaser.Signal();
+
             this.skeleton = new spine.Skeleton(this.skeletonData);
             this.skeleton.updateWorldTransform();
 
             this.stateData = new spine.AnimationStateData(this.skeletonData);
             this.state = new spine.AnimationState(this.stateData);
+            this.state.onEvent = this.onEvent.dispatch.bind(this.onEvent);
 
             this.slotContainers = [];
 
@@ -97,7 +101,6 @@ module PhaserSpine {
         set autoUpdate(value: boolean) {
             this.updateTransform = value ? PhaserSpine.Spine.prototype.autoUpdateTransform : PIXI.DisplayObjectContainer.prototype.updateTransform;
         };
-
 
         private getScaleFromVariant(variant: string): number {
             let scale: RegExpExecArray = SpinePlugin.RESOLUTION_REGEXP.exec(variant);
