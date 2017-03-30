@@ -1,0 +1,50 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title>Phaser Spine Example</title>
+
+    <script src="../node_modules/phaser/build/phaser.js"></script>
+    <script src="../build/phaser-spine.min.js"></script>
+
+    <style>
+        body {
+            padding: 0;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+<script>
+
+    var buddy, game;
+
+    game = new Phaser.Game(400, 400, Phaser.AUTO, '', {init: init, preload: preload, create: create});
+
+    function init() {
+        this.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
+    }
+
+    function preload() {
+        game.plugins.add(PhaserSpine.SpinePlugin);
+        game.stage.disableVisibilityChange = true;
+
+        game.load.spine('spineboy', "assets/spineboy-old.json");
+    }
+
+    function create() {
+        //create the spine object
+        spineboy = game.add.spine(200, 400, "spineboy");
+        // set up the mixes!
+        spineboy.setMixByName("walk", "jump", 0.2);
+        spineboy.setMixByName("jump", "walk", 0.4);
+
+        spineboy.setAnimationByName(0, "walk", false);
+        game.input.onDown.add(function () {
+            spineboy.setAnimationByName(0, "jump", false);
+            spineboy.addAnimationByName(0, "walk", true);
+        });
+    }
+</script>
+
+</body>
+</html>
