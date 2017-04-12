@@ -172,18 +172,17 @@ module PhaserSpine {
                     slotContainer.position.y = attachment.x * bone.c + attachment.y * bone.d + bone.worldY;
 
                     //Update scaling
-                    slotContainer.scale.x = bone.getWorldScaleX();
-                    slotContainer.scale.y = bone.getWorldScaleY();
+                    slotContainer.scale.x = bone.getWorldScaleY() * bone.worldSignX;
+                    slotContainer.scale.y = bone.getWorldScaleX() * bone.worldSignY;
                     //Update rotation
                     slotContainer.rotation = (bone.getWorldRotationX() - attachment.rotation) * Math.PI / 180;
-
-                    if (bone.getWorldScaleY() < 0 || bone.getWorldScaleX() < 0) {
-                        slotContainer.scale.y = -slotContainer.scale.y;
-                        slotContainer.scale.x = -slotContainer.scale.x;
-                        slotContainer.rotation = -slotContainer.rotation;
-
-                    }
-                    
+                    //
+                    //if (bone.getWorldScaleY() < 0 || bone.getWorldScaleX() < 0) {
+                    //    slotContainer.scale.y = slotContainer.scale.y;
+                    //    slotContainer.scale.x = -slotContainer.scale.x;
+                    //    slotContainer.rotation = -slotContainer.rotation;
+                    //}
+                    //
                     slot.currentSprite.blendMode = slot.blendMode;
                     slot.currentSprite.tint =  parseInt(Phaser.Color.componentToHex(255*slot.r) + Phaser.Color.componentToHex(255*slot.g) + Phaser.Color.componentToHex(255*slot.b), 16);
                 } else if (type === spine.AttachmentType.weightedmesh || type === spine.AttachmentType.weightedlinkedmesh) {

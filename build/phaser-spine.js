@@ -1,9 +1,9 @@
 /*!
- * phaser-spine - version 3.0.2 
+ * phaser-spine - version 3.0.3 
  * Spine plugin for Phaser.io!
  *
  * OrangeGames
- * Build at 30-03-2017
+ * Build at 12-04-2017
  * Released under MIT License 
  */
 
@@ -3071,14 +3071,9 @@ var PhaserSpine;
                     var bone = slot.bone;
                     slotContainer.position.x = attachment.x * bone.a + attachment.y * bone.b + bone.worldX;
                     slotContainer.position.y = attachment.x * bone.c + attachment.y * bone.d + bone.worldY;
-                    slotContainer.scale.x = bone.getWorldScaleX();
-                    slotContainer.scale.y = bone.getWorldScaleY();
+                    slotContainer.scale.x = bone.getWorldScaleY() * bone.worldSignX;
+                    slotContainer.scale.y = bone.getWorldScaleX() * bone.worldSignY;
                     slotContainer.rotation = (bone.getWorldRotationX() - attachment.rotation) * Math.PI / 180;
-                    if (bone.getWorldScaleY() < 0 || bone.getWorldScaleX() < 0) {
-                        slotContainer.scale.y = -slotContainer.scale.y;
-                        slotContainer.scale.x = -slotContainer.scale.x;
-                        slotContainer.rotation = -slotContainer.rotation;
-                    }
                     slot.currentSprite.blendMode = slot.blendMode;
                     slot.currentSprite.tint = parseInt(Phaser.Color.componentToHex(255 * slot.r) + Phaser.Color.componentToHex(255 * slot.g) + Phaser.Color.componentToHex(255 * slot.b), 16);
                 }
