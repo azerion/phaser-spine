@@ -1,9 +1,9 @@
 /*!
- * phaser-spine - version 3.0.3 
+ * phaser-spine - version 3.0.4-alpha1 
  * Spine plugin for Phaser.io!
  *
  * OrangeGames
- * Build at 12-04-2017
+ * Build at 13-04-2017
  * Released under MIT License 
  */
 
@@ -3071,9 +3071,18 @@ var PhaserSpine;
                     var bone = slot.bone;
                     slotContainer.position.x = attachment.x * bone.a + attachment.y * bone.b + bone.worldX;
                     slotContainer.position.y = attachment.x * bone.c + attachment.y * bone.d + bone.worldY;
-                    slotContainer.scale.x = bone.getWorldScaleY() * bone.worldSignX;
-                    slotContainer.scale.y = bone.getWorldScaleX() * bone.worldSignY;
+                    slotContainer.scale.x = bone.getWorldScaleY();
+                    slotContainer.scale.y = bone.getWorldScaleX();
                     slotContainer.rotation = (bone.getWorldRotationX() - attachment.rotation) * Math.PI / 180;
+                    if (bone.getWorldScaleY() < 0) {
+                        slotContainer.scale.y = -slotContainer.scale.y;
+                    }
+                    if (bone.getWorldScaleX() < 0) {
+                        slotContainer.scale.x = -slotContainer.scale.x;
+                    }
+                    if (bone.getWorldScaleY() < 0 || bone.getWorldScaleX() < 0) {
+                        slotContainer.rotation = -slotContainer.rotation;
+                    }
                     slot.currentSprite.blendMode = slot.blendMode;
                     slot.currentSprite.tint = parseInt(Phaser.Color.componentToHex(255 * slot.r) + Phaser.Color.componentToHex(255 * slot.g) + Phaser.Color.componentToHex(255 * slot.b), 16);
                 }
@@ -3125,7 +3134,6 @@ var PhaserSpine;
             sprite.scale.x = descriptor.width / descriptor.originalWidth * attachment.scaleX / this.imageScale;
             sprite.scale.y = descriptor.height / descriptor.originalHeight * attachment.scaleY / this.imageScale;
             sprite.rotation = baseRotation;
-            ;
             sprite.anchor.x = (0.5 * descriptor.originalWidth - descriptor.offsetX) / descriptor.width;
             sprite.anchor.y = 1.0 - ((0.5 * descriptor.originalHeight - descriptor.offsetY) / descriptor.height);
             sprite.alpha = attachment.a;

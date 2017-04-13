@@ -172,17 +172,23 @@ module PhaserSpine {
                     slotContainer.position.y = attachment.x * bone.c + attachment.y * bone.d + bone.worldY;
 
                     //Update scaling
-                    slotContainer.scale.x = bone.getWorldScaleY() * bone.worldSignX;
-                    slotContainer.scale.y = bone.getWorldScaleX() * bone.worldSignY;
+                    slotContainer.scale.x = bone.getWorldScaleY();
+                    slotContainer.scale.y = bone.getWorldScaleX();
                     //Update rotation
                     slotContainer.rotation = (bone.getWorldRotationX() - attachment.rotation) * Math.PI / 180;
-                    //
-                    //if (bone.getWorldScaleY() < 0 || bone.getWorldScaleX() < 0) {
-                    //    slotContainer.scale.y = slotContainer.scale.y;
-                    //    slotContainer.scale.x = -slotContainer.scale.x;
-                    //    slotContainer.rotation = -slotContainer.rotation;
-                    //}
-                    //
+
+                    if (bone.getWorldScaleY() < 0) {
+                        slotContainer.scale.y = -slotContainer.scale.y;
+                    }
+                    if (bone.getWorldScaleX() < 0) {
+                        slotContainer.scale.x = -slotContainer.scale.x;
+
+                    }
+                    if (bone.getWorldScaleY() < 0 || bone.getWorldScaleX() < 0) {
+
+                       slotContainer.rotation = -slotContainer.rotation;
+                    }
+
                     slot.currentSprite.blendMode = slot.blendMode;
                     slot.currentSprite.tint =  parseInt(Phaser.Color.componentToHex(255*slot.r) + Phaser.Color.componentToHex(255*slot.g) + Phaser.Color.componentToHex(255*slot.b), 16);
                 } else if (type === spine.AttachmentType.weightedmesh || type === spine.AttachmentType.weightedlinkedmesh) {
@@ -268,7 +274,7 @@ module PhaserSpine {
             sprite.scale.y = descriptor.height / descriptor.originalHeight * attachment.scaleY / this.imageScale;
 
             sprite.rotation = baseRotation;
-;
+
             sprite.anchor.x = (0.5 * descriptor.originalWidth - descriptor.offsetX) / descriptor.width;
             sprite.anchor.y = 1.0 - ((0.5 * descriptor.originalHeight - descriptor.offsetY) / descriptor.height);
 
