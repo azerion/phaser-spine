@@ -3075,7 +3075,7 @@ var PhaserSpine;
                     slotContainer.scale.y = bone.getWorldScaleX() * bone.worldSignY;
                     slotContainer.rotation = (bone.getWorldRotationX() - attachment.rotation) * Math.PI / 180;
                     slot.currentSprite.blendMode = slot.blendMode;
-                    slot.currentSprite.tint = parseInt(Phaser.Color.componentToHex(255 * slot.r) + Phaser.Color.componentToHex(255 * slot.g) + Phaser.Color.componentToHex(255 * slot.b), 16);
+                  slot.currentSprite.tint = parseInt(Phaser.Color.componentToHex(255 * slot.r).substring(0, 2) + Phaser.Color.componentToHex(255 * slot.g).substring(0, 2) + Phaser.Color.componentToHex(255 * slot.b).substring(0, 2), 16);
                 }
                 else if (type === spine.AttachmentType.weightedmesh || type === spine.AttachmentType.weightedlinkedmesh) {
                     if (!slot.currentMeshName || slot.currentMeshName !== attachment.name) {
