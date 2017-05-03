@@ -18,6 +18,7 @@ module PhaserSpine {
         private slotContainers: Phaser.Group[];
         private lastTime: number;
         private imageScale: number = 1;
+        private globalTint: number;
 
         public game: PhaserSpine.SpineGame;
         public onEvent: Phaser.Signal;
@@ -110,6 +111,19 @@ module PhaserSpine {
             return 1;
         }
 
+        public setTint (tint: number): void {
+
+            this.globalTint = tint;
+
+            let slots = this.skeleton.slots;
+            for(let i = 0; i < slots.length; i++) {
+
+                let slot = slots[i];
+                slot.currentSprite.tint = tint;
+
+            }
+        }   
+
         /**
          * Update the spine skeleton and its animations by delta time (dt)
          *
@@ -172,8 +186,8 @@ module PhaserSpine {
                     slotContainer.position.y = attachment.x * bone.c + attachment.y * bone.d + bone.worldY;
 
                     //Update scaling
-                    slotContainer.scale.x = bone.getWorldScaleY();
-                    slotContainer.scale.y = bone.getWorldScaleX();
+                    slotContainer.scale.x = bone.getWorldScaleX();
+                    slotContainer.scale.y = bone.getWorldScaleY();
                     //Update rotation
                     slotContainer.rotation = (bone.getWorldRotationX() - attachment.rotation) * Math.PI / 180;
 
@@ -190,7 +204,10 @@ module PhaserSpine {
                     }
 
                     slot.currentSprite.blendMode = slot.blendMode;
-                    slot.currentSprite.tint =  parseInt(Phaser.Color.componentToHex(255*slot.r) + Phaser.Color.componentToHex(255*slot.g) + Phaser.Color.componentToHex(255*slot.b), 16);
+                    if (!this.globalTint) {
+                        slot.currentSprite.tint = slot.currentSprite.tint = parseInt(Phaser.Color.componentToHex(255 * slot.r).substring(0, 2) + Phaser.Color.componentToHex(255 * slot.g).substring(0, 2) + Phaser.Color.componentToHex(255 * slot.b).substring(0, 2), 16);
+                    }
+
                 } else if (type === spine.AttachmentType.weightedmesh || type === spine.AttachmentType.weightedlinkedmesh) {
                     if (!slot.currentMeshName || slot.currentMeshName !== attachment.name) {
                         var meshName = attachment.name;

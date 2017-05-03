@@ -3,7 +3,7 @@
  * Spine plugin for Phaser.io!
  *
  * OrangeGames
- * Build at 13-04-2017
+ * Build at 03-05-2017
  * Released under MIT License 
  */
 
@@ -3026,6 +3026,14 @@ var PhaserSpine;
             }
             return 1;
         };
+        Spine.prototype.setTint = function (tint) {
+            this.globalTint = tint;
+            var slots = this.skeleton.slots;
+            for (var i = 0; i < slots.length; i++) {
+                var slot = slots[i];
+                slot.currentSprite.tint = tint;
+            }
+        };
         Spine.prototype.update = function (dt) {
             if (dt === undefined) {
                 return;
@@ -3071,8 +3079,8 @@ var PhaserSpine;
                     var bone = slot.bone;
                     slotContainer.position.x = attachment.x * bone.a + attachment.y * bone.b + bone.worldX;
                     slotContainer.position.y = attachment.x * bone.c + attachment.y * bone.d + bone.worldY;
-                    slotContainer.scale.x = bone.getWorldScaleY();
-                    slotContainer.scale.y = bone.getWorldScaleX();
+                    slotContainer.scale.x = bone.getWorldScaleX();
+                    slotContainer.scale.y = bone.getWorldScaleY();
                     slotContainer.rotation = (bone.getWorldRotationX() - attachment.rotation) * Math.PI / 180;
                     if (bone.getWorldScaleY() < 0) {
                         slotContainer.scale.y = -slotContainer.scale.y;
@@ -3084,7 +3092,9 @@ var PhaserSpine;
                         slotContainer.rotation = -slotContainer.rotation;
                     }
                     slot.currentSprite.blendMode = slot.blendMode;
-                    slot.currentSprite.tint = parseInt(Phaser.Color.componentToHex(255 * slot.r) + Phaser.Color.componentToHex(255 * slot.g) + Phaser.Color.componentToHex(255 * slot.b), 16);
+                    if (!this.globalTint) {
+                        slot.currentSprite.tint = slot.currentSprite.tint = parseInt(Phaser.Color.componentToHex(255 * slot.r).substring(0, 2) + Phaser.Color.componentToHex(255 * slot.g).substring(0, 2) + Phaser.Color.componentToHex(255 * slot.b).substring(0, 2), 16);
+                    }
                 }
                 else if (type === spine.AttachmentType.weightedmesh || type === spine.AttachmentType.weightedlinkedmesh) {
                     if (!slot.currentMeshName || slot.currentMeshName !== attachment.name) {
