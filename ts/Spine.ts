@@ -18,6 +18,7 @@ module PhaserSpine {
         private slotContainers: Phaser.Group[];
         private lastTime: number;
         private imageScale: number = 1;
+        private globalTint: number;
 
         public game: PhaserSpine.SpineGame;
         public onEvent: Phaser.Signal;
@@ -110,6 +111,19 @@ module PhaserSpine {
             return 1;
         }
 
+        public setTint (tint: number): void {
+
+            this.globalTint = tint;
+
+            let slots = this.skeleton.slots;
+            for(let i = 0; i < slots.length; i++) {
+
+                let slot = slots[i];
+                slot.currentSprite.tint = tint;
+
+            }
+        }   
+
         /**
          * Update the spine skeleton and its animations by delta time (dt)
          *
@@ -172,19 +186,28 @@ module PhaserSpine {
                     slotContainer.position.y = attachment.x * bone.c + attachment.y * bone.d + bone.worldY;
 
                     //Update scaling
-                    slotContainer.scale.x = bone.getWorldScaleY() * bone.worldSignX;
-                    slotContainer.scale.y = bone.getWorldScaleX() * bone.worldSignY;
+                    slotContainer.scale.x = bone.getWorldScaleX();
+                    slotContainer.scale.y = bone.getWorldScaleY();
                     //Update rotation
                     slotContainer.rotation = (bone.getWorldRotationX() - attachment.rotation) * Math.PI / 180;
-                    //
-                    //if (bone.getWorldScaleY() < 0 || bone.getWorldScaleX() < 0) {
-                    //    slotContainer.scale.y = slotContainer.scale.y;
-                    //    slotContainer.scale.x = -slotContainer.scale.x;
-                    //    slotContainer.rotation = -slotContainer.rotation;
-                    //}
-                    //
+
+                    if (bone.getWorldScaleY() < 0) {
+                        slotContainer.scale.y = -slotContainer.scale.y;
+                    }
+                    if (bone.getWorldScaleX() < 0) {
+                        slotContainer.scale.x = -slotContainer.scale.x;
+
+                    }
+                    if (bone.getWorldScaleY() < 0 || bone.getWorldScaleX() < 0) {
+
+                       slotContainer.rotation = -slotContainer.rotation;
+                    }
+
                     slot.currentSprite.blendMode = slot.blendMode;
-                    slot.currentSprite.tint =  parseInt(Phaser.Color.componentToHex(255*slot.r) + Phaser.Color.componentToHex(255*slot.g) + Phaser.Color.componentToHex(255*slot.b), 16);
+                    if (!this.globalTint) {
+                        slot.currentSprite.tint = slot.currentSprite.tint = parseInt(Phaser.Color.componentToHex(255 * slot.r).substring(0, 2) + Phaser.Color.componentToHex(255 * slot.g).substring(0, 2) + Phaser.Color.componentToHex(255 * slot.b).substring(0, 2), 16);
+                    }
+
                 } else if (type === spine.AttachmentType.weightedmesh || type === spine.AttachmentType.weightedlinkedmesh) {
                     if (!slot.currentMeshName || slot.currentMeshName !== attachment.name) {
                         var meshName = attachment.name;
@@ -268,7 +291,7 @@ module PhaserSpine {
             sprite.scale.y = descriptor.height / descriptor.originalHeight * attachment.scaleY / this.imageScale;
 
             sprite.rotation = baseRotation;
-;
+
             sprite.anchor.x = (0.5 * descriptor.originalWidth - descriptor.offsetX) / descriptor.width;
             sprite.anchor.y = 1.0 - ((0.5 * descriptor.originalHeight - descriptor.offsetY) / descriptor.height);
 

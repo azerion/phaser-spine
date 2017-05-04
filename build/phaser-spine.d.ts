@@ -46,11 +46,13 @@ declare module PhaserSpine {
         private slotContainers;
         private lastTime;
         private imageScale;
+        private globalTint;
         game: PhaserSpine.SpineGame;
         onEvent: Phaser.Signal;
         constructor(game: PhaserSpine.SpineGame, key: string, scalingVariant?: string);
         autoUpdate: boolean;
         private getScaleFromVariant(variant);
+        setTint(tint: number): void;
         update(dt?: number): void;
         destroy(destroyChildren?: boolean, soft?: boolean): void;
         autoUpdateTransform(): void;
