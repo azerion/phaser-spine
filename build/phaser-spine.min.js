@@ -1,9 +1,9 @@
 /*!
- * phaser-spine - version 3.0.4-alpha1 
+ * phaser-spine - version 3.0.4 
  * Spine plugin for Phaser.io!
  *
  * OrangeGames
- * Build at 03-05-2017
+ * Build at 04-05-2017
  * Released under MIT License 
  */
 
