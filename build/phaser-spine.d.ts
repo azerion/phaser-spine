@@ -49,6 +49,7 @@ declare module PhaserSpine {
         private globalTint;
         game: PhaserSpine.SpineGame;
         onEvent: Phaser.Signal;
+        onComplete: Phaser.Signal;
         constructor(game: PhaserSpine.SpineGame, key: string, scalingVariant?: string);
         autoUpdate: boolean;
         private getScaleFromVariant(variant);

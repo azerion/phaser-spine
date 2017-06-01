@@ -1,9 +1,9 @@
 /*!
- * phaser-spine - version 3.0.4 
+ * phaser-spine - version 3.0.5 
  * Spine plugin for Phaser.io!
  *
  * OrangeGames
- * Build at 04-05-2017
+ * Build at 01-06-2017
  * Released under MIT License 
  */
 
@@ -2975,11 +2975,13 @@ var PhaserSpine;
                 throw new Error('Spine data must be preloaded using Loader.spine');
             }
             _this.onEvent = new Phaser.Signal();
+            _this.onComplete = new Phaser.Signal();
             _this.skeleton = new spine.Skeleton(_this.skeletonData);
             _this.skeleton.updateWorldTransform();
             _this.stateData = new spine.AnimationStateData(_this.skeletonData);
             _this.state = new spine.AnimationState(_this.stateData);
             _this.state.onEvent = _this.onEvent.dispatch.bind(_this.onEvent);
+            _this.state.onComplete = _this.onComplete.dispatch.bind(_this.onComplete);
             _this.slotContainers = [];
             for (var i = 0, n = _this.skeleton.slots.length; i < n; i++) {
                 var slot = _this.skeleton.slots[i];
