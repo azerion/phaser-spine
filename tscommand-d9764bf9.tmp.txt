@@ -1,1 +1,0 @@
-ts/definition.d.ts ts/Plugin.ts ts/Spine.ts ts/SpineLoader.ts --sourcemap --declaration --removeComments --noImplicitAny --target ES5 --module amd --out build/phaser-spine.js
