@@ -23,6 +23,7 @@ module PhaserSpine {
         public game: PhaserSpine.SpineGame;
         public onEvent: Phaser.Signal;
         public onComplete: Phaser.Signal;
+        public onEnd: Phaser.Signal;
 
         /**
          * @class Spine
@@ -60,6 +61,7 @@ module PhaserSpine {
 
             this.onEvent = new Phaser.Signal();
             this.onComplete = new Phaser.Signal();
+            this.onEnd = new Phaser.Signal();
 
             this.skeleton = new spine.Skeleton(this.skeletonData);
             this.skeleton.updateWorldTransform();
@@ -68,6 +70,7 @@ module PhaserSpine {
             this.state = new spine.AnimationState(this.stateData);
             this.state.onEvent = this.onEvent.dispatch.bind(this.onEvent);
             this.state.onComplete = this.onComplete.dispatch.bind(this.onComplete);
+            this.state.onEnd = this.onEnd.dispatch.bind(this.onEnd);
 
             this.slotContainers = [];
 
