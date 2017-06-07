@@ -64,12 +64,22 @@
         });
 
         spineboy.onComplete.add(function (i,e) {
-            console.log('animation ended');
+            console.log('animation reached last frame');
         });
 
+        spineboy.onEnd.add(function (trackIndex) {
+            console.log('animation stopped on track', trackIndex);
+        });
+
+        var running = false;
         game.input.onDown.add(function () {
-            spineboy.setAnimationByName(0, "jump", false);
-            spineboy.addAnimationByName(0, "run", true);
+            if (running) {
+                spineboy.setAnimationByName(0, "walk", true);
+            } else {
+                spineboy.setAnimationByName(0, "jump", false);
+                spineboy.addAnimationByName(0, "run", true);
+            }
+            running = !running;
         });
     }
 </script>
