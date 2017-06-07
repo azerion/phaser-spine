@@ -1,9 +1,9 @@
 /*!
- * phaser-spine - version 3.0.6 
+ * phaser-spine - version 3.0.7 
  * Spine plugin for Phaser.io!
  *
  * OrangeGames
- * Build at 06-06-2017
+ * Build at 07-06-2017
  * Released under MIT License 
  */
 
@@ -2156,6 +2156,7 @@ spine.SkeletonJson.prototype = {
 			case spine.AttachmentType.boundingbox:
 				var attachment = this.attachmentLoader.newBoundingBoxAttachment(skin, name);
 				var vertices = map["vertices"];
+                attachment.vertices = new spine.Float32Array(vertices.length);
 				for (var i = 0, n = vertices.length; i < n; i++)
 					attachment.vertices[i] = vertices[i] * scale;
 				return attachment;
