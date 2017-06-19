@@ -284,18 +284,18 @@ spine.Slot.prototype = {
 		if (this.attachment == attachment) return;
 		this.attachment = attachment;
 		//TODO: find better solution
-        if (attachment.r) {
-          this.r = attachment.r
-        }
-        if (attachment.g) {
-          this.g = attachment.g
-        }
-        if (attachment.b) {
-          this.b = attachment.b
-        }
-        if (attachment.a) {
-          this.a = attachment.a
-        }
+	    if(attachment.hasOwnProperty('r')) {
+		  this.r = attachment.r
+		}
+		if(attachment.hasOwnProperty('g')) {
+		  this.g = attachment.g
+		}
+		if(attachment.hasOwnProperty('b')) {
+		  this.b = attachment.b
+		}
+		if(attachment.hasOwnProperty('a')) {
+		  this.a = attachment.a
+		}
 		this._attachmentTime = this.bone.skeleton.time;
 		this.attachmentVertices.length = 0;
 	},
