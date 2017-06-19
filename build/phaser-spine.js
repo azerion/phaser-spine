@@ -42,9 +42,9 @@
 var spine = {
 	radDeg: 180 / Math.PI,
 	degRad: Math.PI / 180,
-	Float32Array: typeof(Float32Array) === 'undefined' ? Array : Float32Array,
-	Uint32Array: typeof(Uint32Array) === 'undefined' ? Array : Uint32Array,
-	Uint16Array: typeof(Uint16Array) === 'undefined' ? Array : Uint16Array
+	Float32Array: Array,
+	Uint32Array: Array,
+	Uint16Array: Array
 };
 spine.temp = new spine.Float32Array(2);
 
@@ -283,6 +283,19 @@ spine.Slot.prototype = {
 	setAttachment: function (attachment) {
 		if (this.attachment == attachment) return;
 		this.attachment = attachment;
+		//TODO: find better solution
+        if (attachment.r) {
+          this.r = attachment.r
+        }
+        if (attachment.g) {
+          this.g = attachment.g
+        }
+        if (attachment.b) {
+          this.b = attachment.b
+        }
+        if (attachment.a) {
+          this.a = attachment.a
+        }
 		this._attachmentTime = this.bone.skeleton.time;
 		this.attachmentVertices.length = 0;
 	},
@@ -524,7 +537,7 @@ spine.Skin.prototype = {
 			var slotIndex = parseInt(key.substring(0, colon));
 			var name = key.substring(colon + 1);
 			var slot = skeleton.slots[slotIndex];
-			if (slot.attachment && slot.attachment.name == name) {
+			if (slot.attachment && slot.data.attachmentName == name) {
 				var attachment = this.getAttachment(slotIndex, name);
 				if (attachment) slot.setAttachment(attachment);
 			}
@@ -3274,4 +3287,5 @@ var PhaserSpine;
     }());
     PhaserSpine.SpineTextureLoader = SpineTextureLoader;
 })(PhaserSpine || (PhaserSpine = {}));
-//# sourceMappingURL=phaser-spine.js.map
+//# sourceMappingURL=phaser-spine.js.mapexport default PhaserSpine
+export default PhaserSpine
