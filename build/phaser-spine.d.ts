@@ -39,6 +39,7 @@ declare module "phaser-spine" {
 }
 declare module PhaserSpine {
     class Spine extends Phaser.Group {
+        static globalAutoUpdate: boolean;
         private skeleton;
         private skeletonData;
         private stateData;
