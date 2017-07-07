@@ -386,6 +386,16 @@ module PhaserSpine {
         };
 
         /**
+         * get the name of the animation currently playing
+         *
+         * @param {number}  trackIndex
+         * @returns {string}
+         */
+        public getCurrentAnimationForTrack(trackIndex: number): string {
+            return this.state.tracks[trackIndex].animation.name;
+        }
+
+        /**
          * Exposing the skeleton's method to change the skin by skinName
          * We override the original runtime's error because warnings dont stop the VM
          *
