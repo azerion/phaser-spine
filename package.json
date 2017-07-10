@@ -1,7 +1,7 @@
 {
   "name": "@orange-games/phaser-spine",
   "author": "OrangeGames",
-  "version": "3.0.7",
+  "version": "3.0.8",
   "description": "Spine plugin for Phaser.io!",
   "contributors": [
     {
