@@ -1,9 +1,9 @@
 /*!
- * phaser-spine - version 3.0.7 
+ * phaser-spine - version 3.0.8 
  * Spine plugin for Phaser.io!
  *
  * OrangeGames
- * Build at 07-06-2017
+ * Build at 04-07-2017
  * Released under MIT License 
  */
 
@@ -3132,10 +3132,15 @@ var PhaserSpine;
             _super.prototype.destroy.call(this, true, soft);
         };
         Spine.prototype.autoUpdateTransform = function () {
-            this.lastTime = this.lastTime || Date.now();
-            var timeDelta = (Date.now() - this.lastTime) * 0.001;
-            this.lastTime = Date.now();
-            this.update(timeDelta);
+            if (Spine.globalAutoUpdate) {
+                this.lastTime = this.lastTime || Date.now();
+                var timeDelta = (Date.now() - this.lastTime) * 0.001;
+                this.lastTime = Date.now();
+                this.update(timeDelta);
+            }
+            else {
+                this.lastTime = 0;
+            }
             PIXI.DisplayObjectContainer.prototype.updateTransform.call(this);
         };
         ;
@@ -3255,6 +3260,7 @@ var PhaserSpine;
         };
         return Spine;
     }(Phaser.Group));
+    Spine.globalAutoUpdate = true;
     PhaserSpine.Spine = Spine;
 })(PhaserSpine || (PhaserSpine = {}));
 var PhaserSpine;
