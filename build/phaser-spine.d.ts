@@ -64,6 +64,7 @@ declare module PhaserSpine {
         setMixByName(fromName: string, toName: string, duration: number): void;
         setAnimationByName(trackIndex: number, animationName: string, loop?: boolean): spine.TrackEntry;
         addAnimationByName(trackIndex: number, animationName: string, loop?: boolean, delay?: number): spine.TrackEntry;
+        getCurrentAnimationForTrack(trackIndex: number): string;
         setSkinByName(skinName: string): void;
         setSkin(skin: spine.Skin): void;
         setToSetupPose(): void;

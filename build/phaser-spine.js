@@ -1,9 +1,9 @@
 /*!
- * phaser-spine - version 3.0.8 
+ * phaser-spine - version 3.0.9 
  * Spine plugin for Phaser.io!
  *
  * OrangeGames
- * Build at 04-07-2017
+ * Build at 10-07-2017
  * Released under MIT License 
  */
 
@@ -3208,6 +3208,9 @@ var PhaserSpine;
             return this.state.addAnimation(trackIndex, animation, loop, delay);
         };
         ;
+        Spine.prototype.getCurrentAnimationForTrack = function (trackIndex) {
+            return this.state.tracks[trackIndex].animation.name;
+        };
         Spine.prototype.setSkinByName = function (skinName) {
             var skin = this.skeleton.data.findSkin(skinName);
             if (!skin) {
