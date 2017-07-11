@@ -399,7 +399,7 @@ module PhaserSpine {
          */
         public getCurrentAnimationForTrack(trackIndex: number): string {
             if (!this.state.tracks[trackIndex] || !this.state.tracks[trackIndex].animation) {
-                console.warn("No animation found on track index");
+                console.warn("No animation found on track index: ", trackIndex);
                 return "";
             }
             return this.state.tracks[trackIndex].animation.name;
