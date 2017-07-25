@@ -11,6 +11,8 @@ module PhaserSpine {
     import Skin = spine.Skin;
     export class Spine extends Phaser.Group
     {
+        static globalAutoUpdate: boolean = true;
+
         private skeleton: spine.Skeleton;
         private skeletonData: spine.SkeletonData;
         private stateData: spine.AnimationStateData;
@@ -263,11 +265,15 @@ module PhaserSpine {
          * @private
          */
         public autoUpdateTransform() {
-            this.lastTime = this.lastTime || Date.now();
-            var timeDelta = (Date.now() - this.lastTime) * 0.001;
-            this.lastTime = Date.now();
+            if (Spine.globalAutoUpdate) {
+                this.lastTime = this.lastTime || Date.now();
+                var timeDelta = (Date.now() - this.lastTime) * 0.001;
+                this.lastTime = Date.now();
 
-            this.update(timeDelta);
+                this.update(timeDelta);
+            } else {
+                this.lastTime = 0;
+            }
 
             PIXI.DisplayObjectContainer.prototype.updateTransform.call(this);
         };
@@ -384,6 +390,16 @@ module PhaserSpine {
             }
             return this.state.addAnimation(trackIndex, animation, loop, delay);
         };
+
+        /**
+         * get the name of the animation currently playing
+         *
+         * @param {number}  trackIndex
+         * @returns {string}
+         */
+        public getCurrentAnimationForTrack(trackIndex: number): string {
+            return this.state.tracks[trackIndex].animation.name;
+        }
 
         /**
          * Exposing the skeleton's method to change the skin by skinName
