@@ -3297,4 +3297,3 @@ var PhaserSpine;
     PhaserSpine.SpineTextureLoader = SpineTextureLoader;
 })(PhaserSpine || (PhaserSpine = {}));
 //# sourceMappingURL=phaser-spine.js.mapexport default PhaserSpine
-export default PhaserSpine
