@@ -92,7 +92,7 @@ module PhaserSpine {
                     return;
                 }
 
-                (<WebGL.Renderer>this.renderer).resize(this.specialBounds, this.scale, renderSession);
+                (<WebGL.Renderer>this.renderer).resize(this.specialBounds, this.position, this.scale, renderSession);
                 (<WebGL.Renderer>this.renderer).draw(this.skeleton, renderSession);
             }
         }
