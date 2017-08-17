@@ -74,7 +74,7 @@ module PhaserSpine {
              * @param matrix
              * @private
              */
-            public _renderCanvas(renderSession: PIXI.RenderSession, matrix?: PIXI.Matrix): void {
+            public _renderCanvas(renderSession: Canvas.IRenderSession, matrix?: PIXI.Matrix): void {
                 if (!this.visible || !this.alive) {
                     return;
                 }

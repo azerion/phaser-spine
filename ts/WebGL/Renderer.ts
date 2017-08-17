@@ -45,8 +45,8 @@ module PhaserSpine {
                 var scale = Math.max(scale2.x, scale2.y);
 
                 var signs = {
-                    x: Math.sign(scale2.x),
-                    y: Math.sign(scale2.y)
+                    x: scale2.x < 0 ? -1 : 1,
+                    y: scale2.y < 0 ? -1 : 1
                 }
 
                 var x = - position.x / scale * signs.x * res,
@@ -58,7 +58,7 @@ module PhaserSpine {
                 renderSession.gl.viewport(0, 0, w * res, h * res);
             }
 
-            public draw(skeleton: spine.Skeleton, renderSession: PIXI.RenderSession) {
+            public draw(skeleton: spine.Skeleton, renderSession: IRenderSession) {
                 ////////////////////:
                 ///        FIX: Save Phaser WebGL Context
                 /////////
@@ -68,7 +68,7 @@ module PhaserSpine {
                 var currentShader = renderSession.shaderManager.currentShader;
 
                 // Reset glVertexAttribArray
-                for (i = 0; i < renderSession.shaderManager.attribState.length; i++)
+                for (let i = 0; i < renderSession.shaderManager.attribState.length; i++)
                 {
                     renderSession.shaderManager.attribState[i] = null;
                     renderSession.gl.disableVertexAttribArray(i);
@@ -112,6 +112,15 @@ module PhaserSpine {
                 renderSession.shaderManager.setShader(currentShader);
 
                 renderSession.spriteBatch.dirty = true;
+
+                // Only for Phaser 2.7.3 - 2.7.7 (inclusive)
+                if(["2.7.3", "2.7.4", "2.7.5", "2.7.6", "2.7.7"].indexOf(Phaser.VERSION) > -1){
+                    renderSession.spriteBatch.sprites.map(sprite => {
+                        if(sprite.texture && sprite.texture.baseTexture){
+                            sprite.texture.baseTexture._dirty[renderSession.spriteBatch.gl.id] = true;
+                        }
+                    });
+                }
                 ////    ENDFIX: Restore Context
                 
 

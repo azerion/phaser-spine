@@ -9,7 +9,7 @@ module PhaserSpine {
                 this.game = game;
             }
 
-            public resize(bounds: PIXI.Rectangle, scale: Phaser.Point, renderSession: PIXI.RenderSession): void {
+            public resize(bounds: PIXI.Rectangle, scale: Phaser.Point, renderSession: IRenderSession): void {
                 let res = renderSession.resolution;
 
                 (<any>renderSession.context).resetTransform();
@@ -24,7 +24,7 @@ module PhaserSpine {
                 renderSession.context.translate(bounds.x / scale.x, bounds.y / scale.y);
             }
 
-            public drawImages (skeleton: spine.Skeleton, renderSession: PIXI.RenderSession) {
+            public drawImages (skeleton: spine.Skeleton, renderSession: IRenderSession) {
                 let ctx = renderSession.context;
                 let drawOrder = skeleton.drawOrder;
 
@@ -71,7 +71,7 @@ module PhaserSpine {
                 }
             }
 
-            public drawTriangles (skeleton: spine.Skeleton, renderSession: PIXI.RenderSession) {
+            public drawTriangles (skeleton: spine.Skeleton, renderSession: IRenderSession) {
                 let blendMode: spine.BlendMode = null;
 
                 let vertices: ArrayLike<number> = null;
