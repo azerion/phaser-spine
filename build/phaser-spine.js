@@ -7743,7 +7743,7 @@ var PhaserSpine;
             if (!this.visible || !this.alive) {
                 return;
             }
-            this.renderer.resize(this.specialBounds, this.position, this.scale, renderSession);
+            this.renderer.resize(this.skeleton, this.getBounds(), this.scale, renderSession);
             this.renderer.draw(this.skeleton, renderSession);
         };
         return Spine;
@@ -7772,17 +7772,20 @@ var PhaserSpine;
                 this.debugShader = spine.webgl.Shader.newColored(gl);
                 this.shapes = new spine.webgl.ShapeRenderer(gl);
             }
-            Renderer.prototype.resize = function (bounds, position, scale2, renderSession) {
+            Renderer.prototype.resize = function (skeleton, spriteBounds, scale2, renderSession) {
                 var w = this.game.width;
                 var h = this.game.height;
-                var res = this.game.resolution;
+                var res = renderSession.resolution;
+                skeleton.flipX = scale2.x < 0;
+                skeleton.flipY = scale2.y < 0;
                 var scale = Math.max(scale2.x, scale2.y);
-                var signs = {
-                    x: scale2.x < 0 ? -1 : 1,
-                    y: scale2.y < 0 ? -1 : 1
-                };
-                var x = -position.x / scale * signs.x * res, y = (position.y - h) / scale * signs.y * res + bounds.height / 2, width = w / scale * signs.x * res, height = h / scale * signs.y * res;
-                this.mvp.ortho2d(x, y, width, height);
+                var width = w / scale;
+                var height = h / scale;
+                var centerX = -spriteBounds.centerX;
+                var centerY = (-h + spriteBounds.centerY) * res + spriteBounds.height / 2;
+                var x = centerX / scale;
+                var y = centerY / scale;
+                this.mvp.ortho2d(x * res, y, width * res, height * res);
                 renderSession.gl.viewport(0, 0, w * res, h * res);
             };
             Renderer.prototype.draw = function (skeleton, renderSession) {
