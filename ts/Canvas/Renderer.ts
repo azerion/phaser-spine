@@ -9,19 +9,26 @@ module PhaserSpine {
                 this.game = game;
             }
 
-            public resize(bounds: PIXI.Rectangle, scale: Phaser.Point, renderSession: PIXI.RenderSession): void {
+            public resize(bounds: PIXI.Rectangle, scale: Phaser.Point, renderSession: IRenderSession): void {
+                let res = renderSession.resolution;
+
                 (<any>renderSession.context).resetTransform();
                 //Scale the animation
-                renderSession.context.scale(scale.x, scale.y);
+                renderSession.context.scale(scale.x * res, scale.y * res);
                 //Offset to model's center
-                renderSession.context.translate(bounds.width / 2 / scale.x, bounds.height/ scale.y);
+                renderSession.context.translate(bounds.width / 2 / scale.x, bounds.height/ scale.y / res);
+                if(res > 1){
+                    renderSession.context.translate(0, bounds.height / scale.y / res / 2);
+                }
                 //Offset to center of screen
                 renderSession.context.translate(bounds.x / scale.x, bounds.y / scale.y);
             }
 
-            public drawImages (skeleton: spine.Skeleton, renderSession: PIXI.RenderSession) {
+            public drawImages (skeleton: spine.Skeleton, renderSession: IRenderSession) {
                 let ctx = renderSession.context;
                 let drawOrder = skeleton.drawOrder;
+
+                let res = renderSession.resolution;
 
                 if (SpinePlugin.DEBUG) ctx.strokeStyle = "green";
 
@@ -49,27 +56,29 @@ module PhaserSpine {
                     let yx = vertices[8] - vertices[0];
                     let yy = vertices[9] - vertices[1];
                     let w = Math.sqrt(xx * xx + xy * xy), h = -Math.sqrt(yx * yx + yy * yy);
-                    ctx.translate(x, y);
+                    ctx.translate(x / res, y / res);
                     ctx.rotate(rotation);
                     if (region.rotate) {
                         ctx.rotate(Math.PI / 2);
-                        ctx.drawImage(image, region.x, region.y, region.height, region.width, 0, 0, h, -w);
+                        ctx.drawImage(image, region.x, region.y, region.height, region.width, 0, 0, h / res, -w / res);
                         ctx.rotate(-Math.PI / 2);
                     } else {
-                        ctx.drawImage(image, region.x, region.y, region.width, region.height, 0, 0, w, h);
+                        ctx.drawImage(image, region.x, region.y, region.width, region.height, 0, 0, w / res, h / res);
                     }
-                    if (SpinePlugin.DEBUG) ctx.strokeRect(0, 0, w, h);
+                    if (SpinePlugin.DEBUG) ctx.strokeRect(0, 0, w / res, h / res);
                     ctx.rotate(-rotation);
-                    ctx.translate(-x, -y);
+                    ctx.translate(-x / res, -y / res);
                 }
             }
 
-            public drawTriangles (skeleton: spine.Skeleton, renderSession: PIXI.RenderSession) {
+            public drawTriangles (skeleton: spine.Skeleton, renderSession: IRenderSession) {
                 let blendMode: spine.BlendMode = null;
 
                 let vertices: ArrayLike<number> = null;
                 let triangles: Array<number> = null;
                 let drawOrder = skeleton.drawOrder;
+
+                let res = renderSession.resolution;
 
                 for (let i = 0, n = drawOrder.length; i < n; i++) {
                     let slot = drawOrder[i];
@@ -105,15 +114,15 @@ module PhaserSpine {
                             let x1 = vertices[t2], y1 = vertices[t2 + 1], u1 = vertices[t2 + 6], v1 = vertices[t2 + 7];
                             let x2 = vertices[t3], y2 = vertices[t3 + 1], u2 = vertices[t3 + 6], v2 = vertices[t3 + 7];
 
-                            this.drawTriangle(renderSession, texture, x0, y0, u0, v0, x1, y1, u1, v1, x2, y2, u2, v2);
+                            this.drawTriangle(renderSession, texture, x0 / res, y0 / res, u0, v0, x1 / res, y1 / res, u1, v1, x2 / res, y2 / res, u2, v2);
 
                             if (SpinePlugin.DEBUG) {
                                 ctx.strokeStyle = "green";
                                 ctx.beginPath();
-                                ctx.moveTo(x0, y0);
-                                ctx.lineTo(x1, y1);
-                                ctx.lineTo(x2, y2);
-                                ctx.lineTo(x0, y0);
+                                ctx.moveTo(x0 / res, y0 / res);
+                                ctx.lineTo(x1 / res, y1 / res);
+                                ctx.lineTo(x2 / res, y2 / res);
+                                ctx.lineTo(x0 / res, y0 / res);
                                 ctx.stroke();
                             }
                         }

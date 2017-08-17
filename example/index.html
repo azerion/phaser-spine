@@ -2,7 +2,6 @@
 <script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
 <script src="../node_modules/phaser/build/phaser.js"></script>
 <script src="../build/phaser-spine.js"></script>
-<script src="../spine-ts/spine-webgl.js"></script>
 <script src="./ui.js"></script>
 <style>
 	* { margin: 0; padding: 0; }
@@ -15,6 +14,11 @@
 <body>
 <center>
 	<div style="color: #fff; position: fixed; top: 0; width: 100%">
+		<span>Renderer:</span><select id="rendererList">
+			<option value="AUTO" selected>Auto</option>
+			<option value="CANVAS">Canvas</option>
+			<option value="WEBGL">WebGL</option>
+		</select>
 		<span>Skeleton:</span><select id="skeletonList"></select>
 		<span>Animation:</span><select id="animationList"></select>
 		<span>Skin:</span><select id="skinList"></select>
@@ -28,10 +32,14 @@
 var activeSpine;
 var spines = {};
 var names = ['spineboy', 'goblins', 'raptor', 'stretchyman', 'tank', 'vine', 'buddy'];
+
+// var renderer = Phaser[location.href.split('?')[1]] || Phaser.AUTO
+
 var game = new Phaser.Game({
 	width: window.innerWidth,
 	height: window.innerWidth / 4 * 3,
-	renderer: Phaser.AUTO,
+	// renderer: Phaser.AUTO,
+	renderer: Phaser[location.href.split('?')[1]] || Phaser.AUTO,
 	parent: 'content',
 	transparent: true,
 	state: {

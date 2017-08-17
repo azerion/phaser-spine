@@ -33,7 +33,7 @@ module.exports = function (grunt) {
                 noImplicitAny: true
             },
             dist: {
-                src: ['ts/**/*.ts', '!ts/oldSpine.ts'],
+                src: ['ts/**/*.ts'],
                 dest: 'build/<%= pkg.config.name %>.js'
             }
         },
@@ -77,11 +77,11 @@ module.exports = function (grunt) {
         },
         concat: {
             definitions: {
-                src: ['build/phaser-spine.d.ts', 'spine-ts/spine-core.d.ts'],
+                src: ['build/phaser-spine.d.ts', 'spine-ts/spine-webgl.d.ts'],
                 dest: 'build/phaser-spine.d.ts'
             },
             dist: {
-                src: ['spine-ts/spine-core.js', 'build/phaser-spine.js'],
+                src: ['spine-ts/spine-webgl.js', 'build/phaser-spine.js'],
                 dest: 'build/phaser-spine.js'
             }
         },

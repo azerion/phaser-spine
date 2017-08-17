@@ -1,12 +1,19 @@
 declare module PhaserSpine {
     module Canvas {
+        interface IRenderSession extends PIXI.RenderSession {
+            resolution: number;
+        }
+    }
+}
+declare module PhaserSpine {
+    module Canvas {
         class Renderer {
             static QUAD_TRIANGLES: number[];
             private game;
             constructor(game: Phaser.Game);
-            resize(bounds: PIXI.Rectangle, scale: Phaser.Point, renderSession: PIXI.RenderSession): void;
-            drawImages(skeleton: spine.Skeleton, renderSession: PIXI.RenderSession): void;
-            drawTriangles(skeleton: spine.Skeleton, renderSession: PIXI.RenderSession): void;
+            resize(bounds: PIXI.Rectangle, scale: Phaser.Point, renderSession: IRenderSession): void;
+            drawImages(skeleton: spine.Skeleton, renderSession: IRenderSession): void;
+            drawTriangles(skeleton: spine.Skeleton, renderSession: IRenderSession): void;
             private drawTriangle(renderSession, img, x0, y0, u0, v0, x1, y1, u1, v1, x2, y2, u2, v2);
         }
     }
@@ -74,14 +81,29 @@ declare module PhaserSpine {
         constructor(game: Phaser.Game, x: number, y: number, key: string);
         private createSkeleton(key);
         update(): void;
-        _renderCanvas(renderSession: PIXI.RenderSession, matrix?: PIXI.Matrix): void;
+        _renderCanvas(renderSession: Canvas.IRenderSession, matrix?: PIXI.Matrix): void;
         _renderWebGL(renderSession: WebGL.IRenderSession, matrix?: PIXI.Matrix): void;
     }
 }
 declare module PhaserSpine {
     module WebGL {
         interface IRenderSession extends PIXI.RenderSession {
-            gl: WebGLRenderingContext;
+            gl: IWebGLRenderingContext;
+            resolution: number;
+            blendModeManager: PIXI.WebGLBlendModeManager;
+            shaderManager: IShaderManager;
+            spriteBatch: ISpriteBatch;
+            drawCount: number;
+        }
+        interface IWebGLRenderingContext extends WebGLRenderingContext {
+            id: number;
+        }
+        interface ISpriteBatch extends PIXI.WebGLSpriteBatch {
+            gl: IWebGLRenderingContext;
+        }
+        interface IShaderManager extends PIXI.WebGLShaderManager {
+            currentShader: PIXI.PrimitiveShader;
+            _currentId: number;
         }
     }
 }
@@ -97,8 +119,8 @@ declare module PhaserSpine {
             private debugShader;
             private shapes;
             constructor(game: Phaser.Game);
-            resize(bounds: PIXI.Rectangle, scale2: Phaser.Point, renderSession: IRenderSession): void;
-            draw(skeleton: spine.Skeleton, renderSession: PIXI.RenderSession): void;
+            resize(bounds: PIXI.Rectangle, position: Phaser.Point, scale2: Phaser.Point, renderSession: IRenderSession): void;
+            draw(skeleton: spine.Skeleton, renderSession: IRenderSession): void;
         }
     }
 }
@@ -1167,4 +1189,390 @@ declare module spine {
 		length: number;
 		[n: number]: T;
 	}
+}
+declare module spine.webgl {
+	class AssetManager extends spine.AssetManager {
+		constructor(gl: WebGLRenderingContext, pathPrefix?: string);
+	}
+}
+declare module spine.webgl {
+	class OrthoCamera {
+		position: Vector3;
+		direction: Vector3;
+		up: Vector3;
+		near: number;
+		far: number;
+		zoom: number;
+		viewportWidth: number;
+		viewportHeight: number;
+		projectionView: Matrix4;
+		inverseProjectionView: Matrix4;
+		projection: Matrix4;
+		view: Matrix4;
+		private tmp;
+		constructor(viewportWidth: number, viewportHeight: number);
+		update(): void;
+		screenToWorld(screenCoords: Vector3, screenWidth: number, screenHeight: number): Vector3;
+		setViewport(viewportWidth: number, viewportHeight: number): void;
+	}
+}
+declare module spine.webgl {
+	class GLTexture extends Texture implements Disposable {
+		private gl;
+		private texture;
+		private boundUnit;
+		constructor(gl: WebGLRenderingContext, image: HTMLImageElement, useMipMaps?: boolean);
+		setFilters(minFilter: TextureFilter, magFilter: TextureFilter): void;
+		setWraps(uWrap: TextureWrap, vWrap: TextureWrap): void;
+		update(useMipMaps: boolean): void;
+		bind(unit?: number): void;
+		unbind(): void;
+		dispose(): void;
+	}
+}
+declare module spine.webgl {
+	class Input {
+		element: HTMLElement;
+		lastX: number;
+		lastY: number;
+		buttonDown: boolean;
+		currTouch: Touch;
+		touchesPool: Pool<Touch>;
+		private listeners;
+		constructor(element: HTMLElement);
+		private setupCallbacks(element);
+		addListener(listener: InputListener): void;
+		removeListener(listener: InputListener): void;
+	}
+	class Touch {
+		identifier: number;
+		x: number;
+		y: number;
+		constructor(identifier: number, x: number, y: number);
+	}
+	interface InputListener {
+		down(x: number, y: number): void;
+		up(x: number, y: number): void;
+		moved(x: number, y: number): void;
+		dragged(x: number, y: number): void;
+	}
+}
+declare module spine.webgl {
+	class LoadingScreen {
+		static FADE_SECONDS: number;
+		private static loaded;
+		private static spinnerImg;
+		private static logoImg;
+		private renderer;
+		private logo;
+		private spinner;
+		private angle;
+		private fadeOut;
+		private timeKeeper;
+		backgroundColor: Color;
+		private tempColor;
+		private firstDraw;
+		private static SPINNER_DATA;
+		private static SPINE_LOGO_DATA;
+		constructor(renderer: SceneRenderer);
+		draw(complete?: boolean): void;
+	}
+}
+declare module spine.webgl {
+	const M00: number;
+	const M01: number;
+	const M02: number;
+	const M03: number;
+	const M10: number;
+	const M11: number;
+	const M12: number;
+	const M13: number;
+	const M20: number;
+	const M21: number;
+	const M22: number;
+	const M23: number;
+	const M30: number;
+	const M31: number;
+	const M32: number;
+	const M33: number;
+	class Matrix4 {
+		temp: Float32Array;
+		values: Float32Array;
+		private static xAxis;
+		private static yAxis;
+		private static zAxis;
+		private static tmpMatrix;
+		constructor();
+		set(values: ArrayLike<number>): Matrix4;
+		transpose(): Matrix4;
+		identity(): Matrix4;
+		invert(): Matrix4;
+		determinant(): number;
+		translate(x: number, y: number, z: number): Matrix4;
+		copy(): Matrix4;
+		projection(near: number, far: number, fovy: number, aspectRatio: number): Matrix4;
+		ortho2d(x: number, y: number, width: number, height: number): Matrix4;
+		ortho(left: number, right: number, bottom: number, top: number, near: number, far: number): Matrix4;
+		multiply(matrix: Matrix4): Matrix4;
+		multiplyLeft(matrix: Matrix4): Matrix4;
+		lookAt(position: Vector3, direction: Vector3, up: Vector3): this;
+		static initTemps(): void;
+	}
+}
+declare module spine.webgl {
+	class Mesh implements Disposable {
+		private attributes;
+		private gl;
+		private vertices;
+		private verticesBuffer;
+		private verticesLength;
+		private dirtyVertices;
+		private indices;
+		private indicesBuffer;
+		private indicesLength;
+		private dirtyIndices;
+		private elementsPerVertex;
+		getAttributes(): VertexAttribute[];
+		maxVertices(): number;
+		numVertices(): number;
+		setVerticesLength(length: number): void;
+		getVertices(): Float32Array;
+		maxIndices(): number;
+		numIndices(): number;
+		setIndicesLength(length: number): void;
+		getIndices(): Uint16Array;
+		constructor(gl: WebGLRenderingContext, attributes: VertexAttribute[], maxVertices: number, maxIndices: number);
+		setVertices(vertices: Array<number>): void;
+		setIndices(indices: Array<number>): void;
+		draw(shader: Shader, primitiveType: number): void;
+		drawWithOffset(shader: Shader, primitiveType: number, offset: number, count: number): void;
+		bind(shader: Shader): void;
+		unbind(shader: Shader): void;
+		private update();
+		dispose(): void;
+	}
+	class VertexAttribute {
+		name: string;
+		type: VertexAttributeType;
+		numElements: number;
+		constructor(name: string, type: VertexAttributeType, numElements: number);
+	}
+	class Position2Attribute extends VertexAttribute {
+		constructor();
+	}
+	class Position3Attribute extends VertexAttribute {
+		constructor();
+	}
+	class TexCoordAttribute extends VertexAttribute {
+		constructor(unit?: number);
+	}
+	class ColorAttribute extends VertexAttribute {
+		constructor();
+	}
+	enum VertexAttributeType {
+		Float = 0,
+	}
+}
+declare module spine.webgl {
+	class PolygonBatcher implements Disposable {
+		private gl;
+		private drawCalls;
+		private isDrawing;
+		private mesh;
+		private shader;
+		private lastTexture;
+		private verticesLength;
+		private indicesLength;
+		private srcBlend;
+		private dstBlend;
+		constructor(gl: WebGLRenderingContext, maxVertices?: number);
+		begin(shader: Shader): void;
+		setBlendMode(srcBlend: number, dstBlend: number): void;
+		draw(texture: GLTexture, vertices: ArrayLike<number>, indices: Array<number>): void;
+		private flush();
+		end(): void;
+		getDrawCalls(): number;
+		dispose(): void;
+	}
+}
+declare module spine.webgl {
+	class SceneRenderer implements Disposable {
+		gl: WebGLRenderingContext;
+		canvas: HTMLCanvasElement;
+		camera: OrthoCamera;
+		batcher: PolygonBatcher;
+		private batcherShader;
+		private shapes;
+		private shapesShader;
+		private activeRenderer;
+		private skeletonRenderer;
+		private skeletonDebugRenderer;
+		private QUAD;
+		private QUAD_TRIANGLES;
+		private WHITE;
+		constructor(canvas: HTMLCanvasElement, gl: WebGLRenderingContext);
+		begin(): void;
+		drawSkeleton(skeleton: Skeleton, premultipliedAlpha?: boolean): void;
+		drawSkeletonDebug(skeleton: Skeleton, premultipliedAlpha?: boolean, ignoredBones?: Array<string>): void;
+		drawTexture(texture: GLTexture, x: number, y: number, width: number, height: number, color?: Color): void;
+		drawTextureRotated(texture: GLTexture, x: number, y: number, width: number, height: number, pivotX: number, pivotY: number, angle: number, color?: Color, premultipliedAlpha?: boolean): void;
+		drawRegion(region: TextureAtlasRegion, x: number, y: number, width: number, height: number, color?: Color, premultipliedAlpha?: boolean): void;
+		line(x: number, y: number, x2: number, y2: number, color?: Color, color2?: Color): void;
+		triangle(filled: boolean, x: number, y: number, x2: number, y2: number, x3: number, y3: number, color?: Color, color2?: Color, color3?: Color): void;
+		quad(filled: boolean, x: number, y: number, x2: number, y2: number, x3: number, y3: number, x4: number, y4: number, color?: Color, color2?: Color, color3?: Color, color4?: Color): void;
+		rect(filled: boolean, x: number, y: number, width: number, height: number, color?: Color): void;
+		rectLine(filled: boolean, x1: number, y1: number, x2: number, y2: number, width: number, color?: Color): void;
+		polygon(polygonVertices: ArrayLike<number>, offset: number, count: number, color?: Color): void;
+		circle(filled: boolean, x: number, y: number, radius: number, color?: Color, segments?: number): void;
+		curve(x1: number, y1: number, cx1: number, cy1: number, cx2: number, cy2: number, x2: number, y2: number, segments: number, color?: Color): void;
+		end(): void;
+		resize(resizeMode: ResizeMode): void;
+		private enableRenderer(renderer);
+		dispose(): void;
+	}
+	enum ResizeMode {
+		Stretch = 0,
+		Expand = 1,
+		Fit = 2,
+	}
+}
+declare module spine.webgl {
+	class Shader implements Disposable {
+		private vertexShader;
+		private fragmentShader;
+		static MVP_MATRIX: string;
+		static POSITION: string;
+		static COLOR: string;
+		static TEXCOORDS: string;
+		static SAMPLER: string;
+		private gl;
+		private vs;
+		private fs;
+		private program;
+		private tmp2x2;
+		private tmp3x3;
+		private tmp4x4;
+		getProgram(): WebGLProgram;
+		getVertexShader(): string;
+		getFragmentShader(): string;
+		constructor(gl: WebGLRenderingContext, vertexShader: string, fragmentShader: string);
+		private compile();
+		private compileShader(type, source);
+		private compileProgram(vs, fs);
+		bind(): void;
+		unbind(): void;
+		setUniformi(uniform: string, value: number): void;
+		setUniformf(uniform: string, value: number): void;
+		setUniform2f(uniform: string, value: number, value2: number): void;
+		setUniform3f(uniform: string, value: number, value2: number, value3: number): void;
+		setUniform4f(uniform: string, value: number, value2: number, value3: number, value4: number): void;
+		setUniform2x2f(uniform: string, value: ArrayLike<number>): void;
+		setUniform3x3f(uniform: string, value: ArrayLike<number>): void;
+		setUniform4x4f(uniform: string, value: ArrayLike<number>): void;
+		getUniformLocation(uniform: string): WebGLUniformLocation;
+		getAttributeLocation(attribute: string): number;
+		dispose(): void;
+		static newColoredTextured(gl: WebGLRenderingContext): Shader;
+		static newColored(gl: WebGLRenderingContext): Shader;
+	}
+}
+declare module spine.webgl {
+	class ShapeRenderer implements Disposable {
+		private gl;
+		private isDrawing;
+		private mesh;
+		private shapeType;
+		private color;
+		private shader;
+		private vertexIndex;
+		private tmp;
+		private srcBlend;
+		private dstBlend;
+		constructor(gl: WebGLRenderingContext, maxVertices?: number);
+		begin(shader: Shader): void;
+		setBlendMode(srcBlend: number, dstBlend: number): void;
+		setColor(color: Color): void;
+		setColorWith(r: number, g: number, b: number, a: number): void;
+		point(x: number, y: number, color?: Color): void;
+		line(x: number, y: number, x2: number, y2: number, color?: Color): void;
+		triangle(filled: boolean, x: number, y: number, x2: number, y2: number, x3: number, y3: number, color?: Color, color2?: Color, color3?: Color): void;
+		quad(filled: boolean, x: number, y: number, x2: number, y2: number, x3: number, y3: number, x4: number, y4: number, color?: Color, color2?: Color, color3?: Color, color4?: Color): void;
+		rect(filled: boolean, x: number, y: number, width: number, height: number, color?: Color): void;
+		rectLine(filled: boolean, x1: number, y1: number, x2: number, y2: number, width: number, color?: Color): void;
+		x(x: number, y: number, size: number): void;
+		polygon(polygonVertices: ArrayLike<number>, offset: number, count: number, color?: Color): void;
+		circle(filled: boolean, x: number, y: number, radius: number, color?: Color, segments?: number): void;
+		curve(x1: number, y1: number, cx1: number, cy1: number, cx2: number, cy2: number, x2: number, y2: number, segments: number, color?: Color): void;
+		private vertex(x, y, color);
+		end(): void;
+		private flush();
+		private check(shapeType, numVertices);
+		dispose(): void;
+	}
+	enum ShapeType {
+		Point,
+		Line,
+		Filled,
+	}
+}
+declare module spine.webgl {
+	class SkeletonDebugRenderer implements Disposable {
+		boneLineColor: Color;
+		boneOriginColor: Color;
+		attachmentLineColor: Color;
+		triangleLineColor: Color;
+		pathColor: Color;
+		aabbColor: Color;
+		drawBones: boolean;
+		drawRegionAttachments: boolean;
+		drawBoundingBoxes: boolean;
+		drawMeshHull: boolean;
+		drawMeshTriangles: boolean;
+		drawPaths: boolean;
+		drawSkeletonXY: boolean;
+		premultipliedAlpha: boolean;
+		scale: number;
+		boneWidth: number;
+		private gl;
+		private bounds;
+		private temp;
+		private static LIGHT_GRAY;
+		private static GREEN;
+		constructor(gl: WebGLRenderingContext);
+		draw(shapes: ShapeRenderer, skeleton: Skeleton, ignoredBones?: Array<string>): void;
+		dispose(): void;
+	}
+}
+declare module spine.webgl {
+	class SkeletonRenderer {
+		static QUAD_TRIANGLES: number[];
+		premultipliedAlpha: boolean;
+		private gl;
+		constructor(gl: WebGLRenderingContext);
+		draw(batcher: PolygonBatcher, skeleton: Skeleton): void;
+	}
+}
+declare module spine.webgl {
+	class Vector3 {
+		x: number;
+		y: number;
+		z: number;
+		constructor(x?: number, y?: number, z?: number);
+		setFrom(v: Vector3): Vector3;
+		set(x: number, y: number, z: number): Vector3;
+		add(v: Vector3): Vector3;
+		sub(v: Vector3): Vector3;
+		scale(s: number): Vector3;
+		normalize(): Vector3;
+		cross(v: Vector3): Vector3;
+		multiply(matrix: Matrix4): Vector3;
+		project(matrix: Matrix4): Vector3;
+		dot(v: Vector3): number;
+		length(): number;
+		distance(v: Vector3): number;
+	}
+}
+declare module spine.webgl {
+	function getSourceGLBlendMode(gl: WebGLRenderingContext, blendMode: BlendMode, premultipliedAlpha?: boolean): number;
+	function getDestGLBlendMode(gl: WebGLRenderingContext, blendMode: BlendMode): number;
 }

@@ -1,4 +1,17 @@
 function setupUI () {
+    var setupRendererUI = function(){
+        var rendererList = $("#rendererList");
+
+        rendererList.children().each(function(i){
+            $(this).attr('selected', i === game.renderType);
+        })
+
+        rendererList.change(function(){
+            var rendererName = $("#rendererList option:selected").attr('value');
+            location.href = location.href.split('?')[0] + '?' + rendererName;
+        })
+    }
+
     var skeletonList = $("#skeletonList");
     for (var skeletonName in spines) {
         var option = $("<option></option>");
@@ -71,6 +84,7 @@ function setupUI () {
         setupAnimationUI();
         setupSkinUI();
     });
+    setupRendererUI();
     setupAnimationUI();
     setupSkinUI();
     setupDebug();

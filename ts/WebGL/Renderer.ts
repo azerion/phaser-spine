@@ -37,25 +37,46 @@ module PhaserSpine {
                 this.shapes = new spine.webgl.ShapeRenderer(gl);
             }
 
-            public resize(bounds: PIXI.Rectangle, scale2: Phaser.Point, renderSession: IRenderSession): void {
+            public resize(bounds: PIXI.Rectangle, position: Phaser.Point, scale2: Phaser.Point, renderSession: IRenderSession): void {
                 var w = this.game.width;
                 var h = this.game.height;
+                var res = this.game.resolution;
 
-                // magic
-                var centerX = bounds.x + bounds.width / 2;
-                var centerY = bounds.y + bounds.height / 2;
-                var scaleX = bounds.width / w;
-                var scaleY = bounds.height / h;
-                var scale = Math.max(scaleX, scaleY) * 1.2;
-                if (scale < 1) scale = 1;
-                var width = w * scale;
-                var height = h * scale;
+                var scale = Math.max(scale2.x, scale2.y);
 
-                this.mvp.ortho2d(centerX - width / 2, centerY - height / 2, width, height);
-                renderSession.gl.viewport(0, 0, w, h);
+                var signs = {
+                    x: scale2.x < 0 ? -1 : 1,
+                    y: scale2.y < 0 ? -1 : 1
+                }
+
+                var x = - position.x / scale * signs.x * res,
+                        y = (position.y - h) / scale * signs.y * res + bounds.height / 2,
+                        width = w / scale * signs.x * res,
+                        height = h / scale * signs.y * res;
+
+                this.mvp.ortho2d(x, y, width, height);
+                renderSession.gl.viewport(0, 0, w * res, h * res);
             }
 
-            public draw(skeleton: spine.Skeleton, renderSession: PIXI.RenderSession) {
+            public draw(skeleton: spine.Skeleton, renderSession: IRenderSession) {
+                ////////////////////:
+                ///        FIX: Save Phaser WebGL Context
+                /////////
+                renderSession.spriteBatch.end();
+
+                var currentBlendMode = renderSession.blendModeManager.currentBlendMode;
+                var currentShader = renderSession.shaderManager.currentShader;
+
+                // Reset glVertexAttribArray
+                for (let i = 0; i < renderSession.shaderManager.attribState.length; i++)
+                {
+                    renderSession.shaderManager.attribState[i] = null;
+                    renderSession.gl.disableVertexAttribArray(i);
+                }
+                ////    ENDFIX: Save Context
+                
+
+                
                 // Bind the shader and set the texture and model-view-projection matrix.
                 this.shader.bind();
                 this.shader.setUniformi(spine.webgl.Shader.SAMPLER, 0);
@@ -78,6 +99,33 @@ module PhaserSpine {
                     this.shapes.end();
                     this.debugShader.unbind();
                 }
+
+
+                ////////////////////:
+                ///        FIX: Restore Phaser WebGL Context
+                /////////
+                renderSession.blendModeManager.currentBlendMode = -1;    // Fix
+                renderSession.blendModeManager.setBlendMode(currentBlendMode);    // Fix 
+                renderSession.gl.enable(renderSession.gl.BLEND);    // Fix
+
+                renderSession.shaderManager._currentId = null;
+                renderSession.shaderManager.setShader(currentShader);
+
+                renderSession.spriteBatch.dirty = true;
+
+                // Only for Phaser 2.7.3 - 2.7.7 (inclusive)
+                if(["2.7.3", "2.7.4", "2.7.5", "2.7.6", "2.7.7"].indexOf(Phaser.VERSION) > -1){
+                    renderSession.spriteBatch.sprites.map(sprite => {
+                        if(sprite.texture && sprite.texture.baseTexture){
+                            sprite.texture.baseTexture._dirty[renderSession.spriteBatch.gl.id] = true;
+                        }
+                    });
+                }
+                ////    ENDFIX: Restore Context
+                
+
+                // Let Phaser know we did draw
+                renderSession.drawCount++;
             }
         }
     }

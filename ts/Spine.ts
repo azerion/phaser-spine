@@ -74,7 +74,7 @@ module PhaserSpine {
              * @param matrix
              * @private
              */
-            public _renderCanvas(renderSession: PIXI.RenderSession, matrix?: PIXI.Matrix): void {
+            public _renderCanvas(renderSession: Canvas.IRenderSession, matrix?: PIXI.Matrix): void {
                 if (!this.visible || !this.alive) {
                     return;
                 }
@@ -92,7 +92,7 @@ module PhaserSpine {
                     return;
                 }
 
-                (<WebGL.Renderer>this.renderer).resize(this.specialBounds, this.scale, renderSession);
+                (<WebGL.Renderer>this.renderer).resize(this.specialBounds, this.position, this.scale, renderSession);
                 (<WebGL.Renderer>this.renderer).draw(this.skeleton, renderSession);
             }
         }
