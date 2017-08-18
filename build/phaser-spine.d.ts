@@ -105,6 +105,10 @@ declare module PhaserSpine {
             currentShader: PIXI.PrimitiveShader;
             _currentId: number;
         }
+        interface IPIXIRectangle extends PIXI.Rectangle {
+            centerX: number;
+            centerY: number;
+        }
     }
 }
 declare module PhaserSpine {
@@ -119,7 +123,7 @@ declare module PhaserSpine {
             private debugShader;
             private shapes;
             constructor(game: Phaser.Game);
-            resize(bounds: PIXI.Rectangle, position: Phaser.Point, scale2: Phaser.Point, renderSession: IRenderSession): void;
+            resize(skeleton: spine.Skeleton, spriteBounds: IPIXIRectangle, scale2: Phaser.Point, renderSession: IRenderSession): void;
             draw(skeleton: spine.Skeleton, renderSession: IRenderSession): void;
         }
     }

@@ -24,5 +24,10 @@ module PhaserSpine {
         	currentShader: PIXI.PrimitiveShader;
         	_currentId: number;
         }
+
+        export interface IPIXIRectangle extends PIXI.Rectangle {
+        	centerX: number;
+        	centerY: number;
+        }
     }
 }
