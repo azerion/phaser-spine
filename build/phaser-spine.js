@@ -1,9 +1,9 @@
 /*!
- * phaser-spine - version 3.1.0-alpha1 
+ * phaser-spine - version 4.0.0-alpha1 
  * Spine plugin for Phaser.io!
  *
  * OrangeGames
- * Build at 17-08-2017
+ * Build at 18-08-2017
  * Released under MIT License 
  */
 
@@ -7455,11 +7455,16 @@ var spine;
 	})(webgl = spine.webgl || (spine.webgl = {}));
 })(spine || (spine = {}));
 //# sourceMappingURL=spine-webgl.js.map
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-};
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 var PhaserSpine;
 (function (PhaserSpine) {
     var Canvas;
@@ -7603,9 +7608,9 @@ var PhaserSpine;
                 ctx.drawImage(img, 0, 0);
                 ctx.restore();
             };
+            Renderer.QUAD_TRIANGLES = [0, 1, 2, 2, 3, 0];
             return Renderer;
         }());
-        Renderer.QUAD_TRIANGLES = [0, 1, 2, 2, 3, 0];
         Canvas.Renderer = Renderer;
     })(Canvas = PhaserSpine.Canvas || (PhaserSpine.Canvas = {}));
 })(PhaserSpine || (PhaserSpine = {}));
@@ -7634,6 +7639,7 @@ var PhaserSpine;
             return _super.call(this, game, parent) || this;
         }
         SpinePlugin.prototype.init = function (config) {
+            if (config === void 0) { config = {}; }
             SpinePlugin.DEBUG = config.debugRendering || false;
             SpinePlugin.TRIANGLE = config.triangleRendering || false;
             this.addSpineCache();
@@ -7672,12 +7678,12 @@ var PhaserSpine;
                 return this.spine[key];
             };
         };
+        SpinePlugin.RESOLUTION_REGEXP = /@(.+)x/;
+        SpinePlugin.SPINE_NAMESPACE = 'spine';
+        SpinePlugin.DEBUG = false;
+        SpinePlugin.TRIANGLE = false;
         return SpinePlugin;
     }(Phaser.Plugin));
-    SpinePlugin.RESOLUTION_REGEXP = /@(.+)x/;
-    SpinePlugin.SPINE_NAMESPACE = 'spine';
-    SpinePlugin.DEBUG = false;
-    SpinePlugin.TRIANGLE = false;
     PhaserSpine.SpinePlugin = SpinePlugin;
 })(PhaserSpine || (PhaserSpine = {}));
 var PhaserSpine;
@@ -7699,7 +7705,8 @@ var PhaserSpine;
             var size = new spine.Vector2();
             _this.skeleton.getBounds(offset, size);
             _this.specialBounds = new PIXI.Rectangle(offset.x, offset.y, size.x, size.y);
-            _this.state = new spine.AnimationState(new spine.AnimationStateData(_this.skeleton.data));
+            _this.stateData = new spine.AnimationStateData(_this.skeleton.data);
+            _this.state = new spine.AnimationState(_this.stateData);
             if (_this.game.renderType === Phaser.CANVAS) {
                 _this.renderer = new PhaserSpine.Canvas.Renderer(_this.game);
             }
@@ -7745,6 +7752,74 @@ var PhaserSpine;
             }
             this.renderer.resize(this.skeleton, this.getBounds(), this.scale, renderSession);
             this.renderer.draw(this.skeleton, renderSession);
+        };
+        Spine.prototype.setMixByName = function (fromName, toName, duration) {
+            this.stateData.setMix(fromName, toName, duration);
+        };
+        ;
+        Spine.prototype.setAnimationByName = function (trackIndex, animationName, loop) {
+            if (loop === void 0) { loop = false; }
+            return this.state.setAnimation(trackIndex, animationName, loop);
+        };
+        ;
+        Spine.prototype.addAnimationByName = function (trackIndex, animationName, loop, delay) {
+            if (loop === void 0) { loop = false; }
+            if (delay === void 0) { delay = 0; }
+            return this.state.addAnimation(trackIndex, animationName, loop, delay);
+        };
+        ;
+        Spine.prototype.getCurrentAnimationForTrack = function (trackIndex) {
+            return this.state.tracks[trackIndex].animation.name;
+        };
+        Spine.prototype.setSkinByName = function (skinName) {
+            var skin = this.skeleton.data.findSkin(skinName);
+            if (!skin) {
+                console.warn("Skin not found: " + skinName);
+                return;
+            }
+            this.skeleton.setSkin(skin);
+        };
+        Spine.prototype.setSkin = function (skin) {
+            this.skeleton.setSkin(skin);
+        };
+        Spine.prototype.setToSetupPose = function () {
+            this.skeleton.setToSetupPose();
+        };
+        Spine.prototype.createCombinedSkin = function (newSkinName) {
+            var skinNames = [];
+            for (var _i = 1; _i < arguments.length; _i++) {
+                skinNames[_i - 1] = arguments[_i];
+            }
+            if (skinNames.length === 0) {
+                console.warn('Unable to combine skins when no skins are passed...');
+                return;
+            }
+            var newSkin = new spine.Skin(newSkinName);
+            for (var i = 0; i < skinNames.length; i++) {
+                var skinName = skinNames[i];
+                var skin = this.skeleton.data.findSkin(skinName);
+                if (!skin) {
+                    console.warn("Skin not found: " + skinName);
+                    return;
+                }
+                for (var key in skin.attachments) {
+                    var slotKeyPair = key.split(':');
+                    var slotIndex = parseInt(slotKeyPair[0]);
+                    var attachmentName = slotKeyPair[1];
+                    var attachment = skin.attachments[key];
+                    if (undefined === slotIndex || undefined === attachmentName) {
+                        console.warn('something went wrong with reading the attachments index and/or name');
+                        return;
+                    }
+                    if (newSkin.getAttachment(slotIndex, attachmentName) !== undefined) {
+                        console.warn('Found double attachment for: ' + skinName + '. Skipping');
+                        continue;
+                    }
+                    newSkin.addAttachment(slotIndex, attachmentName, attachment);
+                }
+            }
+            this.skeleton.data.skins.push(newSkin);
+            return newSkin;
         };
         return Spine;
     }(Phaser.Sprite));

@@ -50,7 +50,7 @@ module PhaserSpine {
                 super(game, parent);
             }
 
-            public init(config?: Config): void {
+            public init(config: Config = <Config>{}): void {
                 SpinePlugin.DEBUG = config.debugRendering || false;
                 SpinePlugin.TRIANGLE = config.triangleRendering || false;
 
