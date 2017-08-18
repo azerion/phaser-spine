@@ -77,6 +77,9 @@ declare module PhaserSpine {
         private addSpineCache();
     }
 }
+declare module "phaser-spine" {
+    export = PhaserSpine;
+}
 declare module PhaserSpine {
     class Spine extends Phaser.Sprite {
         skeleton: spine.Skeleton;
@@ -150,14 +153,16 @@ declare module PhaserSpine {
 }
 declare module PhaserSpine {
     module WebGL {
-        class Texture extends spine.Texture implements spine.Disposable {
-            private gl;
+        class Texture extends spine.Texture implements spine.Disposable, spine.Restorable {
+            private context;
             private texture;
             private boundUnit;
-            constructor(gl: WebGLRenderingContext, image: HTMLImageElement, useMipMaps?: boolean);
+            private useMipMaps;
+            constructor(context: spine.webgl.ManagedWebGLRenderingContext | WebGLRenderingContext, image: HTMLImageElement, useMipMaps?: boolean);
             setFilters(minFilter: spine.TextureFilter, magFilter: spine.TextureFilter): void;
             setWraps(uWrap: spine.TextureWrap, vWrap: spine.TextureWrap): void;
             update(useMipMaps: boolean): void;
+            restore(): void;
             bind(unit?: number): void;
             unbind(): void;
             dispose(): void;

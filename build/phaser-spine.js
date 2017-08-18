@@ -1,5 +1,5 @@
 /*!
- * phaser-spine - version 3.1.0-alpha1 
+ * phaser-spine - version 4.0.0-alpha1 
  * Spine plugin for Phaser.io!
  *
  * OrangeGames
@@ -9207,6 +9207,7 @@ var PhaserSpine;
             return _super.call(this, game, parent) || this;
         }
         SpinePlugin.prototype.init = function (config) {
+            if (config === void 0) { config = {}; }
             SpinePlugin.DEBUG = config.debugRendering || false;
             SpinePlugin.TRIANGLE = config.triangleRendering || false;
             this.addSpineCache();
@@ -9253,6 +9254,7 @@ var PhaserSpine;
     }(Phaser.Plugin));
     PhaserSpine.SpinePlugin = SpinePlugin;
 })(PhaserSpine || (PhaserSpine = {}));
+Phaser.Rope.prototype.postUpdate = function () { };
 var PhaserSpine;
 (function (PhaserSpine) {
     var Spine = (function (_super) {
@@ -9272,7 +9274,22 @@ var PhaserSpine;
             var size = new spine.Vector2();
             _this.skeleton.getBounds(offset, size, []);
             _this.specialBounds = new PIXI.Rectangle(offset.x, offset.y, size.x, size.y);
-            _this.state = new spine.AnimationState(new spine.AnimationStateData(_this.skeleton.data));
+            _this.stateData = new spine.AnimationStateData(_this.skeleton.data);
+            _this.state = new spine.AnimationState(_this.stateData);
+            _this.onEvent = new Phaser.Signal();
+            _this.onComplete = new Phaser.Signal();
+            _this.onEnd = new Phaser.Signal();
+            _this.onInterrupt = new Phaser.Signal();
+            _this.onStart = new Phaser.Signal();
+            _this.onDispose = new Phaser.Signal();
+            _this.state.addListener({
+                interrupt: _this.onInterrupt.dispatch.bind(_this.onInterrupt),
+                dispose: _this.onDispose.dispatch.bind(_this.onDispose),
+                event: _this.onEvent.dispatch.bind(_this.onEvent),
+                complete: _this.onComplete.dispatch.bind(_this.onComplete),
+                start: _this.onStart.dispatch.bind(_this.onStart),
+                end: _this.onEnd.dispatch.bind(_this.onEnd)
+            });
             if (_this.game.renderType === Phaser.CANVAS) {
                 _this.renderer = new PhaserSpine.Canvas.Renderer(_this.game);
             }
@@ -9316,8 +9333,80 @@ var PhaserSpine;
             if (!this.visible || !this.alive) {
                 return;
             }
-            this.renderer.resize(this.specialBounds, this.position, this.scale, renderSession);
+            this.renderer.resize(this.skeleton, this.getBounds(), this.scale, renderSession);
             this.renderer.draw(this.skeleton, renderSession);
+        };
+        Spine.prototype.setMixByName = function (fromName, toName, duration) {
+            this.stateData.setMix(fromName, toName, duration);
+        };
+        ;
+        Spine.prototype.setAnimationByName = function (trackIndex, animationName, loop) {
+            if (loop === void 0) { loop = false; }
+            return this.state.setAnimation(trackIndex, animationName, loop);
+        };
+        ;
+        Spine.prototype.addAnimationByName = function (trackIndex, animationName, loop, delay) {
+            if (loop === void 0) { loop = false; }
+            if (delay === void 0) { delay = 0; }
+            return this.state.addAnimation(trackIndex, animationName, loop, delay);
+        };
+        ;
+        Spine.prototype.getCurrentAnimationForTrack = function (trackIndex) {
+            if (!this.state.tracks[trackIndex] || !this.state.tracks[trackIndex].animation) {
+                console.warn("No animation found on track index: ", trackIndex);
+                return "";
+            }
+            return this.state.tracks[trackIndex].animation.name;
+        };
+        Spine.prototype.setSkinByName = function (skinName) {
+            var skin = this.skeleton.data.findSkin(skinName);
+            if (!skin) {
+                console.warn("Skin not found: " + skinName);
+                return;
+            }
+            this.skeleton.setSkin(skin);
+        };
+        Spine.prototype.setSkin = function (skin) {
+            this.skeleton.setSkin(skin);
+        };
+        Spine.prototype.setToSetupPose = function () {
+            this.skeleton.setToSetupPose();
+        };
+        Spine.prototype.createCombinedSkin = function (newSkinName) {
+            var skinNames = [];
+            for (var _i = 1; _i < arguments.length; _i++) {
+                skinNames[_i - 1] = arguments[_i];
+            }
+            if (skinNames.length === 0) {
+                console.warn('Unable to combine skins when no skins are passed...');
+                return;
+            }
+            var newSkin = new spine.Skin(newSkinName);
+            for (var i = 0; i < skinNames.length; i++) {
+                var skinName = skinNames[i];
+                var skin = this.skeleton.data.findSkin(skinName);
+                if (!skin) {
+                    console.warn("Skin not found: " + skinName);
+                    return;
+                }
+                for (var key in skin.attachments) {
+                    var slotKeyPair = key.split(':');
+                    var slotIndex = parseInt(slotKeyPair[0]);
+                    var attachmentName = slotKeyPair[1];
+                    var attachment = skin.attachments[key];
+                    if (undefined === slotIndex || undefined === attachmentName) {
+                        console.warn('something went wrong with reading the attachments index and/or name');
+                        return;
+                    }
+                    if (newSkin.getAttachment(slotIndex, attachmentName) !== undefined) {
+                        console.warn('Found double attachment for: ' + skinName + '. Skipping');
+                        continue;
+                    }
+                    newSkin.addAttachment(slotIndex, attachmentName, attachment);
+                }
+            }
+            this.skeleton.data.skins.push(newSkin);
+            return newSkin;
         };
         return Spine;
     }(Phaser.Sprite));
@@ -9332,10 +9421,10 @@ var PhaserSpine;
                 this.mvp = new spine.webgl.Matrix4();
                 this.game = game;
                 var gl = this.game.renderer.renderSession.gl;
-                this.shader = spine.webgl.Shader.newColoredTextured(gl);
+                this.shader = spine.webgl.Shader.newTwoColoredTextured(gl);
                 this.batcher = new spine.webgl.PolygonBatcher(gl);
                 this.mvp.ortho2d(0, 0, this.game.width - 1, this.game.height - 1);
-                this.skeletonRenderer = new spine.webgl.SkeletonRenderer(this.game.renderer.renderSession);
+                this.skeletonRenderer = new spine.webgl.SkeletonRenderer(gl);
                 this.debugRenderer = new spine.webgl.SkeletonDebugRenderer(gl);
                 this.debugRenderer.drawRegionAttachments = false;
                 this.debugRenderer.drawBoundingBoxes = false;
@@ -9345,17 +9434,20 @@ var PhaserSpine;
                 this.debugShader = spine.webgl.Shader.newColored(gl);
                 this.shapes = new spine.webgl.ShapeRenderer(gl);
             }
-            Renderer.prototype.resize = function (bounds, position, scale2, renderSession) {
+            Renderer.prototype.resize = function (skeleton, spriteBounds, scale2, renderSession) {
                 var w = this.game.width;
                 var h = this.game.height;
-                var res = this.game.resolution;
+                var res = renderSession.resolution;
+                skeleton.flipX = scale2.x < 0;
+                skeleton.flipY = scale2.y < 0;
                 var scale = Math.max(scale2.x, scale2.y);
-                var signs = {
-                    x: scale2.x < 0 ? -1 : 1,
-                    y: scale2.y < 0 ? -1 : 1
-                };
-                var x = -position.x / scale * signs.x * res, y = (position.y - h) / scale * signs.y * res + bounds.height / 2, width = w / scale * signs.x * res, height = h / scale * signs.y * res;
-                this.mvp.ortho2d(x, y, width, height);
+                var width = w / scale;
+                var height = h / scale;
+                var centerX = -spriteBounds.centerX;
+                var centerY = (-h + spriteBounds.centerY) * res + spriteBounds.height / 2;
+                var x = centerX / scale;
+                var y = centerY / scale;
+                this.mvp.ortho2d(x * res, y, width * res, height * res);
                 renderSession.gl.viewport(0, 0, w * res, h * res);
             };
             Renderer.prototype.draw = function (skeleton, renderSession) {
@@ -9408,29 +9500,35 @@ var PhaserSpine;
     (function (WebGL) {
         var Texture = (function (_super) {
             __extends(Texture, _super);
-            function Texture(gl, image, useMipMaps) {
+            function Texture(context, image, useMipMaps) {
                 if (useMipMaps === void 0) { useMipMaps = false; }
                 var _this = _super.call(this, image) || this;
+                _this.texture = null;
                 _this.boundUnit = 0;
-                _this.gl = gl;
-                _this.texture = gl.createTexture();
-                _this.update(useMipMaps);
+                _this.useMipMaps = false;
+                _this.context = context instanceof spine.webgl.ManagedWebGLRenderingContext ? context : new spine.webgl.ManagedWebGLRenderingContext(context);
+                _this.useMipMaps = useMipMaps;
+                _this.restore();
+                _this.context.addRestorable(_this);
                 return _this;
             }
             Texture.prototype.setFilters = function (minFilter, magFilter) {
-                var gl = this.gl;
+                var gl = this.context.gl;
                 this.bind();
                 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, minFilter);
                 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, magFilter);
             };
             Texture.prototype.setWraps = function (uWrap, vWrap) {
-                var gl = this.gl;
+                var gl = this.context.gl;
                 this.bind();
                 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, uWrap);
                 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, vWrap);
             };
             Texture.prototype.update = function (useMipMaps) {
-                var gl = this.gl;
+                var gl = this.context.gl;
+                if (!this.texture) {
+                    this.texture = this.context.gl.createTexture();
+                }
                 this.bind();
                 gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this._image);
                 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
@@ -9440,20 +9538,25 @@ var PhaserSpine;
                 if (useMipMaps)
                     gl.generateMipmap(gl.TEXTURE_2D);
             };
+            Texture.prototype.restore = function () {
+                this.texture = null;
+                this.update(this.useMipMaps);
+            };
             Texture.prototype.bind = function (unit) {
                 if (unit === void 0) { unit = 0; }
-                var gl = this.gl;
+                var gl = this.context.gl;
                 this.boundUnit = unit;
                 gl.activeTexture(gl.TEXTURE0 + unit);
                 gl.bindTexture(gl.TEXTURE_2D, this.texture);
             };
             Texture.prototype.unbind = function () {
-                var gl = this.gl;
+                var gl = this.context.gl;
                 gl.activeTexture(gl.TEXTURE0 + this.boundUnit);
                 gl.bindTexture(gl.TEXTURE_2D, null);
             };
             Texture.prototype.dispose = function () {
-                var gl = this.gl;
+                this.context.removeRestorable(this);
+                var gl = this.context.gl;
                 gl.deleteTexture(this.texture);
             };
             return Texture;
