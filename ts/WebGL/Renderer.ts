@@ -1,5 +1,7 @@
 module PhaserSpine {
     export module WebGL {
+        import ManagedWebGLRenderingContext = spine.webgl.ManagedWebGLRenderingContext;
+
         export class Renderer {
             public game: Phaser.Game;
 
@@ -26,7 +28,7 @@ module PhaserSpine {
                 this.shader = spine.webgl.Shader.newColoredTextured(gl);
                 this.batcher = new spine.webgl.PolygonBatcher(gl);
                 this.mvp.ortho2d(0, 0, this.game.width - 1, this.game.height - 1);
-                this.skeletonRenderer = new spine.webgl.SkeletonRenderer(gl);
+                this.skeletonRenderer = new spine.webgl.SkeletonRenderer((<any>this.game.renderer.renderSession));
                 this.debugRenderer = new spine.webgl.SkeletonDebugRenderer(gl);
                 this.debugRenderer.drawRegionAttachments = false;
                 this.debugRenderer.drawBoundingBoxes = false;
@@ -47,12 +49,12 @@ module PhaserSpine {
                 var signs = {
                     x: scale2.x < 0 ? -1 : 1,
                     y: scale2.y < 0 ? -1 : 1
-                }
+                };
 
                 var x = - position.x / scale * signs.x * res,
-                        y = (position.y - h) / scale * signs.y * res + bounds.height / 2,
-                        width = w / scale * signs.x * res,
-                        height = h / scale * signs.y * res;
+                    y = (position.y - h) / scale * signs.y * res + bounds.height / 2,
+                    width = w / scale * signs.x * res,
+                    height = h / scale * signs.y * res;
 
                 this.mvp.ortho2d(x, y, width, height);
                 renderSession.gl.viewport(0, 0, w * res, h * res);

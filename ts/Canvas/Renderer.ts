@@ -1,9 +1,15 @@
 module PhaserSpine {
     export module Canvas {
         export class Renderer {
-            static QUAD_TRIANGLES = [0, 1, 2, 2, 3, 0];
+            private static QUAD_TRIANGLES: number[] = [0, 1, 2, 2, 3, 0];
+
+            private static VERTEX_SIZE: number = 2 + 2 + 4;
 
             private game: Phaser.Game;
+
+            private vertices = spine.Utils.newFloatArray(8 * 1024);
+
+            private tempColor = new spine.Color();
 
             constructor (game: Phaser.Game) {
                 this.game = game;
@@ -32,43 +38,63 @@ module PhaserSpine {
 
                 if (SpinePlugin.DEBUG) ctx.strokeStyle = "green";
 
+                ctx.save();
                 for (let i = 0, n = drawOrder.length; i < n; i++) {
                     let slot = drawOrder[i];
                     let attachment = slot.getAttachment();
+                    let regionAttachment: spine.RegionAttachment = null;
                     let region: spine.TextureAtlasRegion = null;
                     let image: HTMLImageElement = null;
-                    let vertices: ArrayLike<number> = null;
-                    if (attachment instanceof spine.RegionAttachment) {
-                        let regionAttachment = <spine.RegionAttachment>attachment;
-                        vertices = regionAttachment.updateWorldVertices(slot, false);
-                        region = <spine.TextureAtlasRegion>regionAttachment.region;
-                        image = (<Texture>(region).texture).getImage();
 
+                    if (attachment instanceof spine.RegionAttachment) {
+                        regionAttachment = <spine.RegionAttachment>attachment;
+                        region = <spine.TextureAtlasRegion>regionAttachment.region;
+                        image = (<Canvas.Texture>region.texture).getImage();
                     } else continue;
+
+                    let skeleton = slot.bone.skeleton;
+                    let skeletonColor = skeleton.color;
+                    let slotColor = slot.color;
+                    let regionColor = regionAttachment.color;
+                    let alpha = skeletonColor.a * slotColor.a * regionColor.a;
+                    let color = this.tempColor;
+                    color.set(skeletonColor.r * slotColor.r * regionColor.r,
+                        skeletonColor.g * slotColor.g * regionColor.g,
+                        skeletonColor.b * slotColor.b * regionColor.b,
+                        alpha);
 
                     let att = <spine.RegionAttachment>attachment;
                     let bone = slot.bone;
-                    let x = vertices[0];
-                    let y = vertices[1];
-                    let rotation = (bone.getWorldRotationX() - att.rotation) * Math.PI / 180;
-                    let xx = vertices[24] - vertices[0];
-                    let xy = vertices[25] - vertices[1];
-                    let yx = vertices[8] - vertices[0];
-                    let yy = vertices[9] - vertices[1];
-                    let w = Math.sqrt(xx * xx + xy * xy), h = -Math.sqrt(yx * yx + yy * yy);
-                    ctx.translate(x / res, y / res);
-                    ctx.rotate(rotation);
-                    if (region.rotate) {
-                        ctx.rotate(Math.PI / 2);
-                        ctx.drawImage(image, region.x, region.y, region.height, region.width, 0, 0, h / res, -w / res);
+                    let w = region.width;
+                    let h = region.height;
+                    ctx.save();
+                    ctx.transform(bone.a, bone.c, bone.b, bone.d, bone.worldX, bone.worldY);
+                    ctx.translate(attachment.offset[0], attachment.offset[1]);
+                    ctx.rotate(attachment.rotation * Math.PI / 180);
+                    let atlasScale = att.width / w;
+                    ctx.scale(atlasScale * attachment.scaleX, atlasScale * attachment.scaleY);
+                    ctx.translate(w / 2, h / 2);
+                    if (attachment.region.rotate) {
+                        let t = w;
+                        w = h;
+                        h = t;
                         ctx.rotate(-Math.PI / 2);
-                    } else {
-                        ctx.drawImage(image, region.x, region.y, region.width, region.height, 0, 0, w / res, h / res);
                     }
+                    ctx.scale(1, -1);
+                    ctx.translate(-w / 2 / res, -h / 2 / res);
+                    if (color.r != 1 || color.g != 1 || color.b != 1 || color.a != 1) {
+                        ctx.globalAlpha = color.a;
+                        // experimental tinting via compositing, doesn't work
+                        // ctx.globalCompositeOperation = "source-atop";
+                        // ctx.fillStyle = "rgba(" + (color.r * 255 | 0) + ", " + (color.g * 255 | 0)  + ", " + (color.b * 255 | 0) + ", " + color.a + ")";
+                        // ctx.fillRect(0, 0, w, h);
+                    }
+                    ctx.drawImage(image, region.x, region.y, w, h, 0, 0, w / res, h / res);
                     if (SpinePlugin.DEBUG) ctx.strokeRect(0, 0, w / res, h / res);
-                    ctx.rotate(-rotation);
-                    ctx.translate(-x / res, -y / res);
+                    ctx.restore();
                 }
+
+                ctx.restore();
             }
 
             public drawTriangles (skeleton: spine.Skeleton, renderSession: IRenderSession) {
@@ -87,14 +113,14 @@ module PhaserSpine {
                     let region: spine.TextureAtlasRegion = null;
                     if (attachment instanceof spine.RegionAttachment) {
                         let regionAttachment = <spine.RegionAttachment>attachment;
-                        vertices = regionAttachment.updateWorldVertices(slot, false);
+                        vertices = this.computeRegionVertices(slot, regionAttachment, false);
                         triangles = Renderer.QUAD_TRIANGLES;
                         region = <spine.TextureAtlasRegion>regionAttachment.region;
-                        texture = (<Texture>region.texture).getImage();
+                        texture = (<Canvas.Texture>region.texture).getImage();
 
                     } else if (attachment instanceof spine.MeshAttachment) {
                         let mesh = <spine.MeshAttachment>attachment;
-                        vertices = mesh.updateWorldVertices(slot, false);
+                        vertices = this.computeMeshVertices(slot, mesh, false);
                         triangles = mesh.triangles;
                         texture = (<spine.TextureAtlasRegion>mesh.region.renderObject).texture.getImage();
                     } else continue;
@@ -162,13 +188,13 @@ module PhaserSpine {
 
                 var det = 1 / (u1*v2 - u2*v1),
 
-                // linear transformation
+                    // linear transformation
                     a = (v2*x1 - v1*x2) * det,
                     b = (v2*y1 - v1*y2) * det,
                     c = (u1*x2 - u2*x1) * det,
                     d = (u1*y2 - u2*y1) * det,
 
-                // translation
+                    // translation
                     e = x0 - a*u0 - c*v0,
                     f = y0 - b*u0 - d*v0;
 
@@ -177,6 +203,89 @@ module PhaserSpine {
                 ctx.clip();
                 ctx.drawImage(img, 0, 0);
                 ctx.restore();
+            }
+
+            private computeRegionVertices(slot: spine.Slot, region: spine.RegionAttachment, pma: boolean) {
+                let skeleton = slot.bone.skeleton;
+                let skeletonColor = skeleton.color;
+                let slotColor = slot.color;
+                let regionColor = region.color;
+                let alpha = skeletonColor.a * slotColor.a * regionColor.a;
+                let multiplier = pma ? alpha : 1;
+                let color = this.tempColor;
+                color.set(skeletonColor.r * slotColor.r * regionColor.r * multiplier,
+                    skeletonColor.g * slotColor.g * regionColor.g * multiplier,
+                    skeletonColor.b * slotColor.b * regionColor.b * multiplier,
+                    alpha);
+
+                region.computeWorldVertices(slot.bone, this.vertices, 0, Renderer.VERTEX_SIZE);
+
+                let vertices = this.vertices;
+                let uvs = region.uvs;
+
+                vertices[spine.RegionAttachment.C1R] = color.r;
+                vertices[spine.RegionAttachment.C1G] = color.g;
+                vertices[spine.RegionAttachment.C1B] = color.b;
+                vertices[spine.RegionAttachment.C1A] = color.a;
+                vertices[spine.RegionAttachment.U1] = uvs[0];
+                vertices[spine.RegionAttachment.V1] = uvs[1];
+
+                vertices[spine.RegionAttachment.C2R] = color.r;
+                vertices[spine.RegionAttachment.C2G] = color.g;
+                vertices[spine.RegionAttachment.C2B] = color.b;
+                vertices[spine.RegionAttachment.C2A] = color.a;
+                vertices[spine.RegionAttachment.U2] = uvs[2];
+                vertices[spine.RegionAttachment.V2] = uvs[3];
+
+                vertices[spine.RegionAttachment.C3R] = color.r;
+                vertices[spine.RegionAttachment.C3G] = color.g;
+                vertices[spine.RegionAttachment.C3B] = color.b;
+                vertices[spine.RegionAttachment.C3A] = color.a;
+                vertices[spine.RegionAttachment.U3] = uvs[4];
+                vertices[spine.RegionAttachment.V3] = uvs[5];
+
+                vertices[spine.RegionAttachment.C4R] = color.r;
+                vertices[spine.RegionAttachment.C4G] = color.g;
+                vertices[spine.RegionAttachment.C4B] = color.b;
+                vertices[spine.RegionAttachment.C4A] = color.a;
+                vertices[spine.RegionAttachment.U4] = uvs[6];
+                vertices[spine.RegionAttachment.V4] = uvs[7];
+
+                return vertices;
+            }
+
+            private computeMeshVertices(slot: spine.Slot, mesh: spine.MeshAttachment, pma: boolean) {
+                let skeleton = slot.bone.skeleton;
+                let skeletonColor = skeleton.color;
+                let slotColor = slot.color;
+                let regionColor = mesh.color;
+                let alpha = skeletonColor.a * slotColor.a * regionColor.a;
+                let multiplier = pma ? alpha : 1;
+                let color = this.tempColor;
+                color.set(skeletonColor.r * slotColor.r * regionColor.r * multiplier,
+                    skeletonColor.g * slotColor.g * regionColor.g * multiplier,
+                    skeletonColor.b * slotColor.b * regionColor.b * multiplier,
+                    alpha);
+
+                let numVertices = mesh.worldVerticesLength / 2;
+                if (this.vertices.length < mesh.worldVerticesLength) {
+                    this.vertices = spine.Utils.newFloatArray(mesh.worldVerticesLength);
+                }
+                let vertices = this.vertices;
+                mesh.computeWorldVertices(slot, 0, mesh.worldVerticesLength, vertices, 0, Renderer.VERTEX_SIZE);
+
+                let uvs = mesh.uvs;
+                for (let i = 0, n = numVertices, u = 0, v = 2; i < n; i++) {
+                    vertices[v++] = color.r;
+                    vertices[v++] = color.g;
+                    vertices[v++] = color.b;
+                    vertices[v++] = color.a;
+                    vertices[v++] = uvs[u++];
+                    vertices[v++] = uvs[u++];
+                    v += 2;
+                }
+
+                return vertices;
             }
         }
     }

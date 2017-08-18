@@ -17,14 +17,14 @@ module PhaserSpine {
                 this.skeleton.updateWorldTransform(); //Update everything to get correct bounds
 
                 var size = new spine.Vector2();
-                this.skeleton.getBounds(new spine.Vector2(), size);
+                this.skeleton.getBounds(new spine.Vector2(), size, []);
                 this.texture.setFrame(new PIXI.Rectangle(0, 0, size.x, size.y));
 
                 this.skeleton.setToSetupPose();
                 this.skeleton.updateWorldTransform();
                 var offset = new spine.Vector2();
                 var size = new spine.Vector2();
-                this.skeleton.getBounds(offset, size);
+                this.skeleton.getBounds(offset, size ,[]);
                 this.specialBounds = new PIXI.Rectangle(offset.x, offset.y, size.x, size.y);
 
                 // Create an AnimationState.
