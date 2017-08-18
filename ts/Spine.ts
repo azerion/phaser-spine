@@ -1,3 +1,9 @@
+declare module "phaser-spine" {
+    export = PhaserSpine;
+}
+
+(<any>Phaser.Rope).prototype.postUpdate = function () {};
+
 module PhaserSpine {
     export class Spine extends Phaser.Sprite {
         public skeleton: spine.Skeleton;
@@ -190,6 +196,10 @@ module PhaserSpine {
          * @returns {string}
          */
         public getCurrentAnimationForTrack(trackIndex: number): string {
+            if (!this.state.tracks[trackIndex] || !this.state.tracks[trackIndex].animation) {
+                console.warn("No animation found on track index: ", trackIndex);
+                return "";
+            }
             return this.state.tracks[trackIndex].animation.name;
         }
 
