@@ -11,6 +11,13 @@ Key features:
 * Mixes and fading animations
 * Support for scaled atlases
 
+Spine Version
+-------------
+Please note that the current spine version is an older version, and as a result of that it will work best with **Spine version 3.2**.
+There is a newer version of spine available (Spine-ts, up-to-date with latest spine runtime) but work on that is currently halted for this library.
+
+If you feel like helping out, you're welcome to clone the [spine-ts](https://github.com/orange-games/phaser-spine/tree/spine-ts) branch of this library.
+
 Getting Started
 ---------------
 First you want to get a fresh copy of the plugin. You can get it from this repo or from npm, ain't that handy.
@@ -31,7 +38,6 @@ game.add.plugin(PhaserSpine.SpinePlugin);
 
 Usage
 -----
-
 Like any other asset in Phaser, you need to preload the spine object you want in your game. A spine Javascript export will deliver you three files; *.atlas, *.json and *.png.
 The preloader expects these to be in the same folder, and when so you can just preload the json file by adding the following code to your game:
 
@@ -60,6 +66,16 @@ buddy.setAnimationByName(
     true        //If the animation should loop or not
 );
 ```
+
+### Handling events
+You can handle Spine events, just add your callback to Spine.onEvent, it's regular [Phaser.Signal](https://phaser.io/docs/2.6.2/Phaser.Signal.html) object. Your callback should be defined with two arguments: event index (number) and event object (Spine.Event):
+
+```javascript
+spineboy.onEvent.add(function (i,e) {
+    console.log('name=' + e.data.name + ' int=' + e.intValue + ' float=' + e.floatValue + ' string=' + e.stringValue);
+}
+```
+
 
 ### Crossfading animations
 Stacking animations in spine is rather simple, you just add non-looping animations on top of eachother:

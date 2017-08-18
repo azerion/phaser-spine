@@ -31,12 +31,9 @@ var activeSpine;
 var spines = {};
 var names = ['spineboy', 'goblins', 'raptor', 'stretchyman', 'tank', 'vine', 'buddy'];
 
-// var renderer = Phaser[location.href.split('?')[1]] || Phaser.AUTO
-
 var game = new Phaser.Game({
 	width: window.innerWidth,
 	height: window.innerWidth / 4 * 3,
-	// renderer: Phaser.AUTO,
 	renderer: Phaser[location.href.split('?')[1]] || Phaser.AUTO,
 	parent: 'content',
 	transparent: true,

@@ -56,7 +56,7 @@ module PhaserSpine {
                     width = w / scale * signs.x * res,
                     height = h / scale * signs.y * res;
 
-                this.mvp.ortho2d(x, y, width, height);
+                this.mvp.ortho2d(x, y, width * res, height * res);
                 renderSession.gl.viewport(0, 0, w * res, h * res);
             }
 

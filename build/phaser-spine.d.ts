@@ -80,14 +80,29 @@ declare module PhaserSpine {
 declare module PhaserSpine {
     class Spine extends Phaser.Sprite {
         skeleton: spine.Skeleton;
-        state: spine.AnimationState;
+        private stateData;
+        private state;
         private renderer;
         private specialBounds;
+        onEvent: Phaser.Signal;
+        onStart: Phaser.Signal;
+        onInterrupt: Phaser.Signal;
+        onDispose: Phaser.Signal;
+        onComplete: Phaser.Signal;
+        onEnd: Phaser.Signal;
         constructor(game: Phaser.Game, x: number, y: number, key: string);
         private createSkeleton(key);
         update(): void;
         _renderCanvas(renderSession: Canvas.IRenderSession, matrix?: PIXI.Matrix): void;
         _renderWebGL(renderSession: WebGL.IRenderSession, matrix?: PIXI.Matrix): void;
+        setMixByName(fromName: string, toName: string, duration: number): void;
+        setAnimationByName(trackIndex: number, animationName: string, loop?: boolean): spine.TrackEntry;
+        addAnimationByName(trackIndex: number, animationName: string, loop?: boolean, delay?: number): spine.TrackEntry;
+        getCurrentAnimationForTrack(trackIndex: number): string;
+        setSkinByName(skinName: string): void;
+        setSkin(skin: spine.Skin): void;
+        setToSetupPose(): void;
+        createCombinedSkin(newSkinName: string, ...skinNames: string[]): spine.Skin;
     }
 }
 declare module PhaserSpine {
@@ -110,6 +125,10 @@ declare module PhaserSpine {
             currentShader: PIXI.PrimitiveShader;
             _currentId: number;
         }
+        interface IPIXIRectangle extends PIXI.Rectangle {
+            centerX: number;
+            centerY: number;
+        }
     }
 }
 declare module PhaserSpine {
@@ -124,7 +143,7 @@ declare module PhaserSpine {
             private debugShader;
             private shapes;
             constructor(game: Phaser.Game);
-            resize(bounds: PIXI.Rectangle, position: Phaser.Point, scale2: Phaser.Point, renderSession: IRenderSession): void;
+            resize(skeleton: spine.Skeleton, spriteBounds: IPIXIRectangle, scale2: Phaser.Point, renderSession: IRenderSession): void;
             draw(skeleton: spine.Skeleton, renderSession: IRenderSession): void;
         }
     }
