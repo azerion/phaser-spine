@@ -79,6 +79,12 @@ declare module PhaserSpine {
         private state;
         private renderer;
         private specialBounds;
+        onEvent: Phaser.Signal;
+        onStart: Phaser.Signal;
+        onInterrupt: Phaser.Signal;
+        onDispose: Phaser.Signal;
+        onComplete: Phaser.Signal;
+        onEnd: Phaser.Signal;
         constructor(game: Phaser.Game, x: number, y: number, key: string);
         private createSkeleton(key);
         update(): void;

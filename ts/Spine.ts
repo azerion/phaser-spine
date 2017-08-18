@@ -10,6 +10,18 @@ module PhaserSpine {
 
         private specialBounds: PIXI.Rectangle;
 
+        public onEvent: Phaser.Signal;
+
+        public onStart: Phaser.Signal;
+
+        public onInterrupt: Phaser.Signal;
+
+        public onDispose: Phaser.Signal;
+
+        public onComplete: Phaser.Signal;
+
+        public onEnd: Phaser.Signal;
+
         constructor(game: Phaser.Game, x: number, y: number, key: string) {
             super(game, x, y, SpinePlugin.SPINE_NAMESPACE + key);
 
@@ -32,6 +44,29 @@ module PhaserSpine {
             // Create an AnimationState.
             this.stateData = new spine.AnimationStateData(this.skeleton.data);
             this.state = new spine.AnimationState(this.stateData);
+
+            this.onEvent = new Phaser.Signal();
+            this.onComplete = new Phaser.Signal();
+            this.onEnd = new Phaser.Signal();
+            this.onInterrupt = new Phaser.Signal();
+            this.onStart = new Phaser.Signal();
+            this.onDispose = new Phaser.Signal();
+
+            this.state.addListener({
+                interrupt: this.onInterrupt.dispatch.bind(this.onInterrupt),
+                dispose: this.onDispose.dispatch.bind(this.onDispose),
+                /** Invoked when the current animation triggers an event. */
+                event : this.onEvent.dispatch.bind(this.onEvent),
+                /** Invoked when the current animation has completed.
+                 * @param loopCount The number of times the animation reached the end. */
+                complete : this.onComplete.dispatch.bind(this.onComplete),
+                /** Invoked just after the current animation is set. */
+                start: this.onStart.dispatch.bind(this.onStart),
+                /** Invoked just before the current animation is replaced. */
+                end: this.onEnd.dispatch.bind(this.onEnd)
+            });
+            // this.state.onComplete = this.onComplete.dispatch.bind(this.onComplete);
+            // this.state.onEnd = this.onEnd.dispatch.bind(this.onEnd);
 
             if (this.game.renderType === Phaser.CANVAS) {
                 this.renderer = new PhaserSpine.Canvas.Renderer(this.game);

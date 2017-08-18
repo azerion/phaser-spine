@@ -7707,6 +7707,20 @@ var PhaserSpine;
             _this.specialBounds = new PIXI.Rectangle(offset.x, offset.y, size.x, size.y);
             _this.stateData = new spine.AnimationStateData(_this.skeleton.data);
             _this.state = new spine.AnimationState(_this.stateData);
+            _this.onEvent = new Phaser.Signal();
+            _this.onComplete = new Phaser.Signal();
+            _this.onEnd = new Phaser.Signal();
+            _this.onInterrupt = new Phaser.Signal();
+            _this.onStart = new Phaser.Signal();
+            _this.onDispose = new Phaser.Signal();
+            _this.state.addListener({
+                interrupt: _this.onInterrupt.dispatch.bind(_this.onInterrupt),
+                dispose: _this.onDispose.dispatch.bind(_this.onDispose),
+                event: _this.onEvent.dispatch.bind(_this.onEvent),
+                complete: _this.onComplete.dispatch.bind(_this.onComplete),
+                start: _this.onStart.dispatch.bind(_this.onStart),
+                end: _this.onEnd.dispatch.bind(_this.onEnd)
+            });
             if (_this.game.renderType === Phaser.CANVAS) {
                 _this.renderer = new PhaserSpine.Canvas.Renderer(_this.game);
             }
