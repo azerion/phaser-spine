@@ -68,6 +68,9 @@ function setupUI () {
         var debugList = $("#debugList");
         debugList.change(function () {
             PhaserSpine.SpinePlugin.DEBUG = $("#debugList option:selected").text() === 'true';
+            if (!PhaserSpine.SpinePlugin.DEBUG) {
+                game.debug.reset();
+            }
         });
 
         var triangleList = $("#triangleList");

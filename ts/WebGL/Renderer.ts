@@ -25,10 +25,10 @@ module PhaserSpine {
                 let gl: WebGLRenderingContext = (<IRenderSession>this.game.renderer.renderSession).gl;
 
                 // Create a simple shader, mesh, model-view-projection matrix and SkeletonRenderer.
-                this.shader = spine.webgl.Shader.newColoredTextured(gl);
+                this.shader = spine.webgl.Shader.newTwoColoredTextured(gl);
                 this.batcher = new spine.webgl.PolygonBatcher(gl);
                 this.mvp.ortho2d(0, 0, this.game.width - 1, this.game.height - 1);
-                this.skeletonRenderer = new spine.webgl.SkeletonRenderer((<any>this.game.renderer.renderSession));
+                this.skeletonRenderer = new spine.webgl.SkeletonRenderer(<any>gl);
                 this.debugRenderer = new spine.webgl.SkeletonDebugRenderer(gl);
                 this.debugRenderer.drawRegionAttachments = false;
                 this.debugRenderer.drawBoundingBoxes = false;
