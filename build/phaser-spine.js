@@ -3,7 +3,7 @@
  * Spine plugin for Phaser.io!
  *
  * OrangeGames
- * Build at 18-08-2017
+ * Build at 21-08-2017
  * Released under MIT License 
  */
 
@@ -9392,15 +9392,11 @@ var PhaserSpine;
                 for (var key in skin.attachments) {
                     var slotKeyPair = key.split(':');
                     var slotIndex = parseInt(slotKeyPair[0]);
-                    var attachmentName = slotKeyPair[1];
-                    var attachment = skin.attachments[key];
+                    var attachmentName = Object.keys(skin.attachments[key])[0];
+                    var attachment = skin.attachments[key][attachmentName];
                     if (undefined === slotIndex || undefined === attachmentName) {
                         console.warn('something went wrong with reading the attachments index and/or name');
                         return;
-                    }
-                    if (newSkin.getAttachment(slotIndex, attachmentName) !== undefined) {
-                        console.warn('Found double attachment for: ' + skinName + '. Skipping');
-                        continue;
                     }
                     newSkin.addAttachment(slotIndex, attachmentName, attachment);
                 }

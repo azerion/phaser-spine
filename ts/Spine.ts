@@ -261,17 +261,12 @@ module PhaserSpine {
                 for (let key in skin.attachments) {
                     let slotKeyPair = key.split(':');
                     let slotIndex: number = parseInt(slotKeyPair[0]);
-                    let attachmentName = slotKeyPair[1];
-                    let attachment: spine.Attachment = <any>skin.attachments[key];
+                    let attachmentName: string = Object.keys(skin.attachments[key])[0];
+                    let attachment: spine.Attachment = skin.attachments[key][attachmentName];
 
                     if (undefined === slotIndex || undefined === attachmentName) {
                         console.warn('something went wrong with reading the attachments index and/or name');
                         return;
-                    }
-
-                    if (newSkin.getAttachment(slotIndex, attachmentName) !== undefined) {
-                        console.warn('Found double attachment for: ' + skinName + '. Skipping');
-                        continue;
                     }
 
                     newSkin.addAttachment(slotIndex, attachmentName, attachment);
