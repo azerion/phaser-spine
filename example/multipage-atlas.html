@@ -1,0 +1,46 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title>Phaser Spine MultiPage Example</title>
+
+    <script src="../node_modules/phaser/build/phaser.js"></script>
+    <script src="../build/phaser-spine.js"></script>
+
+    <style>
+        body {
+            padding: 0;
+            margin: 0;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+<script>
+    var circle, game;
+
+
+    game = new Phaser.Game(800, 600, Phaser.AUTO, '', {init: init, preload: preload, create: create});
+
+    function init() {
+        this.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
+    }
+
+    function preload() {
+        game.plugins.add(PhaserSpine.SpinePlugin);
+        game.stage.disableVisibilityChange = true;
+
+        game.load.spine('mp', "assets/mp/test-multipage-spine.json");
+        game.load.image('button1', "assets/btn_01.png");
+        game.load.image('button2', "assets/btn_02.png");
+    }
+
+    function create() {
+        //create the spine object
+        circle = game.add.spine(200, 200, "mp", true);
+        circle.scale.set(0.3);
+        circle.anchor.set(0.5);
+    }
+</script>
+
+</body>
+</html>

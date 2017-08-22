@@ -31,7 +31,7 @@ module PhaserSpine {
         public onEnd: Phaser.Signal;
 
         constructor(game: Phaser.Game, x: number, y: number, key: string, premultipliedAlpha: boolean = false) {
-            super(game, x, y, SpinePlugin.SPINE_NAMESPACE + key);
+            super(game, x, y, '');
 
             this.premultipliedAlpha = premultipliedAlpha;
 
@@ -88,12 +88,12 @@ module PhaserSpine {
         private createSkeleton(key: string): spine.Skeleton {
             // Load the texture atlas using name.atlas and name.png from the AssetManager.
             // The function passed to TextureAtlas is used to resolve relative paths.
-            let atlas: spine.TextureAtlas = new spine.TextureAtlas(this.game.cache.getText(SpinePlugin.SPINE_NAMESPACE + key), (path) => {
+            let atlas: spine.TextureAtlas = new spine.TextureAtlas(this.game.cache.getText('atlas_' + SpinePlugin.SPINE_NAMESPACE + '_' + key), (path) => {
                 if (this.game.renderType === Phaser.CANVAS) {
-                    return new PhaserSpine.Canvas.Texture(this.game.cache.getImage(SpinePlugin.SPINE_NAMESPACE + key));
+                    return new PhaserSpine.Canvas.Texture(this.game.cache.getImage(path));
                 }
 
-                return new PhaserSpine.WebGL.Texture(<WebGLRenderingContext>(<any>this.game.renderer).gl, this.game.cache.getImage(SpinePlugin.SPINE_NAMESPACE + key));
+                return new PhaserSpine.WebGL.Texture(<WebGLRenderingContext>(<any>this.game.renderer).gl, this.game.cache.getImage(path));
             });
 
             // Create a AtlasAttachmentLoader, which is specific to the WebGL backend.

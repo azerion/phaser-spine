@@ -37,7 +37,7 @@
 
     function create() {
         //create the spine object
-        spineboy = game.add.spine(0, 0, "spineboy");
+        spineboy = game.add.spine(0, 0, "spineboy", true);
         spineboy.scale.set(0.5);
         // set up the mixes!
         spineboy.setMixByName("run", "jump", 0.2);

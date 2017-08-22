@@ -1,4 +1,4 @@
 node_modules
 .idea
 .tscache
-.tmp.txt
+*.tmp.txt

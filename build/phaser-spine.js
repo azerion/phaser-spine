@@ -9216,10 +9216,27 @@ var PhaserSpine;
         };
         SpinePlugin.prototype.addSpineLoader = function () {
             Phaser.Loader.prototype.spine = function (key, url, scalingVariants) {
+                var _this = this;
                 var path = url.substr(0, url.lastIndexOf('.'));
-                this.text(SpinePlugin.SPINE_NAMESPACE + key, path + '.atlas');
+                this.text('atlas_' + SpinePlugin.SPINE_NAMESPACE + '_' + key, path + '.atlas');
                 this.json(SpinePlugin.SPINE_NAMESPACE + key, path + '.json');
-                this.image(SpinePlugin.SPINE_NAMESPACE + key, path + '.png');
+                this.onFileComplete.add(function (progress, name) {
+                    if (name.indexOf('atlas_spine_') === 0) {
+                        var atlas = _this.game.cache.getText(name);
+                        var firstImageName = null;
+                        atlas.split(/\r\n|\r|\n/).forEach(function (line, idx) {
+                            if (line.length === 0 || line.indexOf(':') !== -1) {
+                                return;
+                            }
+                            if (firstImageName === null) {
+                                firstImageName = line.substr(0, line.lastIndexOf('.'));
+                            }
+                            if (firstImageName !== null && line.indexOf(firstImageName) !== -1 && line.indexOf('.') !== -1) {
+                                this.image(line, url.substr(0, url.lastIndexOf('/') + 1) + line);
+                            }
+                        }.bind(_this));
+                    }
+                });
             };
         };
         SpinePlugin.prototype.addSpineFactory = function () {
@@ -9263,7 +9280,7 @@ var PhaserSpine;
         __extends(Spine, _super);
         function Spine(game, x, y, key, premultipliedAlpha) {
             if (premultipliedAlpha === void 0) { premultipliedAlpha = false; }
-            var _this = _super.call(this, game, x, y, PhaserSpine.SpinePlugin.SPINE_NAMESPACE + key) || this;
+            var _this = _super.call(this, game, x, y, '') || this;
             _this.premultipliedAlpha = false;
             _this.premultipliedAlpha = premultipliedAlpha;
             _this.skeleton = _this.createSkeleton(key);
@@ -9305,11 +9322,11 @@ var PhaserSpine;
         }
         Spine.prototype.createSkeleton = function (key) {
             var _this = this;
-            var atlas = new spine.TextureAtlas(this.game.cache.getText(PhaserSpine.SpinePlugin.SPINE_NAMESPACE + key), function (path) {
+            var atlas = new spine.TextureAtlas(this.game.cache.getText('atlas_' + PhaserSpine.SpinePlugin.SPINE_NAMESPACE + '_' + key), function (path) {
                 if (_this.game.renderType === Phaser.CANVAS) {
-                    return new PhaserSpine.Canvas.Texture(_this.game.cache.getImage(PhaserSpine.SpinePlugin.SPINE_NAMESPACE + key));
+                    return new PhaserSpine.Canvas.Texture(_this.game.cache.getImage(path));
                 }
-                return new PhaserSpine.WebGL.Texture(_this.game.renderer.gl, _this.game.cache.getImage(PhaserSpine.SpinePlugin.SPINE_NAMESPACE + key));
+                return new PhaserSpine.WebGL.Texture(_this.game.renderer.gl, _this.game.cache.getImage(path));
             });
             var atlasLoader = new spine.AtlasAttachmentLoader(atlas);
             var skeletonJson = new spine.SkeletonJson(atlasLoader);
