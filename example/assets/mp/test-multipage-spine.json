@@ -1,0 +1,65 @@
+{
+"skeleton": {
+	"hash": "S34lZajzPaZb7zhtlhoYYBXIkSw",
+	"spine": "3.7.01-beta",
+	"width": 602,
+	"height": 602,
+	"images": "",
+	"audio": "D:/Projects/Self/Ramen No Oujisama/Graphics/Other/multipage-test"
+},
+"bones": [
+	{ "name": "root" },
+	{ "name": "main", "parent": "root", "length": 212, "rotation": 90, "x": 398.34, "y": 397.4 }
+],
+"slots": [
+	{ "name": "skyblue", "bone": "main", "attachment": "skyblue" },
+	{ "name": "yellow", "bone": "main", "attachment": "yellow" },
+	{ "name": "purple", "bone": "main", "attachment": "purple" },
+	{ "name": "red", "bone": "main", "attachment": "red" },
+	{ "name": "pink", "bone": "main", "attachment": "pink" },
+	{ "name": "bluegreen", "bone": "main", "attachment": "bluegreen" },
+	{ "name": "orange", "bone": "main", "attachment": "orange" },
+	{ "name": "green", "bone": "main", "attachment": "green" }
+],
+"skins": {
+	"default": {
+		"bluegreen": {
+			"bluegreen": { "x": -102.9, "y": 103.84, "rotation": -90, "width": 303, "height": 303 }
+		},
+		"green": {
+			"green": { "x": 104.1, "y": 108.84, "rotation": -90, "width": 303, "height": 303 }
+		},
+		"orange": {
+			"orange": { "x": -107.9, "y": -103.16, "rotation": -90, "width": 303, "height": 303 }
+		},
+		"pink": {
+			"pink": { "x": 110.1, "y": -109.16, "rotation": -90, "width": 303, "height": 303 }
+		},
+		"purple": {
+			"purple": { "x": -146.4, "y": -2.66, "rotation": -90, "width": 302, "height": 302 }
+		},
+		"red": {
+			"red": { "x": 153.6, "y": -2.66, "rotation": -90, "width": 302, "height": 302 }
+		},
+		"skyblue": {
+			"skyblue": { "x": -4.9, "y": -152.66, "rotation": -90, "width": 302, "height": 303 }
+		},
+		"yellow": {
+			"yellow": { "x": -4.9, "y": 147.34, "rotation": -90, "width": 302, "height": 303 }
+		}
+	}
+},
+"animations": {
+	"turn": {
+		"bones": {
+			"main": {
+				"rotate": [
+					{ "time": 0, "angle": 0 },
+					{ "time": 1, "angle": -180 },
+					{ "time": 2, "angle": 0 }
+				]
+			}
+		}
+	}
+}
+}

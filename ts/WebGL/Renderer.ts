@@ -29,6 +29,7 @@ module PhaserSpine {
                 this.batcher = new spine.webgl.PolygonBatcher(gl);
                 this.mvp.ortho2d(0, 0, this.game.width - 1, this.game.height - 1);
                 this.skeletonRenderer = new spine.webgl.SkeletonRenderer(<any>gl);
+
                 this.debugRenderer = new spine.webgl.SkeletonDebugRenderer(gl);
                 this.debugRenderer.drawRegionAttachments = false;
                 this.debugRenderer.drawBoundingBoxes = false;
@@ -61,7 +62,7 @@ module PhaserSpine {
                 renderSession.gl.viewport(0, 0, w * res, h * res);
             }
 
-            public draw(skeleton: spine.Skeleton, renderSession: IRenderSession) {
+            public draw(skeleton: spine.Skeleton, renderSession: IRenderSession, premultipliedAlpha?: boolean) {
                 ////////////////////:
                 ///        FIX: Save Phaser WebGL Context
                 /////////
@@ -87,6 +88,7 @@ module PhaserSpine {
 
                 //Start the batch and tell the SkeletonRenderer to render the active skeleton.
                 this.batcher.begin(this.shader);
+                this.skeletonRenderer.premultipliedAlpha = premultipliedAlpha;
                 this.skeletonRenderer.draw(this.batcher, skeleton);
                 this.batcher.end();
 
@@ -96,7 +98,7 @@ module PhaserSpine {
                 if (SpinePlugin.DEBUG) {
                     this.debugShader.bind();
                     this.debugShader.setUniform4x4f(spine.webgl.Shader.MVP_MATRIX, this.mvp.values);
-                    this.debugRenderer.premultipliedAlpha = false;
+                    this.debugRenderer.premultipliedAlpha = premultipliedAlpha;
                     this.shapes.begin(this.debugShader);
                     this.debugRenderer.draw(this.shapes, skeleton);
                     this.shapes.end();

@@ -1,0 +1,104 @@
+
+test-multipage-spine.png
+size: 512,512
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+bluegreen
+  rotate: false
+  xy: 2, 2
+  size: 303, 303
+  orig: 303, 303
+  offset: 0, 0
+  index: -1
+
+test-multipage-spine2.png
+size: 512,512
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+green
+  rotate: false
+  xy: 2, 2
+  size: 303, 303
+  orig: 303, 303
+  offset: 0, 0
+  index: -1
+
+test-multipage-spine3.png
+size: 512,512
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+orange
+  rotate: false
+  xy: 2, 2
+  size: 303, 303
+  orig: 303, 303
+  offset: 0, 0
+  index: -1
+
+test-multipage-spine4.png
+size: 512,512
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+pink
+  rotate: false
+  xy: 2, 2
+  size: 303, 303
+  orig: 303, 303
+  offset: 0, 0
+  index: -1
+
+test-multipage-spine5.png
+size: 512,512
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+skyblue
+  rotate: false
+  xy: 2, 2
+  size: 302, 303
+  orig: 302, 303
+  offset: 0, 0
+  index: -1
+
+test-multipage-spine6.png
+size: 512,512
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+yellow
+  rotate: false
+  xy: 2, 2
+  size: 302, 303
+  orig: 302, 303
+  offset: 0, 0
+  index: -1
+
+test-multipage-spine7.png
+size: 512,512
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+purple
+  rotate: false
+  xy: 2, 2
+  size: 302, 302
+  orig: 302, 302
+  offset: 0, 0
+  index: -1
+
+test-multipage-spine8.png
+size: 512,512
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+red
+  rotate: false
+  xy: 2, 2
+  size: 302, 302
+  orig: 302, 302
+  offset: 0, 0
+  index: -1

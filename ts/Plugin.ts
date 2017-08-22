@@ -1,11 +1,11 @@
 
 module PhaserSpine {
         export interface SpineObjectFactory extends Phaser.GameObjectFactory {
-            spine: (x: number, y: number, key: string, scalingVariant?: string, group?: Phaser.Group) => any;
+            spine: (x: number, y: number, key: string, premultipliedAlpha?: boolean, scalingVariant?: string, group?: Phaser.Group) => any;
         }
 
         export interface SpineObjectCreator extends Phaser.GameObjectCreator {
-            spine: (x: number, y: number, key: string, scalingVariant?: string, group?: Phaser.Group) => any
+            spine: (x: number, y: number, key: string, premultipliedAlpha?: boolean, scalingVariant?: string, group?: Phaser.Group) => any
         }
 
         export interface SpineCache extends Phaser.Cache {
@@ -74,18 +74,18 @@ module PhaserSpine {
              * game.add.spine();
              */
             private addSpineFactory() {
-                (<PhaserSpine.SpineObjectFactory>Phaser.GameObjectFactory.prototype).spine = function(x: number, y: number, key: string, scalingVariant?: string, group?: Phaser.Group): Spine
+                (<PhaserSpine.SpineObjectFactory>Phaser.GameObjectFactory.prototype).spine = function(x: number, y: number, key: string, premultipliedAlpha: boolean = false, scalingVariant?: string, group?: Phaser.Group): Spine
                 {
                     if (group === undefined) { group = this.world; }
 
-                    let spineObject = new Spine(this.game, x, y, key);
+                    let spineObject = new Spine(this.game, x, y, key, premultipliedAlpha);
 
                     return group.add(spineObject);
                 };
 
-                (<PhaserSpine.SpineObjectCreator>Phaser.GameObjectCreator.prototype).spine = function(x: number, y: number, key: string, scalingVariant?: string, group?: Phaser.Group): Spine
+                (<PhaserSpine.SpineObjectCreator>Phaser.GameObjectCreator.prototype).spine = function(x: number, y: number, key: string, premultipliedAlpha: boolean = false, scalingVariant?: string, group?: Phaser.Group): Spine
                 {
-                    return null;//new Spine(this.game, key, scalingVariant);
+                    return new Spine(this.game, x, y, key, premultipliedAlpha);
                 };
             }
 

@@ -35,10 +35,10 @@ declare module PhaserSpine {
 }
 declare module PhaserSpine {
     interface SpineObjectFactory extends Phaser.GameObjectFactory {
-        spine: (x: number, y: number, key: string, scalingVariant?: string, group?: Phaser.Group) => any;
+        spine: (x: number, y: number, key: string, premultipliedAlpha?: boolean, scalingVariant?: string, group?: Phaser.Group) => any;
     }
     interface SpineObjectCreator extends Phaser.GameObjectCreator {
-        spine: (x: number, y: number, key: string, scalingVariant?: string, group?: Phaser.Group) => any;
+        spine: (x: number, y: number, key: string, premultipliedAlpha?: boolean, scalingVariant?: string, group?: Phaser.Group) => any;
     }
     interface SpineCache extends Phaser.Cache {
         addSpine: (key: string, data: any) => void;
@@ -87,13 +87,14 @@ declare module PhaserSpine {
         private state;
         private renderer;
         private specialBounds;
+        private premultipliedAlpha;
         onEvent: Phaser.Signal;
         onStart: Phaser.Signal;
         onInterrupt: Phaser.Signal;
         onDispose: Phaser.Signal;
         onComplete: Phaser.Signal;
         onEnd: Phaser.Signal;
-        constructor(game: Phaser.Game, x: number, y: number, key: string);
+        constructor(game: Phaser.Game, x: number, y: number, key: string, premultipliedAlpha?: boolean);
         private createSkeleton(key);
         update(): void;
         _renderCanvas(renderSession: Canvas.IRenderSession, matrix?: PIXI.Matrix): void;
@@ -147,7 +148,7 @@ declare module PhaserSpine {
             private shapes;
             constructor(game: Phaser.Game);
             resize(skeleton: spine.Skeleton, spriteBounds: IPIXIRectangle, scale2: Phaser.Point, renderSession: IRenderSession): void;
-            draw(skeleton: spine.Skeleton, renderSession: IRenderSession): void;
+            draw(skeleton: spine.Skeleton, renderSession: IRenderSession, premultipliedAlpha?: boolean): void;
         }
     }
 }

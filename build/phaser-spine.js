@@ -3,7 +3,7 @@
  * Spine plugin for Phaser.io!
  *
  * OrangeGames
- * Build at 21-08-2017
+ * Build at 22-08-2017
  * Released under MIT License 
  */
 
@@ -9223,15 +9223,17 @@ var PhaserSpine;
             };
         };
         SpinePlugin.prototype.addSpineFactory = function () {
-            Phaser.GameObjectFactory.prototype.spine = function (x, y, key, scalingVariant, group) {
+            Phaser.GameObjectFactory.prototype.spine = function (x, y, key, premultipliedAlpha, scalingVariant, group) {
+                if (premultipliedAlpha === void 0) { premultipliedAlpha = false; }
                 if (group === undefined) {
                     group = this.world;
                 }
-                var spineObject = new PhaserSpine.Spine(this.game, x, y, key);
+                var spineObject = new PhaserSpine.Spine(this.game, x, y, key, premultipliedAlpha);
                 return group.add(spineObject);
             };
-            Phaser.GameObjectCreator.prototype.spine = function (x, y, key, scalingVariant, group) {
-                return null;
+            Phaser.GameObjectCreator.prototype.spine = function (x, y, key, premultipliedAlpha, scalingVariant, group) {
+                if (premultipliedAlpha === void 0) { premultipliedAlpha = false; }
+                return new PhaserSpine.Spine(this.game, x, y, key, premultipliedAlpha);
             };
         };
         SpinePlugin.prototype.addSpineCache = function () {
@@ -9259,8 +9261,11 @@ var PhaserSpine;
 (function (PhaserSpine) {
     var Spine = (function (_super) {
         __extends(Spine, _super);
-        function Spine(game, x, y, key) {
+        function Spine(game, x, y, key, premultipliedAlpha) {
+            if (premultipliedAlpha === void 0) { premultipliedAlpha = false; }
             var _this = _super.call(this, game, x, y, PhaserSpine.SpinePlugin.SPINE_NAMESPACE + key) || this;
+            _this.premultipliedAlpha = false;
+            _this.premultipliedAlpha = premultipliedAlpha;
             _this.skeleton = _this.createSkeleton(key);
             _this.skeleton.flipY = (_this.game.renderType === Phaser.CANVAS);
             _this.skeleton.setToSetupPose();
@@ -9334,7 +9339,7 @@ var PhaserSpine;
                 return;
             }
             this.renderer.resize(this.skeleton, this.getBounds(), this.scale, renderSession);
-            this.renderer.draw(this.skeleton, renderSession);
+            this.renderer.draw(this.skeleton, renderSession, this.premultipliedAlpha);
         };
         Spine.prototype.setMixByName = function (fromName, toName, duration) {
             this.stateData.setMix(fromName, toName, duration);
@@ -9446,7 +9451,7 @@ var PhaserSpine;
                 this.mvp.ortho2d(x * res, y, width * res, height * res);
                 renderSession.gl.viewport(0, 0, w * res, h * res);
             };
-            Renderer.prototype.draw = function (skeleton, renderSession) {
+            Renderer.prototype.draw = function (skeleton, renderSession, premultipliedAlpha) {
                 renderSession.spriteBatch.end();
                 var currentBlendMode = renderSession.blendModeManager.currentBlendMode;
                 var currentShader = renderSession.shaderManager.currentShader;
@@ -9458,13 +9463,14 @@ var PhaserSpine;
                 this.shader.setUniformi(spine.webgl.Shader.SAMPLER, 0);
                 this.shader.setUniform4x4f(spine.webgl.Shader.MVP_MATRIX, this.mvp.values);
                 this.batcher.begin(this.shader);
+                this.skeletonRenderer.premultipliedAlpha = premultipliedAlpha;
                 this.skeletonRenderer.draw(this.batcher, skeleton);
                 this.batcher.end();
                 this.shader.unbind();
                 if (PhaserSpine.SpinePlugin.DEBUG) {
                     this.debugShader.bind();
                     this.debugShader.setUniform4x4f(spine.webgl.Shader.MVP_MATRIX, this.mvp.values);
-                    this.debugRenderer.premultipliedAlpha = false;
+                    this.debugRenderer.premultipliedAlpha = premultipliedAlpha;
                     this.shapes.begin(this.debugShader);
                     this.debugRenderer.draw(this.shapes, skeleton);
                     this.shapes.end();

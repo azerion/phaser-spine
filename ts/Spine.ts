@@ -16,6 +16,8 @@ module PhaserSpine {
 
         private specialBounds: PIXI.Rectangle;
 
+        private premultipliedAlpha: boolean = false;
+
         public onEvent: Phaser.Signal;
 
         public onStart: Phaser.Signal;
@@ -28,8 +30,10 @@ module PhaserSpine {
 
         public onEnd: Phaser.Signal;
 
-        constructor(game: Phaser.Game, x: number, y: number, key: string) {
+        constructor(game: Phaser.Game, x: number, y: number, key: string, premultipliedAlpha: boolean = false) {
             super(game, x, y, SpinePlugin.SPINE_NAMESPACE + key);
+
+            this.premultipliedAlpha = premultipliedAlpha;
 
             this.skeleton = this.createSkeleton(key);
             this.skeleton.flipY = (this.game.renderType === Phaser.CANVAS); //In Canvas we always FlipY
@@ -137,7 +141,7 @@ module PhaserSpine {
             }
 
             (<WebGL.Renderer>this.renderer).resize(this.skeleton, <WebGL.IPIXIRectangle>this.getBounds(), this.scale, renderSession);
-            (<WebGL.Renderer>this.renderer).draw(this.skeleton, renderSession);
+            (<WebGL.Renderer>this.renderer).draw(this.skeleton, renderSession, this.premultipliedAlpha);
         }
 
         /**
