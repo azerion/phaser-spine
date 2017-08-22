@@ -8980,9 +8980,9 @@ var PhaserSpine;
                 }
                 renderSession.context.translate(bounds.x / scale.x, bounds.y / scale.y);
             };
-            Renderer.prototype.drawImages = function (skeleton, renderSession) {
+            Renderer.prototype.drawImages = function (phaserSpine, renderSession) {
                 var ctx = renderSession.context;
-                var drawOrder = skeleton.drawOrder;
+                var drawOrder = phaserSpine.skeleton.drawOrder;
                 var res = renderSession.resolution;
                 if (PhaserSpine.SpinePlugin.DEBUG)
                     ctx.strokeStyle = "green";
@@ -9000,8 +9000,8 @@ var PhaserSpine;
                     }
                     else
                         continue;
-                    var skeleton_1 = slot.bone.skeleton;
-                    var skeletonColor = skeleton_1.color;
+                    var skeleton = slot.bone.skeleton;
+                    var skeletonColor = skeleton.color;
                     var slotColor = slot.color;
                     var regionColor = regionAttachment.color;
                     var alpha = skeletonColor.a * slotColor.a * regionColor.a;
@@ -9036,11 +9036,11 @@ var PhaserSpine;
                 }
                 ctx.restore();
             };
-            Renderer.prototype.drawTriangles = function (skeleton, renderSession) {
+            Renderer.prototype.drawTriangles = function (phaserSpine, renderSession) {
                 var blendMode = null;
                 var vertices = null;
                 var triangles = null;
-                var drawOrder = skeleton.drawOrder;
+                var drawOrder = phaserSpine.skeleton.drawOrder;
                 var res = renderSession.resolution;
                 for (var i = 0, n = drawOrder.length; i < n; i++) {
                     var slot = drawOrder[i];
@@ -9325,6 +9325,21 @@ var PhaserSpine;
             }
             return _this;
         }
+        Object.defineProperty(Spine.prototype, "alpha", {
+            get: function () {
+                if (this.skeleton && this.skeleton.color) {
+                    return this.skeleton.color.a;
+                }
+                return 0;
+            },
+            set: function (value) {
+                if (this.skeleton && this.skeleton.color) {
+                    this.skeleton.color.a = value;
+                }
+            },
+            enumerable: true,
+            configurable: true
+        });
         Spine.prototype.destroy = function (destroyChildren) {
             _super.prototype.destroy.call(this, destroyChildren);
             this.specialBounds = null;
@@ -9368,18 +9383,18 @@ var PhaserSpine;
             }
             this.renderer.resize(this.getBounds(), this.scale, renderSession);
             if (PhaserSpine.SpinePlugin.TRIANGLE) {
-                this.renderer.drawTriangles(this.skeleton, renderSession);
+                this.renderer.drawTriangles(this, renderSession);
             }
             else {
-                this.renderer.drawImages(this.skeleton, renderSession);
+                this.renderer.drawImages(this, renderSession);
             }
         };
         Spine.prototype._renderWebGL = function (renderSession, matrix) {
             if (!this.visible || !this.alive) {
                 return;
             }
-            this.renderer.resize(this.skeleton, this.getBounds(), this.scale, renderSession);
-            this.renderer.draw(this.skeleton, renderSession, this.premultipliedAlpha);
+            this.renderer.resize(this, this.getBounds(), this.scale, renderSession);
+            this.renderer.draw(this, renderSession, this.premultipliedAlpha);
         };
         Spine.prototype.setMixByName = function (fromName, toName, duration) {
             this.stateData.setMix(fromName, toName, duration);
@@ -9488,12 +9503,12 @@ var PhaserSpine;
                 this.skeletonRenderer = null;
                 this.debugRenderer = null;
             };
-            Renderer.prototype.resize = function (skeleton, spriteBounds, scale2, renderSession) {
+            Renderer.prototype.resize = function (phaserSpine, spriteBounds, scale2, renderSession) {
                 var w = this.game.width;
                 var h = this.game.height;
                 var res = renderSession.resolution;
-                skeleton.flipX = scale2.x < 0;
-                skeleton.flipY = scale2.y < 0;
+                phaserSpine.skeleton.flipX = scale2.x < 0;
+                phaserSpine.skeleton.flipY = scale2.y < 0;
                 var scale = Math.max(scale2.x, scale2.y);
                 var width = w / scale;
                 var height = h / scale;
@@ -9504,7 +9519,7 @@ var PhaserSpine;
                 this.mvp.ortho2d(x * res, y, width * res, height * res);
                 renderSession.gl.viewport(0, 0, w * res, h * res);
             };
-            Renderer.prototype.draw = function (skeleton, renderSession, premultipliedAlpha) {
+            Renderer.prototype.draw = function (phaserSpine, renderSession, premultipliedAlpha) {
                 renderSession.spriteBatch.end();
                 var currentBlendMode = renderSession.blendModeManager.currentBlendMode;
                 var currentShader = renderSession.shaderManager.currentShader;
@@ -9517,7 +9532,7 @@ var PhaserSpine;
                 this.shader.setUniform4x4f(spine.webgl.Shader.MVP_MATRIX, this.mvp.values);
                 this.batcher.begin(this.shader);
                 this.skeletonRenderer.premultipliedAlpha = premultipliedAlpha;
-                this.skeletonRenderer.draw(this.batcher, skeleton);
+                this.skeletonRenderer.draw(this.batcher, phaserSpine.skeleton);
                 this.batcher.end();
                 this.shader.unbind();
                 if (PhaserSpine.SpinePlugin.DEBUG) {
@@ -9525,7 +9540,7 @@ var PhaserSpine;
                     this.debugShader.setUniform4x4f(spine.webgl.Shader.MVP_MATRIX, this.mvp.values);
                     this.debugRenderer.premultipliedAlpha = premultipliedAlpha;
                     this.shapes.begin(this.debugShader);
-                    this.debugRenderer.draw(this.shapes, skeleton);
+                    this.debugRenderer.draw(this.shapes, phaserSpine.skeleton);
                     this.shapes.end();
                     this.debugShader.unbind();
                 }

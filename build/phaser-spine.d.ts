@@ -16,8 +16,8 @@ declare module PhaserSpine {
             constructor(game: Phaser.Game);
             destroy(): void;
             resize(bounds: PIXI.Rectangle, scale: Phaser.Point, renderSession: IRenderSession): void;
-            drawImages(skeleton: spine.Skeleton, renderSession: IRenderSession): void;
-            drawTriangles(skeleton: spine.Skeleton, renderSession: IRenderSession): void;
+            drawImages(phaserSpine: Spine, renderSession: IRenderSession): void;
+            drawTriangles(phaserSpine: Spine, renderSession: IRenderSession): void;
             private drawTriangle(renderSession, img, x0, y0, u0, v0, x1, y1, u1, v1, x2, y2, u2, v2);
             private computeRegionVertices(slot, region, pma);
             private computeMeshVertices(slot, mesh, pma);
@@ -95,6 +95,7 @@ declare module PhaserSpine {
         onDispose: Phaser.Signal;
         onComplete: Phaser.Signal;
         onEnd: Phaser.Signal;
+        alpha: number;
         constructor(game: Phaser.Game, x: number, y: number, key: string, premultipliedAlpha?: boolean);
         destroy(destroyChildren: boolean): void;
         private createSkeleton(key);
@@ -150,8 +151,8 @@ declare module PhaserSpine {
             private shapes;
             constructor(game: Phaser.Game);
             destroy(): void;
-            resize(skeleton: spine.Skeleton, spriteBounds: IPIXIRectangle, scale2: Phaser.Point, renderSession: IRenderSession): void;
-            draw(skeleton: spine.Skeleton, renderSession: IRenderSession, premultipliedAlpha?: boolean): void;
+            resize(phaserSpine: Spine, spriteBounds: IPIXIRectangle, scale2: Phaser.Point, renderSession: IRenderSession): void;
+            draw(phaserSpine: Spine, renderSession: IRenderSession, premultipliedAlpha?: boolean): void;
         }
     }
 }

@@ -53,13 +53,13 @@ module PhaserSpine {
                 this.debugRenderer = null;
             }
 
-            public resize(skeleton: spine.Skeleton, spriteBounds: IPIXIRectangle, scale2: Phaser.Point, renderSession: IRenderSession): void {
+            public resize(phaserSpine: Spine, spriteBounds: IPIXIRectangle, scale2: Phaser.Point, renderSession: IRenderSession): void {
                 var w = this.game.width;
                 var h = this.game.height;
                 var res = renderSession.resolution;
 
-                skeleton.flipX = scale2.x < 0;
-                skeleton.flipY = scale2.y < 0;
+                phaserSpine.skeleton.flipX = scale2.x < 0;
+                phaserSpine.skeleton.flipY = scale2.y < 0;
 
                 var scale = Math.max(scale2.x, scale2.y);
 
@@ -75,7 +75,7 @@ module PhaserSpine {
                 renderSession.gl.viewport(0, 0, w * res, h * res);
             }
 
-            public draw(skeleton: spine.Skeleton, renderSession: IRenderSession, premultipliedAlpha?: boolean) {
+            public draw(phaserSpine: Spine, renderSession: IRenderSession, premultipliedAlpha?: boolean) {
                 ////////////////////:
                 ///        FIX: Save Phaser WebGL Context
                 /////////
@@ -102,7 +102,7 @@ module PhaserSpine {
                 //Start the batch and tell the SkeletonRenderer to render the active skeleton.
                 this.batcher.begin(this.shader);
                 this.skeletonRenderer.premultipliedAlpha = premultipliedAlpha;
-                this.skeletonRenderer.draw(this.batcher, skeleton);
+                this.skeletonRenderer.draw(this.batcher, phaserSpine.skeleton);
                 this.batcher.end();
 
                 this.shader.unbind();
@@ -113,7 +113,7 @@ module PhaserSpine {
                     this.debugShader.setUniform4x4f(spine.webgl.Shader.MVP_MATRIX, this.mvp.values);
                     this.debugRenderer.premultipliedAlpha = premultipliedAlpha;
                     this.shapes.begin(this.debugShader);
-                    this.debugRenderer.draw(this.shapes, skeleton);
+                    this.debugRenderer.draw(this.shapes, phaserSpine.skeleton);
                     this.shapes.end();
                     this.debugShader.unbind();
                 }

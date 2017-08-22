@@ -36,9 +36,9 @@ module PhaserSpine {
                 renderSession.context.translate(bounds.x / scale.x, bounds.y / scale.y);
             }
 
-            public drawImages (skeleton: spine.Skeleton, renderSession: IRenderSession) {
+            public drawImages (phaserSpine: Spine, renderSession: IRenderSession) {
                 let ctx = renderSession.context;
-                let drawOrder = skeleton.drawOrder;
+                let drawOrder = phaserSpine.skeleton.drawOrder;
 
                 let res = renderSession.resolution;
 
@@ -103,12 +103,12 @@ module PhaserSpine {
                 ctx.restore();
             }
 
-            public drawTriangles (skeleton: spine.Skeleton, renderSession: IRenderSession) {
+            public drawTriangles (phaserSpine: Spine, renderSession: IRenderSession) {
                 let blendMode: spine.BlendMode = null;
 
                 let vertices: ArrayLike<number> = null;
                 let triangles: Array<number> = null;
-                let drawOrder = skeleton.drawOrder;
+                let drawOrder = phaserSpine.skeleton.drawOrder;
 
                 let res = renderSession.resolution;
 

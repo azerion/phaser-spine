@@ -30,6 +30,19 @@ module PhaserSpine {
 
         public onEnd: Phaser.Signal;
 
+        get alpha(): number {
+            if (this.skeleton && this.skeleton.color) {
+                return this.skeleton.color.a;
+            }
+            return 0;
+        }
+
+        set alpha(value: number) {
+            if (this.skeleton && this.skeleton.color) {
+                this.skeleton.color.a = value;
+            }
+        }
+
         constructor(game: Phaser.Game, x: number, y: number, key: string, premultipliedAlpha: boolean = false) {
             super(game, x, y, '');
 
@@ -153,9 +166,9 @@ module PhaserSpine {
 
             (<Canvas.Renderer>this.renderer).resize(this.getBounds(), this.scale, renderSession);
             if (SpinePlugin.TRIANGLE) {
-                (<Canvas.Renderer>this.renderer).drawTriangles(this.skeleton, renderSession);
+                (<Canvas.Renderer>this.renderer).drawTriangles(this, renderSession);
             } else {
-                (<Canvas.Renderer>this.renderer).drawImages(this.skeleton, renderSession);
+                (<Canvas.Renderer>this.renderer).drawImages(this, renderSession);
             }
         }
 
@@ -164,8 +177,8 @@ module PhaserSpine {
                 return;
             }
 
-            (<WebGL.Renderer>this.renderer).resize(this.skeleton, <WebGL.IPIXIRectangle>this.getBounds(), this.scale, renderSession);
-            (<WebGL.Renderer>this.renderer).draw(this.skeleton, renderSession, this.premultipliedAlpha);
+            (<WebGL.Renderer>this.renderer).resize(this, <WebGL.IPIXIRectangle>this.getBounds(), this.scale, renderSession);
+            (<WebGL.Renderer>this.renderer).draw(this, renderSession, this.premultipliedAlpha);
         }
 
         /**
