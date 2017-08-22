@@ -15,6 +15,12 @@ module PhaserSpine {
                 this.game = game;
             }
 
+            public destroy(): void {
+                this.game = null;
+                this.vertices = null;
+                this.tempColor = null;
+            }
+
             public resize(bounds: PIXI.Rectangle, scale: Phaser.Point, renderSession: IRenderSession): void {
                 let res = renderSession.resolution;
 

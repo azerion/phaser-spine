@@ -8965,6 +8965,11 @@ var PhaserSpine;
                 this.tempColor = new spine.Color();
                 this.game = game;
             }
+            Renderer.prototype.destroy = function () {
+                this.game = null;
+                this.vertices = null;
+                this.tempColor = null;
+            };
             Renderer.prototype.resize = function (bounds, scale, renderSession) {
                 var res = renderSession.resolution;
                 renderSession.context.resetTransform();
@@ -9320,6 +9325,24 @@ var PhaserSpine;
             }
             return _this;
         }
+        Spine.prototype.destroy = function (destroyChildren) {
+            _super.prototype.destroy.call(this, destroyChildren);
+            this.specialBounds = null;
+            this.renderer.destroy();
+            this.onEvent.dispose();
+            this.onStart.dispose();
+            this.onInterrupt.dispose();
+            this.onDispose.dispose();
+            this.onComplete.dispose();
+            this.onEnd.dispose();
+            this.onEvent = null;
+            this.onStart = null;
+            this.onInterrupt = null;
+            this.onDispose = null;
+            this.onComplete = null;
+            this.onEnd = null;
+            this.state.clearListeners();
+        };
         Spine.prototype.createSkeleton = function (key) {
             var _this = this;
             var atlas = new spine.TextureAtlas(this.game.cache.getText('atlas_' + PhaserSpine.SpinePlugin.SPINE_NAMESPACE + '_' + key), function (path) {
@@ -9452,6 +9475,19 @@ var PhaserSpine;
                 this.debugShader = spine.webgl.Shader.newColored(gl);
                 this.shapes = new spine.webgl.ShapeRenderer(gl);
             }
+            Renderer.prototype.destroy = function () {
+                this.shader.dispose();
+                this.batcher.dispose();
+                this.debugShader.dispose();
+                this.shapes.dispose();
+                this.game = null;
+                this.shader = null;
+                this.debugShader = null;
+                this.batcher = null;
+                this.shapes = null;
+                this.skeletonRenderer = null;
+                this.debugRenderer = null;
+            };
             Renderer.prototype.resize = function (skeleton, spriteBounds, scale2, renderSession) {
                 var w = this.game.width;
                 var h = this.game.height;

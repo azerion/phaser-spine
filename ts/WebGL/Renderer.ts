@@ -1,7 +1,5 @@
 module PhaserSpine {
     export module WebGL {
-        import ManagedWebGLRenderingContext = spine.webgl.ManagedWebGLRenderingContext;
-
         export class Renderer {
             public game: Phaser.Game;
 
@@ -38,6 +36,21 @@ module PhaserSpine {
                 this.debugRenderer.drawPaths = false;
                 this.debugShader = spine.webgl.Shader.newColored(gl);
                 this.shapes = new spine.webgl.ShapeRenderer(gl);
+            }
+
+            public destroy(): void {
+                this.shader.dispose();
+                this.batcher.dispose();
+                this.debugShader.dispose();
+                this.shapes.dispose();
+
+                this.game = null;
+                this.shader = null;
+                this.debugShader = null;
+                this.batcher = null;
+                this.shapes = null;
+                this.skeletonRenderer = null;
+                this.debugRenderer = null;
             }
 
             public resize(skeleton: spine.Skeleton, spriteBounds: IPIXIRectangle, scale2: Phaser.Point, renderSession: IRenderSession): void {

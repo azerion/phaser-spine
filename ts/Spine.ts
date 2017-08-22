@@ -85,6 +85,30 @@ module PhaserSpine {
             }
         }
 
+        public destroy(destroyChildren: boolean): void {
+            super.destroy(destroyChildren);
+
+            this.specialBounds = null;
+
+            this.renderer.destroy();
+
+            this.onEvent.dispose();
+            this.onStart.dispose();
+            this.onInterrupt.dispose();
+            this.onDispose.dispose();
+            this.onComplete.dispose();
+            this.onEnd.dispose();
+
+            this.onEvent = null;
+            this.onStart = null;
+            this.onInterrupt = null;
+            this.onDispose = null;
+            this.onComplete = null;
+            this.onEnd = null;
+
+            this.state.clearListeners();
+        }
+
         private createSkeleton(key: string): spine.Skeleton {
             // Load the texture atlas using name.atlas and name.png from the AssetManager.
             // The function passed to TextureAtlas is used to resolve relative paths.

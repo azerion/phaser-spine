@@ -14,6 +14,7 @@ declare module PhaserSpine {
             private vertices;
             private tempColor;
             constructor(game: Phaser.Game);
+            destroy(): void;
             resize(bounds: PIXI.Rectangle, scale: Phaser.Point, renderSession: IRenderSession): void;
             drawImages(skeleton: spine.Skeleton, renderSession: IRenderSession): void;
             drawTriangles(skeleton: spine.Skeleton, renderSession: IRenderSession): void;
@@ -95,6 +96,7 @@ declare module PhaserSpine {
         onComplete: Phaser.Signal;
         onEnd: Phaser.Signal;
         constructor(game: Phaser.Game, x: number, y: number, key: string, premultipliedAlpha?: boolean);
+        destroy(destroyChildren: boolean): void;
         private createSkeleton(key);
         update(): void;
         _renderCanvas(renderSession: Canvas.IRenderSession, matrix?: PIXI.Matrix): void;
@@ -147,6 +149,7 @@ declare module PhaserSpine {
             private debugShader;
             private shapes;
             constructor(game: Phaser.Game);
+            destroy(): void;
             resize(skeleton: spine.Skeleton, spriteBounds: IPIXIRectangle, scale2: Phaser.Point, renderSession: IRenderSession): void;
             draw(skeleton: spine.Skeleton, renderSession: IRenderSession, premultipliedAlpha?: boolean): void;
         }
