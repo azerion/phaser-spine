@@ -95,7 +95,6 @@ declare module PhaserSpine {
         onDispose: Phaser.Signal;
         onComplete: Phaser.Signal;
         onEnd: Phaser.Signal;
-        alpha: number;
         constructor(game: Phaser.Game, x: number, y: number, key: string, premultipliedAlpha?: boolean);
         destroy(destroyChildren: boolean): void;
         private createSkeleton(key);

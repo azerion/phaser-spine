@@ -30,19 +30,6 @@ module PhaserSpine {
 
         public onEnd: Phaser.Signal;
 
-        get alpha(): number {
-            if (this.skeleton && this.skeleton.color) {
-                return this.skeleton.color.a;
-            }
-            return 0;
-        }
-
-        set alpha(value: number) {
-            if (this.skeleton && this.skeleton.color) {
-                this.skeleton.color.a = value;
-            }
-        }
-
         constructor(game: Phaser.Game, x: number, y: number, key: string, premultipliedAlpha: boolean = false) {
             super(game, x, y, '');
 
@@ -146,6 +133,8 @@ module PhaserSpine {
 
         public update(): void {
             super.update();
+
+            this.skeleton.color.a = this.worldAlpha;
 
             this.state.update(this.game.time.elapsed / 1000);
             this.state.apply(this.skeleton);

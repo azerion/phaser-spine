@@ -3,7 +3,7 @@
  * Spine plugin for Phaser.io!
  *
  * OrangeGames
- * Build at 22-08-2017
+ * Build at 24-08-2017
  * Released under MIT License 
  */
 
@@ -9325,21 +9325,6 @@ var PhaserSpine;
             }
             return _this;
         }
-        Object.defineProperty(Spine.prototype, "alpha", {
-            get: function () {
-                if (this.skeleton && this.skeleton.color) {
-                    return this.skeleton.color.a;
-                }
-                return 0;
-            },
-            set: function (value) {
-                if (this.skeleton && this.skeleton.color) {
-                    this.skeleton.color.a = value;
-                }
-            },
-            enumerable: true,
-            configurable: true
-        });
         Spine.prototype.destroy = function (destroyChildren) {
             _super.prototype.destroy.call(this, destroyChildren);
             this.specialBounds = null;
@@ -9373,6 +9358,7 @@ var PhaserSpine;
         };
         Spine.prototype.update = function () {
             _super.prototype.update.call(this);
+            this.skeleton.color.a = this.worldAlpha;
             this.state.update(this.game.time.elapsed / 1000);
             this.state.apply(this.skeleton);
             this.skeleton.updateWorldTransform();
