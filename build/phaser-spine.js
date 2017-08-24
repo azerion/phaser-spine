@@ -9358,9 +9358,10 @@ var PhaserSpine;
         };
         Spine.prototype.update = function () {
             _super.prototype.update.call(this);
-            this.skeleton.color.a = this.worldAlpha;
             this.state.update(this.game.time.elapsed / 1000);
             this.state.apply(this.skeleton);
+            this.skeleton.color.a = this.worldAlpha;
+            this.skeleton.getRootBone().rotation = this.worldRotation * 180 / Math.PI;
             this.skeleton.updateWorldTransform();
         };
         Spine.prototype._renderCanvas = function (renderSession, matrix) {
