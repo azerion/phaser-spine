@@ -16,7 +16,7 @@
 </head>
 <body>
 <script>
-    var circle, game;
+    var circle, game, button1;
 
 
     game = new Phaser.Game(800, 600, Phaser.AUTO, '', {init: init, preload: preload, create: create});
@@ -35,7 +35,7 @@
 
     function create() {
         //Add skin switch button
-        var button1 = this.game.add.button(20, 20, 'button1', function() {
+        button1 = this.game.add.button(20, 20, 'button1', function() {
             goblin.destroy();
             createGoblin();
         });

@@ -88,25 +88,40 @@ module PhaserSpine {
         public destroy(destroyChildren: boolean): void {
             super.destroy(destroyChildren);
 
+            if (this.game === null || this.destroyPhase) { return; }
+
             this.specialBounds = null;
 
-            this.renderer.destroy();
+            if (this.renderer) {
+                this.renderer.destroy();
+                this.renderer = null;
+            }
 
-            this.onEvent.dispose();
-            this.onStart.dispose();
-            this.onInterrupt.dispose();
-            this.onDispose.dispose();
-            this.onComplete.dispose();
-            this.onEnd.dispose();
+            if (this.onEvent) {
+                this.onEvent.dispose();
+                this.onEvent = null;
 
-            this.onEvent = null;
-            this.onStart = null;
-            this.onInterrupt = null;
-            this.onDispose = null;
-            this.onComplete = null;
-            this.onEnd = null;
+                this.onStart.dispose();
+                this.onStart = null;
 
-            this.state.clearListeners();
+                this.onInterrupt.dispose();
+                this.onInterrupt = null;
+
+                this.onDispose.dispose();
+                this.onDispose = null;
+
+                this.onComplete.dispose();
+                this.onComplete = null;
+
+                this.onEnd.dispose();
+                this.onEnd = null;
+            }
+
+            if (this.state) {
+                this.state.clearListeners();
+                this.state = null;
+                this.stateData = null;
+            }
         }
 
         private createSkeleton(key: string): spine.Skeleton {

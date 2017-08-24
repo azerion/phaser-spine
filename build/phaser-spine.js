@@ -9327,21 +9327,33 @@ var PhaserSpine;
         }
         Spine.prototype.destroy = function (destroyChildren) {
             _super.prototype.destroy.call(this, destroyChildren);
+            if (this.game === null || this.destroyPhase) {
+                return;
+            }
             this.specialBounds = null;
-            this.renderer.destroy();
-            this.onEvent.dispose();
-            this.onStart.dispose();
-            this.onInterrupt.dispose();
-            this.onDispose.dispose();
-            this.onComplete.dispose();
-            this.onEnd.dispose();
-            this.onEvent = null;
-            this.onStart = null;
-            this.onInterrupt = null;
-            this.onDispose = null;
-            this.onComplete = null;
-            this.onEnd = null;
-            this.state.clearListeners();
+            if (this.renderer) {
+                this.renderer.destroy();
+                this.renderer = null;
+            }
+            if (this.onEvent) {
+                this.onEvent.dispose();
+                this.onEvent = null;
+                this.onStart.dispose();
+                this.onStart = null;
+                this.onInterrupt.dispose();
+                this.onInterrupt = null;
+                this.onDispose.dispose();
+                this.onDispose = null;
+                this.onComplete.dispose();
+                this.onComplete = null;
+                this.onEnd.dispose();
+                this.onEnd = null;
+            }
+            if (this.state) {
+                this.state.clearListeners();
+                this.state = null;
+                this.stateData = null;
+            }
         };
         Spine.prototype.createSkeleton = function (key) {
             var _this = this;
