@@ -134,10 +134,11 @@ module PhaserSpine {
         public update(): void {
             super.update();
 
-            this.skeleton.color.a = this.worldAlpha;
-
             this.state.update(this.game.time.elapsed / 1000);
             this.state.apply(this.skeleton);
+
+            this.skeleton.color.a = this.worldAlpha;
+            this.skeleton.getRootBone().rotation = this.worldRotation * 180 / Math.PI;
             this.skeleton.updateWorldTransform();
         }
 
