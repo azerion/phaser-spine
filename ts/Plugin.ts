@@ -62,6 +62,9 @@ module PhaserSpine {
             (<PhaserSpine.SpineLoader>Phaser.Loader.prototype).spine = function (key: string, url: string, scalingVariants?: string[]) {
                 let path: string = url.substr(0, url.lastIndexOf('.'));
 
+                let pathonly = url.substr(0, url.lastIndexOf('/'));
+                let filenameonly = url.substring(url.lastIndexOf('/') + 1, url.lastIndexOf('.'));
+
                 (<PhaserSpine.SpineLoader>this).text('atlas_' + SpinePlugin.SPINE_NAMESPACE + '_' + key, path + '.atlas');
                 (<PhaserSpine.SpineLoader>this).json(SpinePlugin.SPINE_NAMESPACE + key, path + '.json');
                 // (<PhaserSpine.SpineLoader>this).image(SpinePlugin.SPINE_NAMESPACE + key, path +'.png');
@@ -80,7 +83,11 @@ module PhaserSpine {
                             }
 
                             if (firstImageName !== null && line.indexOf(firstImageName) !== -1 && line.indexOf('.') !== -1) {
-                                this.image(line, url.substr(0, url.lastIndexOf('/') + 1) + line)
+                                //Only load up atlas images if filename or keyname matches text atlas key [atlas_spine_keyname] are of the same spine project
+                                //Assumes each spine project is in its own separate directory. Filename or keyname must match text atlas key!
+                                if (filenameonly === name.replace('atlas_spine_', '') || key === name.replace('atlas_spine_', '')) {
+                                    this.image(line, pathonly + '/' + line);
+                                }
                             }
                         }.bind(this));
                     }
