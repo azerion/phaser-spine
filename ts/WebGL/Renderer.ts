@@ -53,10 +53,12 @@ module PhaserSpine {
                 this.debugRenderer = null;
             }
 
-            public resize(phaserSpine: Spine, spriteBounds: IPIXIRectangle, scale2: Phaser.Point, renderSession: IRenderSession): void {
+            public resize(phaserSpine: Spine, renderSession: IRenderSession): void {
                 var w = this.game.width;
                 var h = this.game.height;
                 var res = renderSession.resolution;
+                var scale2 = phaserSpine.scale;
+                var spriteBounds = <WebGL.IPIXIRectangle>phaserSpine.getBounds();
 
                 phaserSpine.skeleton.flipX = scale2.x < 0;
                 phaserSpine.skeleton.flipY = scale2.y < 0;
@@ -66,7 +68,7 @@ module PhaserSpine {
                 var width = w / scale;
                 var height = h / scale;
                 var centerX = - spriteBounds.centerX;
-                var centerY = (-h + spriteBounds.centerY) * res + spriteBounds.height / 2;
+                var centerY = (-h + spriteBounds.centerY) * res;
 
                 var x = centerX / scale;
                 var y = centerY / scale;
@@ -75,7 +77,7 @@ module PhaserSpine {
                 renderSession.gl.viewport(0, 0, w * res, h * res);
             }
 
-            public draw(phaserSpine: Spine, renderSession: IRenderSession, premultipliedAlpha?: boolean) {
+            public draw(phaserSpine: Spine, renderSession: IRenderSession) {
                 ////////////////////:
                 ///        FIX: Save Phaser WebGL Context
                 /////////
@@ -101,7 +103,7 @@ module PhaserSpine {
 
                 //Start the batch and tell the SkeletonRenderer to render the active skeleton.
                 this.batcher.begin(this.shader);
-                this.skeletonRenderer.premultipliedAlpha = premultipliedAlpha;
+                this.skeletonRenderer.premultipliedAlpha = phaserSpine.premultipliedAlpha;
                 this.skeletonRenderer.draw(this.batcher, phaserSpine.skeleton);
                 this.batcher.end();
 
@@ -111,7 +113,7 @@ module PhaserSpine {
                 if (SpinePlugin.DEBUG) {
                     this.debugShader.bind();
                     this.debugShader.setUniform4x4f(spine.webgl.Shader.MVP_MATRIX, this.mvp.values);
-                    this.debugRenderer.premultipliedAlpha = premultipliedAlpha;
+                    this.debugRenderer.premultipliedAlpha = phaserSpine.premultipliedAlpha;
                     this.shapes.begin(this.debugShader);
                     this.debugRenderer.draw(this.shapes, phaserSpine.skeleton);
                     this.shapes.end();

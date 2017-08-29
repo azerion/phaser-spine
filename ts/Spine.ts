@@ -14,9 +14,11 @@ module PhaserSpine {
 
         private renderer: Canvas.Renderer | WebGL.Renderer;
 
-        private specialBounds: PIXI.Rectangle;
+        public offset: spine.Vector2;
 
-        private premultipliedAlpha: boolean = false;
+        public size: spine.Vector2;
+
+        public premultipliedAlpha: boolean = false;
 
         public onEvent: Phaser.Signal;
 
@@ -37,19 +39,13 @@ module PhaserSpine {
 
             this.skeleton = this.createSkeleton(key);
             this.skeleton.flipY = (this.game.renderType === Phaser.CANVAS); //In Canvas we always FlipY
-            this.skeleton.setToSetupPose(); //Update everything to get correct bounds
-            this.skeleton.updateWorldTransform(); //Update everything to get correct bounds
-
-            var size = new spine.Vector2();
-            this.skeleton.getBounds(new spine.Vector2(), size, []);
-            this.texture.setFrame(new PIXI.Rectangle(0, 0, size.x, size.y));
 
             this.skeleton.setToSetupPose();
             this.skeleton.updateWorldTransform();
-            var offset = new spine.Vector2();
-            var size = new spine.Vector2();
-            this.skeleton.getBounds(offset, size ,[]);
-            this.specialBounds = new PIXI.Rectangle(offset.x, offset.y, size.x, size.y);
+            this.offset = new spine.Vector2();
+            this.size = new spine.Vector2();
+            this.skeleton.getBounds(this.offset, this.size ,[]);
+            this.texture.setFrame(new PIXI.Rectangle(0, 0, this.size.x, this.size.y));
 
             // Create an AnimationState.
             this.stateData = new spine.AnimationStateData(this.skeleton.data);
@@ -90,7 +86,8 @@ module PhaserSpine {
 
             if (this.game === null || this.destroyPhase) { return; }
 
-            this.specialBounds = null;
+            this.offset = null;
+            this.size = null;
 
             if (this.renderer) {
                 this.renderer.destroy();
@@ -169,7 +166,7 @@ module PhaserSpine {
                 return;
             }
 
-            (<Canvas.Renderer>this.renderer).resize(this.getBounds(), this.scale, renderSession);
+            (<Canvas.Renderer>this.renderer).resize(this, renderSession);
             if (SpinePlugin.TRIANGLE) {
                 (<Canvas.Renderer>this.renderer).drawTriangles(this, renderSession);
             } else {
@@ -182,8 +179,8 @@ module PhaserSpine {
                 return;
             }
 
-            (<WebGL.Renderer>this.renderer).resize(this, <WebGL.IPIXIRectangle>this.getBounds(), this.scale, renderSession);
-            (<WebGL.Renderer>this.renderer).draw(this, renderSession, this.premultipliedAlpha);
+            (<WebGL.Renderer>this.renderer).resize(this, renderSession);
+            (<WebGL.Renderer>this.renderer).draw(this, renderSession);
         }
 
         /**

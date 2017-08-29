@@ -15,7 +15,7 @@ declare module PhaserSpine {
             private tempColor;
             constructor(game: Phaser.Game);
             destroy(): void;
-            resize(bounds: PIXI.Rectangle, scale: Phaser.Point, renderSession: IRenderSession): void;
+            resize(phaserSpine: Spine, renderSession: IRenderSession): void;
             drawImages(phaserSpine: Spine, renderSession: IRenderSession): void;
             drawTriangles(phaserSpine: Spine, renderSession: IRenderSession): void;
             private drawTriangle(renderSession, img, x0, y0, u0, v0, x1, y1, u1, v1, x2, y2, u2, v2);
@@ -87,8 +87,9 @@ declare module PhaserSpine {
         private stateData;
         private state;
         private renderer;
-        private specialBounds;
-        private premultipliedAlpha;
+        offset: spine.Vector2;
+        size: spine.Vector2;
+        premultipliedAlpha: boolean;
         onEvent: Phaser.Signal;
         onStart: Phaser.Signal;
         onInterrupt: Phaser.Signal;
@@ -150,8 +151,8 @@ declare module PhaserSpine {
             private shapes;
             constructor(game: Phaser.Game);
             destroy(): void;
-            resize(phaserSpine: Spine, spriteBounds: IPIXIRectangle, scale2: Phaser.Point, renderSession: IRenderSession): void;
-            draw(phaserSpine: Spine, renderSession: IRenderSession, premultipliedAlpha?: boolean): void;
+            resize(phaserSpine: Spine, renderSession: IRenderSession): void;
+            draw(phaserSpine: Spine, renderSession: IRenderSession): void;
         }
     }
 }

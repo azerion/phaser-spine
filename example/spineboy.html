@@ -18,7 +18,7 @@
 
     var buddy, game, notificationLeft, notificationRight, tween;
 
-    game = new Phaser.Game(400, 400, Phaser.AUTO, '', {init: init, preload: preload, create: create});
+    game = new Phaser.Game(400, 400, Phaser.CANVAS, '', {init: init, preload: preload, create: create});
 
 
     function init() {
@@ -37,8 +37,8 @@
 
     function create() {
         //create the spine object
-        spineboy = game.add.spine(0, 0, "spineboy", true);
-        spineboy.scale.set(0.5);
+        spineboy = game.add.spine(200, 200, "spineboy", true);
+//        spineboy.scale.set(0.5);
         // set up the mixes!
         spineboy.setMixByName("run", "jump", 0.2);
         spineboy.setMixByName("jump", "run", 0.4);

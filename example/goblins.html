@@ -18,7 +18,7 @@
 
     var buddy, game;
 
-    game = new Phaser.Game(400, 400, Phaser.AUTO, '', {init: init, preload: preload, create: create});
+    game = new Phaser.Game(400, 400, Phaser.CANVAS, '', {init: init, preload: preload, create: create});
 
     function init() {
         this.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
@@ -26,7 +26,8 @@
 
     function preload() {
         game.plugins.add(PhaserSpine.SpinePlugin, {
-            triangleRendering: true
+            triangleRendering: true,
+            debugRendering: true
         });
         game.stage.disableVisibilityChange = true;
 
@@ -41,7 +42,7 @@
         goblin.setAnimationByName(0, "walk", true);
         goblin.setSkinByName("goblin");
         goblin.setToSetupPose();
-        goblin.scale.set(0.5);
+//        goblin.scale.set(0.5);
 
         //Add skin switch button
         var button1 = this.game.add.button(20, 20, 'button1', function() {
