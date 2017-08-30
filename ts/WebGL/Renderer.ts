@@ -54,27 +54,16 @@ module PhaserSpine {
             }
 
             public resize(phaserSpine: Spine, renderSession: IRenderSession): void {
-                var w = this.game.width;
-                var h = this.game.height;
-                var res = renderSession.resolution;
-                var scale2 = phaserSpine.scale;
-                var spriteBounds = <WebGL.IPIXIRectangle>phaserSpine.getBounds();
+                let res = renderSession.resolution;
+                let scale = phaserSpine.scale;
+                let offset = phaserSpine.offset;
+                let anchor = phaserSpine.anchor;
+                let position = phaserSpine.position;
 
-                phaserSpine.skeleton.flipX = scale2.x < 0;
-                phaserSpine.skeleton.flipY = scale2.y < 0;
+                phaserSpine.skeleton.flipX = scale.x < 0;
+                phaserSpine.skeleton.flipY = scale.y < 0;
 
-                var scale = Math.max(scale2.x, scale2.y);
-
-                var width = w / scale;
-                var height = h / scale;
-                var centerX = - spriteBounds.centerX;
-                var centerY = (-h + spriteBounds.centerY) * res;
-
-                var x = centerX / scale;
-                var y = centerY / scale;
-
-                this.mvp.ortho2d(x * res, y, width * res, height * res);
-                renderSession.gl.viewport(0, 0, w * res, h * res);
+                this.mvp.ortho2d(-400, -300, 800, 600);
             }
 
             public draw(phaserSpine: Spine, renderSession: IRenderSession) {

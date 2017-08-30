@@ -18,7 +18,7 @@
 
     var buddy, game;
 
-    game = new Phaser.Game(800, 600, Phaser.CANVAS, '', {init: init, preload: preload, create: create});
+    game = new Phaser.Game(800, 600, Phaser.AUTO, '', {init: init, preload: preload, create: create});
 
     function init() {
         this.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
