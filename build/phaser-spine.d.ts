@@ -109,6 +109,7 @@ declare module PhaserSpine {
         setSkinByName(skinName: string): void;
         setSkin(skin: spine.Skin): void;
         setToSetupPose(): void;
+        resetAnchorToRootBonePosition(): void;
         createCombinedSkin(newSkinName: string, ...skinNames: string[]): spine.Skin;
     }
 }

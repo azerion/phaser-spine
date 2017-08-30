@@ -3,7 +3,7 @@
  * Spine plugin for Phaser.io!
  *
  * OrangeGames
- * Build at 29-08-2017
+ * Build at 30-08-2017
  * Released under MIT License 
  */
 
@@ -8971,20 +8971,15 @@ var PhaserSpine;
                 this.tempColor = null;
             };
             Renderer.prototype.resize = function (phaserSpine, renderSession) {
-                var bounds = phaserSpine.getBounds();
-                var centerX = phaserSpine.offset.x + phaserSpine.size.x / 2;
-                var centerY = phaserSpine.offset.y + phaserSpine.size.y / 2;
-                var scaleX = phaserSpine.size.x / this.game.width;
-                var scaleY = phaserSpine.size.y / this.game.height;
-                var scale = 1;
-                if (scale < 1)
-                    scale = 1;
-                var width = this.game.width * scale;
-                var height = this.game.height * scale;
+                var res = renderSession.resolution;
+                var scale = phaserSpine.scale;
+                var offset = phaserSpine.offset;
+                var anchor = phaserSpine.anchor;
+                var position = phaserSpine.position;
                 renderSession.context.setTransform(1, 0, 0, 1, 0, 0);
-                renderSession.context.scale(1 / scale, 1 / scale);
-                renderSession.context.translate(-centerX, -centerY);
-                renderSession.context.translate(bounds.x, bounds.y);
+                renderSession.context.translate(position.x, position.y);
+                renderSession.context.translate(-(offset.x * scale.x + phaserSpine.width * anchor.x), -(offset.y * scale.y + phaserSpine.height * anchor.y));
+                renderSession.context.scale(scale.x * res, scale.y * res);
             };
             Renderer.prototype.drawImages = function (phaserSpine, renderSession) {
                 var ctx = renderSession.context;
@@ -9328,6 +9323,7 @@ var PhaserSpine;
             else {
                 _this.renderer = new PhaserSpine.WebGL.Renderer(_this.game);
             }
+            _this.resetAnchorToRootBonePosition();
             return _this;
         }
         Spine.prototype.destroy = function (destroyChildren) {
@@ -9436,6 +9432,9 @@ var PhaserSpine;
         };
         Spine.prototype.setToSetupPose = function () {
             this.skeleton.setToSetupPose();
+        };
+        Spine.prototype.resetAnchorToRootBonePosition = function () {
+            this.anchor.set(Math.abs(this.offset.x) / this.size.x, Math.abs(this.offset.y) / this.size.y);
         };
         Spine.prototype.createCombinedSkin = function (newSkinName) {
             var skinNames = [];

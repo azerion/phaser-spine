@@ -22,43 +22,25 @@ module PhaserSpine {
             }
 
             public resize(phaserSpine: Spine,  renderSession: IRenderSession): void {
-                // let res = renderSession.resolution;
-                // let scale = phaserSpine.scale;
-                let bounds = phaserSpine.getBounds();
+                let res = renderSession.resolution;
+                let scale = phaserSpine.scale;
+                let offset = phaserSpine.offset;
+                let anchor = phaserSpine.anchor;
+                let position = phaserSpine.position;
 
-                // magic
-                var centerX = phaserSpine.offset.x + phaserSpine.size.x / 2;
-                var centerY = phaserSpine.offset.y + phaserSpine.size.y / 2;
-                var scaleX = phaserSpine.size.x / this.game.width;
-                var scaleY = phaserSpine.size.y / this.game.height;
-                var scale = 1;
-                if (scale < 1) scale = 1;
-                var width = this.game.width * scale;
-                var height = this.game.height * scale;
                 renderSession.context.setTransform(1, 0, 0, 1, 0, 0);
-                renderSession.context.scale(1 / scale, 1 / scale);
-
-                //Offset to spine's rootbone position
-                renderSession.context.translate(-centerX, -centerY);
 
                 //Offset to Phaser's position
-                renderSession.context.translate(bounds.x, bounds.y);
+                renderSession.context.translate(position.x, position.y);
 
-                //Calculate the x/y positions
-                //
-                // renderSession.context.setTransform(1, 0, 0, 1, 0, 0);;
-                // //Scale the animation
-                // renderSession.context.scale(scale.x * res, scale.y * res);
-                // //Offset to model's center
-                // renderSession.context.translate(
-                //     phaserSpine.offset.x + phaserSpine.size.x / 2,
-                //     phaserSpine.offset.y + phaserSpine.size.y / 2
-                // );
-                // // if(res > 1){
-                // //     renderSession.context.translate(0, bounds.height / scale.y / res / 2);
-                // // }
-                // //Offset to center of screen
-                // renderSession.context.translate(this.game.width / 2, this.game.height / 2);
+                //Offset to spine's rootbone position taking anchor in account
+                renderSession.context.translate(
+                    -(offset.x * scale.x + phaserSpine.width * anchor.x),
+                    -(offset.y * scale.y + phaserSpine.height * anchor.y)
+                );
+
+                //Now adjust for scale, let's not include Phaser.Bounds translations because it already takes scale into account
+                renderSession.context.scale(scale.x * res, scale.y * res);
             }
 
             public drawImages (phaserSpine: Spine, renderSession: IRenderSession) {

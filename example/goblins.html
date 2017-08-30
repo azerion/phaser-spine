@@ -18,7 +18,7 @@
 
     var buddy, game;
 
-    game = new Phaser.Game(400, 400, Phaser.CANVAS, '', {init: init, preload: preload, create: create});
+    game = new Phaser.Game(400, 400, Phaser.CANVAS, '', {init: init, preload: preload, create: create, render: render});
 
     function init() {
         this.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
@@ -27,7 +27,7 @@
     function preload() {
         game.plugins.add(PhaserSpine.SpinePlugin, {
             triangleRendering: true,
-            debugRendering: true
+            debugRendering: false
         });
         game.stage.disableVisibilityChange = true;
 
@@ -38,7 +38,7 @@
 
     function create() {
         //create the spine object
-        goblin = game.add.spine(200, 200, "goblin");
+        goblin = game.add.spine(200, 400, "goblin");
         goblin.setAnimationByName(0, "walk", true);
         goblin.setSkinByName("goblin");
         goblin.setToSetupPose();
@@ -53,6 +53,11 @@
             goblin.setSkinByName("goblingirl");
             goblin.setToSetupPose();
         });
+    }
+
+    function render() {
+//        game.debug.spriteBounds(goblin);
+//        game.debug.spriteInfo(goblin, 20, 20);
     }
 </script>
 

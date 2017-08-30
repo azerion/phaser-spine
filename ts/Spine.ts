@@ -79,6 +79,8 @@ module PhaserSpine {
             } else {
                 this.renderer = new PhaserSpine.WebGL.Renderer(this.game);
             }
+
+            this.resetAnchorToRootBonePosition();
         }
 
         public destroy(destroyChildren: boolean): void {
@@ -275,6 +277,13 @@ module PhaserSpine {
          */
         public setToSetupPose(): void {
             this.skeleton.setToSetupPose();
+        }
+
+        public resetAnchorToRootBonePosition(): void {
+            this.anchor.set(
+                Math.abs(this.offset.x) / this.size.x,
+                Math.abs(this.offset.y) / this.size.y
+            );
         }
 
         /**
