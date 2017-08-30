@@ -3,8 +3,8 @@
 <head>
     <title>Phaser Spine MultiPage Example</title>
 
-    <script src="../node_modules/phaser/build/phaser.js"></script>
-    <script src="../build/phaser-spine.js"></script>
+    <script src="../../node_modules/phaser/build/phaser.js"></script>
+    <script src="../../build/phaser-spine.js"></script>
 
     <style>
         body {
@@ -29,9 +29,9 @@
         game.plugins.add(PhaserSpine.SpinePlugin);
         game.stage.disableVisibilityChange = true;
 
-        game.load.spine('mp', "assets/mp/test-multipage-spine.json");
-        game.load.image('button1', "assets/btn_01.png");
-        game.load.image('button2', "assets/btn_02.png");
+        game.load.spine('mp', "../assets/mp/test-multipage-spine.json");
+        game.load.image('button1', "../assets/btn_01.png");
+        game.load.image('button2', "../assets/btn_02.png");
     }
 
     function create() {
