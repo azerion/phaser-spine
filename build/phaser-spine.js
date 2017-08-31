@@ -3,7 +3,7 @@
  * Spine plugin for Phaser.io!
  *
  * OrangeGames
- * Build at 30-08-2017
+ * Build at 31-08-2017
  * Released under MIT License 
  */
 
@@ -8975,10 +8975,11 @@ var PhaserSpine;
                 var scale = phaserSpine.scale;
                 var offset = phaserSpine.offset;
                 var anchor = phaserSpine.anchor;
-                var position = phaserSpine.position;
+                var position = phaserSpine.worldPosition;
+                var rootBone = phaserSpine.skeleton.getRootBone();
                 renderSession.context.setTransform(1, 0, 0, 1, 0, 0);
                 renderSession.context.translate(position.x, position.y);
-                renderSession.context.translate(-(offset.x * scale.x + phaserSpine.width * anchor.x), -(offset.y * scale.y + phaserSpine.height * anchor.y));
+                renderSession.context.translate(-(offset.x * scale.x + phaserSpine.width * anchor.x), -(offset.y * scale.y + phaserSpine.height * anchor.y) + rootBone.y);
                 renderSession.context.scale(scale.x * res, scale.y * res);
             };
             Renderer.prototype.drawImages = function (phaserSpine, renderSession) {
@@ -9300,6 +9301,7 @@ var PhaserSpine;
             _this.offset = new spine.Vector2();
             _this.size = new spine.Vector2();
             _this.skeleton.getBounds(_this.offset, _this.size, []);
+            console.log(_this.offset, _this.size);
             _this.texture.setFrame(new PIXI.Rectangle(0, 0, _this.size.x, _this.size.y));
             _this.stateData = new spine.AnimationStateData(_this.skeleton.data);
             _this.state = new spine.AnimationState(_this.stateData);

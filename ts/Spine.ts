@@ -45,6 +45,7 @@ module PhaserSpine {
             this.offset = new spine.Vector2();
             this.size = new spine.Vector2();
             this.skeleton.getBounds(this.offset, this.size ,[]);
+            console.log(this.offset, this.size);
             this.texture.setFrame(new PIXI.Rectangle(0, 0, this.size.x, this.size.y));
 
             // Create an AnimationState.
