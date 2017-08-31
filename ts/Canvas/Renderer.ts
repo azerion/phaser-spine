@@ -26,7 +26,7 @@ module PhaserSpine {
                 let scale = phaserSpine.scale;
                 let offset = phaserSpine.offset;
                 let anchor = phaserSpine.anchor;
-                let position = phaserSpine.position;
+                let position = phaserSpine.worldPosition;
 
                 renderSession.context.setTransform(1, 0, 0, 1, 0, 0);
 
