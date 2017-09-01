@@ -37,7 +37,7 @@ module PhaserSpine {
                 //Offset to spine's rootbone position taking anchor in account
                 renderSession.context.translate(
                     -(offset.x * scale.x + phaserSpine.width * anchor.x),
-                    -(offset.y * scale.y + phaserSpine.height * anchor.y) + rootBone.y
+                    -(offset.y * scale.y + phaserSpine.height * anchor.y)
                 );
 
                 //Now adjust for scale, let's not include Phaser.Bounds translations because it already takes scale into account

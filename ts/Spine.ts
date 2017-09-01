@@ -82,6 +82,36 @@ module PhaserSpine {
             }
 
             this.resetAnchorToRootBonePosition();
+
+            let rootBone: spine.Bone = this.skeleton.getRootBone();
+            
+            if (rootBone.x > 0 && rootBone.y > 0) {
+                // Upper right quadrant
+                // X correction
+                this.skeleton.x = -1 * rootBone.x;
+                this.skeleton.y = 1 * rootBone.y;
+                this.anchor.x *= -1;
+
+            } else if (rootBone.x < 0 && rootBone.y > 0) {
+                // Upper left quadrant
+                this.skeleton.x = 1 * rootBone.x;
+                this.skeleton.y = 1 * rootBone.y;
+
+            } else if (rootBone.x < 0 && rootBone.y < 0) {
+                // Bottom left quadrant
+                // Y correction
+                this.skeleton.x = 1 * rootBone.x;
+                this.skeleton.y = -1 * rootBone.y;
+                this.anchor.y *= -1;
+
+            } else if (rootBone.x > 0 && rootBone.y < 0) {
+                // Bottom right quadrant
+                // X and Y correction
+                this.skeleton.x = -1 * rootBone.x;
+                this.skeleton.y = -1 * rootBone.y;
+                this.anchor.x *= -1;
+                this.anchor.y *= -1;
+            }
         }
 
         public destroy(destroyChildren: boolean): void {

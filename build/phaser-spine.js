@@ -3,7 +3,7 @@
  * Spine plugin for Phaser.io!
  *
  * OrangeGames
- * Build at 31-08-2017
+ * Build at 01-09-2017
  * Released under MIT License 
  */
 
@@ -8979,7 +8979,7 @@ var PhaserSpine;
                 var rootBone = phaserSpine.skeleton.getRootBone();
                 renderSession.context.setTransform(1, 0, 0, 1, 0, 0);
                 renderSession.context.translate(position.x, position.y);
-                renderSession.context.translate(-(offset.x * scale.x + phaserSpine.width * anchor.x), -(offset.y * scale.y + phaserSpine.height * anchor.y) + rootBone.y);
+                renderSession.context.translate(-(offset.x * scale.x + phaserSpine.width * anchor.x), -(offset.y * scale.y + phaserSpine.height * anchor.y));
                 renderSession.context.scale(scale.x * res, scale.y * res);
             };
             Renderer.prototype.drawImages = function (phaserSpine, renderSession) {
@@ -9326,6 +9326,27 @@ var PhaserSpine;
                 _this.renderer = new PhaserSpine.WebGL.Renderer(_this.game);
             }
             _this.resetAnchorToRootBonePosition();
+            var rootBone = _this.skeleton.getRootBone();
+            if (rootBone.x > 0 && rootBone.y > 0) {
+                _this.skeleton.x = -1 * rootBone.x;
+                _this.skeleton.y = 1 * rootBone.y;
+                _this.anchor.x *= -1;
+            }
+            else if (rootBone.x < 0 && rootBone.y > 0) {
+                _this.skeleton.x = 1 * rootBone.x;
+                _this.skeleton.y = 1 * rootBone.y;
+            }
+            else if (rootBone.x < 0 && rootBone.y < 0) {
+                _this.skeleton.x = 1 * rootBone.x;
+                _this.skeleton.y = -1 * rootBone.y;
+                _this.anchor.y *= -1;
+            }
+            else if (rootBone.x > 0 && rootBone.y < 0) {
+                _this.skeleton.x = -1 * rootBone.x;
+                _this.skeleton.y = -1 * rootBone.y;
+                _this.anchor.x *= -1;
+                _this.anchor.y *= -1;
+            }
             return _this;
         }
         Spine.prototype.destroy = function (destroyChildren) {
