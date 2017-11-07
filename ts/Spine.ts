@@ -299,13 +299,13 @@ module PhaserSpine {
             let sprite: Phaser.Sprite = new Phaser.Sprite(this.game, 0, 0, spriteTexture);
 
             let baseRotation: number = descriptor.rotate ? Math.PI * 0.5 : 0.0;
-            sprite.scale.x = descriptor.width / descriptor.originalWidth * attachment.scaleX / this.imageScale;
-            sprite.scale.y = descriptor.height / descriptor.originalHeight * attachment.scaleY / this.imageScale;
+            sprite.scale.x = attachment.scaleX / this.imageScale;
+            sprite.scale.y = attachment.scaleY / this.imageScale;
 
             sprite.rotation = baseRotation;
 
             sprite.anchor.x = (0.5 * descriptor.originalWidth - descriptor.offsetX) / descriptor.width;
-            sprite.anchor.y = 1.0 - ((0.5 * descriptor.originalHeight - descriptor.offsetY) / descriptor.height);
+            sprite.anchor.y = (0.5 * descriptor.originalHeight - descriptor.offsetY) / descriptor.height;
 
             sprite.alpha = attachment.a;
 
