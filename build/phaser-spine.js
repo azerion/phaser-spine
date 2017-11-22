@@ -9369,7 +9369,7 @@ var PhaserSpine;
                 if (_this.game.renderType === Phaser.CANVAS) {
                     return new PhaserSpine.Canvas.Texture(_this.game.cache.getImage(path));
                 }
-                var useMipMaps = minMagFilterStrings.min.toLowerCase().indexOf('mip') !== 0;
+                var useMipMaps = minMagFilterStrings.min.toLowerCase().indexOf('mip') !== -1;
                 return new PhaserSpine.WebGL.Texture(_this.game.renderer.gl, _this.game.cache.getImage(path), useMipMaps);
             });
             var atlasLoader = new spine.AtlasAttachmentLoader(atlas);

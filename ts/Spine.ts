@@ -131,7 +131,7 @@ module PhaserSpine {
                 if (this.game.renderType === Phaser.CANVAS) {
                     return new PhaserSpine.Canvas.Texture(this.game.cache.getImage(path));
                 }
-                var useMipMaps = minMagFilterStrings.min.toLowerCase().indexOf('mip') !== 0;
+                var useMipMaps = minMagFilterStrings.min.toLowerCase().indexOf('mip') !== -1;
                 return new PhaserSpine.WebGL.Texture(<WebGLRenderingContext>(<any>this.game.renderer).gl, this.game.cache.getImage(path), useMipMaps);
             });
 
