@@ -5047,8 +5047,12 @@ var spine;
 						reader.readTuple(tuple);
 					}
 					reader.readTuple(tuple);
-					page.minFilter = spine.Texture.filterFromString(tuple[0]);
-					page.magFilter = spine.Texture.filterFromString(tuple[1]);
+					var minMagFilterStrings = {
+						min: tuple[0],
+						mag: tuple[1]
+					};
+					page.minFilter = spine.Texture.filterFromString(minMagFilterStrings.min);
+					page.magFilter = spine.Texture.filterFromString(minMagFilterStrings.mag);
 					var direction = reader.readValue();
 					page.uWrap = spine.TextureWrap.ClampToEdge;
 					page.vWrap = spine.TextureWrap.ClampToEdge;
@@ -5058,7 +5062,7 @@ var spine;
 						page.vWrap = spine.TextureWrap.Repeat;
 					else if (direction == "xy")
 						page.uWrap = page.vWrap = spine.TextureWrap.Repeat;
-					page.texture = textureLoader(line);
+					page.texture = textureLoader(line, minMagFilterStrings);
 					page.texture.setFilters(page.minFilter, page.magFilter);
 					page.texture.setWraps(page.uWrap, page.vWrap);
 					page.width = page.texture.getImage().width;
