@@ -3,7 +3,7 @@
  * Spine plugin for Phaser.io!
  *
  * OrangeGames
- * Build at 24-08-2017
+ * Build at 22-11-2017
  * Released under MIT License 
  */
 
@@ -5056,8 +5056,12 @@ var spine;
 						reader.readTuple(tuple);
 					}
 					reader.readTuple(tuple);
-					page.minFilter = spine.Texture.filterFromString(tuple[0]);
-					page.magFilter = spine.Texture.filterFromString(tuple[1]);
+					var minMagFilterStrings = {
+						min: tuple[0],
+						mag: tuple[1]
+					};
+					page.minFilter = spine.Texture.filterFromString(minMagFilterStrings.min);
+					page.magFilter = spine.Texture.filterFromString(minMagFilterStrings.mag);
 					var direction = reader.readValue();
 					page.uWrap = spine.TextureWrap.ClampToEdge;
 					page.vWrap = spine.TextureWrap.ClampToEdge;
@@ -5067,7 +5071,7 @@ var spine;
 						page.vWrap = spine.TextureWrap.Repeat;
 					else if (direction == "xy")
 						page.uWrap = page.vWrap = spine.TextureWrap.Repeat;
-					page.texture = textureLoader(line);
+					page.texture = textureLoader(line, minMagFilterStrings);
 					page.texture.setFilters(page.minFilter, page.magFilter);
 					page.texture.setWraps(page.uWrap, page.vWrap);
 					page.width = page.texture.getImage().width;
@@ -9223,6 +9227,8 @@ var PhaserSpine;
             Phaser.Loader.prototype.spine = function (key, url, scalingVariants) {
                 var _this = this;
                 var path = url.substr(0, url.lastIndexOf('.'));
+                var pathonly = url.substr(0, url.lastIndexOf('/'));
+                var filenameonly = url.substring(url.lastIndexOf('/') + 1, url.lastIndexOf('.'));
                 this.text('atlas_' + SpinePlugin.SPINE_NAMESPACE + '_' + key, path + '.atlas');
                 this.json(SpinePlugin.SPINE_NAMESPACE + key, path + '.json');
                 this.onFileComplete.add(function (progress, name) {
@@ -9237,7 +9243,9 @@ var PhaserSpine;
                                 firstImageName = line.substr(0, line.lastIndexOf('.'));
                             }
                             if (firstImageName !== null && line.indexOf(firstImageName) !== -1 && line.indexOf('.') !== -1) {
-                                this.image(line, url.substr(0, url.lastIndexOf('/') + 1) + line);
+                                if (filenameonly === name.replace('atlas_spine_', '') || key === name.replace('atlas_spine_', '')) {
+                                    this.image(line, pathonly + '/' + line);
+                                }
                             }
                         }.bind(_this));
                     }
@@ -9357,11 +9365,12 @@ var PhaserSpine;
         };
         Spine.prototype.createSkeleton = function (key) {
             var _this = this;
-            var atlas = new spine.TextureAtlas(this.game.cache.getText('atlas_' + PhaserSpine.SpinePlugin.SPINE_NAMESPACE + '_' + key), function (path) {
+            var atlas = new spine.TextureAtlas(this.game.cache.getText('atlas_' + PhaserSpine.SpinePlugin.SPINE_NAMESPACE + '_' + key), function (path, minMagFilterStrings) {
                 if (_this.game.renderType === Phaser.CANVAS) {
                     return new PhaserSpine.Canvas.Texture(_this.game.cache.getImage(path));
                 }
-                return new PhaserSpine.WebGL.Texture(_this.game.renderer.gl, _this.game.cache.getImage(path));
+                var useMipMaps = minMagFilterStrings.min.toLowerCase().indexOf('mip') !== 0;
+                return new PhaserSpine.WebGL.Texture(_this.game.renderer.gl, _this.game.cache.getImage(path), useMipMaps);
             });
             var atlasLoader = new spine.AtlasAttachmentLoader(atlas);
             var skeletonJson = new spine.SkeletonJson(atlasLoader);

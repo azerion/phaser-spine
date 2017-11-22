@@ -1001,10 +1001,14 @@ declare module spine {
 	}
 }
 declare module spine {
+	class MinMagFilterStringPair {
+		min: string;
+		mag: string;
+	}
 	class TextureAtlas implements Disposable {
 		pages: TextureAtlasPage[];
 		regions: TextureAtlasRegion[];
-		constructor(atlasText: string, textureLoader: (path: string) => any);
+		constructor(atlasText: string, textureLoader: (path: string, minMagFiltersString :MinMagFilterStringPair) => any);
 		private load(atlasText, textureLoader);
 		findRegion(name: string): TextureAtlasRegion;
 		dispose(): void;
