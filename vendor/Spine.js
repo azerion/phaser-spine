@@ -1103,7 +1103,7 @@ spine.SkeletonData.prototype = {
 	findSlot: function (slotName) {
 		var slots = this.slots;
 		for (var i = 0, n = slots.length; i < n; i++) {
-			if (slots[i].name == slotName) return slot[i];
+			if (slots[i].name == slotName) return slots[i];
 		}
 		return null;
 	},

@@ -1,9 +1,9 @@
 /*!
- * phaser-spine - version 3.0.9 
+ * phaser-spine - version 3.0.10 
  * Spine plugin for Phaser.io!
  *
  * OrangeGames
- * Build at 10-07-2017
+ * Build at 30-11-2017
  * Released under MIT License 
  */
 
@@ -1112,7 +1112,7 @@ spine.SkeletonData.prototype = {
 	findSlot: function (slotName) {
 		var slots = this.slots;
 		for (var i = 0, n = slots.length; i < n; i++) {
-			if (slots[i].name == slotName) return slot[i];
+			if (slots[i].name == slotName) return slots[i];
 		}
 		return null;
 	},
@@ -2872,11 +2872,16 @@ spine.SkeletonBounds.prototype = {
 	}
 };
 
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-};
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 var PhaserSpine;
 (function (PhaserSpine) {
     var SpinePlugin = (function (_super) {
@@ -2946,9 +2951,9 @@ var PhaserSpine;
                 return this.spine[key];
             };
         };
+        SpinePlugin.RESOLUTION_REGEXP = /@(.+)x/;
         return SpinePlugin;
     }(Phaser.Plugin));
-    SpinePlugin.RESOLUTION_REGEXP = /@(.+)x/;
     PhaserSpine.SpinePlugin = SpinePlugin;
 })(PhaserSpine || (PhaserSpine = {}));
 Phaser.Rope.prototype.postUpdate = function () { };
@@ -3036,7 +3041,8 @@ var PhaserSpine;
             var slots = this.skeleton.slots;
             for (var i = 0; i < slots.length; i++) {
                 var slot = slots[i];
-                slot.currentSprite.tint = tint;
+                if (slot.currentSprite)
+                    slot.currentSprite.tint = tint;
             }
         };
         Spine.prototype.update = function (dt) {
@@ -3209,6 +3215,10 @@ var PhaserSpine;
         };
         ;
         Spine.prototype.getCurrentAnimationForTrack = function (trackIndex) {
+            if (!this.state.tracks[trackIndex] || !this.state.tracks[trackIndex].animation) {
+                console.warn("No animation found on track index: ", trackIndex);
+                return "";
+            }
             return this.state.tracks[trackIndex].animation.name;
         };
         Spine.prototype.setSkinByName = function (skinName) {
@@ -3261,9 +3271,9 @@ var PhaserSpine;
             this.skeleton.data.skins.push(newSkin);
             return newSkin;
         };
+        Spine.globalAutoUpdate = true;
         return Spine;
     }(Phaser.Group));
-    Spine.globalAutoUpdate = true;
     PhaserSpine.Spine = Spine;
 })(PhaserSpine || (PhaserSpine = {}));
 var PhaserSpine;
