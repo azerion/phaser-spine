@@ -127,7 +127,7 @@ module PhaserSpine {
             for(let i = 0; i < slots.length; i++) {
 
                 let slot = slots[i];
-                slot.currentSprite.tint = tint;
+                if(slot.currentSprite) slot.currentSprite.tint = tint;
 
             }
         }   
