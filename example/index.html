@@ -29,7 +29,7 @@
 <script>
 var activeSpine;
 var spines = {};
-var names = ['spineboy', 'goblins', 'raptor', 'stretchyman', 'tank', 'vine', 'buddy'];
+var names = ['spineboy-pro', 'goblins', 'raptor', 'stretchyman', 'tank', 'vine', 'buddy'];
 
 var game = new Phaser.Game({
 	width: window.innerWidth,
@@ -78,7 +78,7 @@ function create() {
 		spines[name] = spine;
 	});
 
-	activeSpine = 'spineboy';
+	activeSpine = 'spineboy-pro';
 	spines[activeSpine].visible = true;
 
 	//Add button AFTER spine to show depth

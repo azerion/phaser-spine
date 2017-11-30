@@ -1,0 +1,64 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title>Phaser Spine Example</title>
+
+    <script src="../../node_modules/phaser/build/phaser.js"></script>
+    <script src="../../build/phaser-spine.js"></script>
+
+    <style>
+        body {
+            padding: 0;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+<script>
+
+    var buddy, game, notificationLeft, notificationRight, tween;
+
+    game = new Phaser.Game(1000, 800, Phaser.CANVAS, '', {init: init, preload: preload, create: create});
+
+
+    function init() {
+        this.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
+    }
+
+    function preload() {
+        game.plugins.add(PhaserSpine.SpinePlugin, {
+            debugRendering: false,
+            triangleRendering: true
+        });
+        game.stage.disableVisibilityChange = true;
+        game.load.spine('spinecorrect', "../assets/spineboy-pro-regular.json");
+        game.load.spine('spineboy', "../assets/spineboy-pro.json");
+    }
+
+    function create() {
+        game.add.graphics(0,0)
+            .lineStyle(1, 0x33cc00)
+            .moveTo(500, 0)
+            .lineTo(500, 800)
+            .moveTo(0, 400)
+            .lineTo(1000, 400)
+            .lineStyle(1, 0xd9ffcc)
+            .moveTo(1000 * .25, 0)
+            .lineTo(1000 * .25, 800)
+            .moveTo(1000 * .75, 0)
+            .lineTo(1000 * .75, 800)
+            .moveTo(0, 800 * .75)
+            .lineTo(1000, 800 * .75)
+            .endFill();
+
+        //create the spine object
+        regular = game.add.spine(1000 * .25, 800 * .75, "spinecorrect", true);
+        spineboy = game.add.spine(1000 * .75, 800 * .75, "spineboy", true);
+
+        regular.setAnimationByName(0, "walk", true);
+        spineboy.setAnimationByName(0, "walk", true);
+    }
+</script>
+
+</body>
+</html>
