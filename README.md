@@ -16,13 +16,13 @@ Spine Version
 Please note that the current spine version is an older version, and as a result of that it will work best with **Spine version 3.2**.
 There is a newer version of spine available (Spine-ts, up-to-date with latest spine runtime) but work on that is currently halted for this library.
 
-If you feel like helping out, you're welcome to clone the [spine-ts](https://github.com/orange-games/phaser-spine/tree/spine-ts) branch of this library.
+If you feel like helping out, you're welcome to clone the [spine-ts](https://github.com/azerion/phaser-spine/tree/spine-ts) branch of this library.
 
 Getting Started
 ---------------
 First you want to get a fresh copy of the plugin. You can get it from this repo or from npm, ain't that handy.
 ```
-npm install @orange-games/phaser-spine --save-dev
+npm install @azerion/phaser-spine --save-dev
 ```
 
 Next up you'd want to add it to your list of js sources you load into your game
@@ -157,7 +157,7 @@ Credit due, where credit's due as my mom always said. This version of phaser-spi
 
 Disclaimer
 ----------
-We at OrangeGames just love playing and creating
+We at Azerion just love playing and creating
 awesome games. We aren't affiliated with Phaser.io and/or esotericsoftware. We just needed some awesome spine animations in our awesome HTML5 games. Feel free to use it for enhancing your own awesome games!
 
 Phaser Spine is distributed under the MIT license. All 3rd party libraries and components are distributed under their

@@ -2,8 +2,8 @@
  * phaser-spine - version 3.0.10 
  * Spine plugin for Phaser.io!
  *
- * OrangeGames
- * Build at 30-11-2017
+ * Azerion
+ * Build at 19-03-2019
  * Released under MIT License 
  */
 
@@ -2872,16 +2872,11 @@ spine.SkeletonBounds.prototype = {
 	}
 };
 
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
+var __extends = (this && this.__extends) || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+};
 var PhaserSpine;
 (function (PhaserSpine) {
     var SpinePlugin = (function (_super) {
@@ -2951,9 +2946,9 @@ var PhaserSpine;
                 return this.spine[key];
             };
         };
-        SpinePlugin.RESOLUTION_REGEXP = /@(.+)x/;
         return SpinePlugin;
     }(Phaser.Plugin));
+    SpinePlugin.RESOLUTION_REGEXP = /@(.+)x/;
     PhaserSpine.SpinePlugin = SpinePlugin;
 })(PhaserSpine || (PhaserSpine = {}));
 Phaser.Rope.prototype.postUpdate = function () { };
@@ -3271,9 +3266,9 @@ var PhaserSpine;
             this.skeleton.data.skins.push(newSkin);
             return newSkin;
         };
-        Spine.globalAutoUpdate = true;
         return Spine;
     }(Phaser.Group));
+    Spine.globalAutoUpdate = true;
     PhaserSpine.Spine = Spine;
 })(PhaserSpine || (PhaserSpine = {}));
 var PhaserSpine;
