@@ -1,27 +1,27 @@
 {
-  "name": "@orange-games/phaser-spine",
-  "author": "OrangeGames",
-  "version": "3.0.9",
+  "name": "@azerion/phaser-spine",
+  "author": "Azerion",
+  "version": "3.0.10",
   "description": "Spine plugin for Phaser.io!",
   "contributors": [
     {
       "name": "Ale Bles",
-      "email": "a.bles@orangegames.com"
+      "email": "a.bles@azerion.com"
     }
   ],
   "repository": {
     "type": "git",
-    "url": "git@github.com:orange-games/phaser-spine.git"
+    "url": "git@github.com:azerion/phaser-spine.git"
   },
   "licenses": [
     {
       "type": "MIT",
-      "url": "https://raw.githubusercontent.com/orange-games/phaser-spine/master/LICENSE"
+      "url": "https://raw.githubusercontent.com/azerion/phaser-spine/master/LICENSE"
     }
   ],
   "bugs": [
     {
-      "url": "https://github.com/orange-games/phaser-spine/issues"
+      "url": "https://github.com/azerion/phaser-spine/issues"
     }
   ],
   "config": {

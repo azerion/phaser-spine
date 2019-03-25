@@ -1,9 +1,9 @@
 /*!
- * phaser-spine - version 3.0.9 
+ * phaser-spine - version 3.0.10 
  * Spine plugin for Phaser.io!
  *
- * OrangeGames
- * Build at 10-07-2017
+ * Azerion
+ * Build at 19-03-2019
  * Released under MIT License 
  */
 
@@ -1112,7 +1112,7 @@ spine.SkeletonData.prototype = {
 	findSlot: function (slotName) {
 		var slots = this.slots;
 		for (var i = 0, n = slots.length; i < n; i++) {
-			if (slots[i].name == slotName) return slot[i];
+			if (slots[i].name == slotName) return slots[i];
 		}
 		return null;
 	},
@@ -3036,7 +3036,8 @@ var PhaserSpine;
             var slots = this.skeleton.slots;
             for (var i = 0; i < slots.length; i++) {
                 var slot = slots[i];
-                slot.currentSprite.tint = tint;
+                if (slot.currentSprite)
+                    slot.currentSprite.tint = tint;
             }
         };
         Spine.prototype.update = function (dt) {
@@ -3209,6 +3210,10 @@ var PhaserSpine;
         };
         ;
         Spine.prototype.getCurrentAnimationForTrack = function (trackIndex) {
+            if (!this.state.tracks[trackIndex] || !this.state.tracks[trackIndex].animation) {
+                console.warn("No animation found on track index: ", trackIndex);
+                return "";
+            }
             return this.state.tracks[trackIndex].animation.name;
         };
         Spine.prototype.setSkinByName = function (skinName) {
