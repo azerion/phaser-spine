@@ -84,6 +84,8 @@ module PhaserSpine {
                 this.slotContainers.push(slotContainer);
                 this.add(slotContainer);
 
+                slot.container = slotContainer;
+
                 if (attachment instanceof spine.RegionAttachment) {
                     let spriteName: string = attachment.rendererObject.name;
                     let sprite: Phaser.Sprite = this.createSprite(slot, attachment);
@@ -150,9 +152,7 @@ module PhaserSpine {
             let drawOrder: spine.Slot[] = this.skeleton.drawOrder;
             let slots: spine.Slot[] = this.skeleton.slots;
             for (var i = 0, n = drawOrder.length; i < n; i++) {
-                if (drawOrder[i].currentSprite !== undefined) {
-                    this.children[i] = drawOrder[i].currentSprite.parent
-                }
+                this.children[i] = drawOrder[i].container;
             }
 
             for (var i = 0, n = slots.length; i < n; i++) {

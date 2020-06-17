@@ -3,7 +3,7 @@
  * Spine plugin for Phaser.io!
  *
  * Azerion
- * Build at 19-03-2019
+ * Build at 17-06-2020
  * Released under MIT License 
  */
 
@@ -2992,6 +2992,7 @@ var PhaserSpine;
                 var slotContainer = new Phaser.Group(game);
                 _this.slotContainers.push(slotContainer);
                 _this.add(slotContainer);
+                slot.container = slotContainer;
                 if (attachment instanceof spine.RegionAttachment) {
                     var spriteName = attachment.rendererObject.name;
                     var sprite = _this.createSprite(slot, attachment);
@@ -3050,9 +3051,7 @@ var PhaserSpine;
             var drawOrder = this.skeleton.drawOrder;
             var slots = this.skeleton.slots;
             for (var i = 0, n = drawOrder.length; i < n; i++) {
-                if (drawOrder[i].currentSprite !== undefined) {
-                    this.children[i] = drawOrder[i].currentSprite.parent;
-                }
+                this.children[i] = drawOrder[i].container;
             }
             for (var i = 0, n = slots.length; i < n; i++) {
                 var slot = slots[i];

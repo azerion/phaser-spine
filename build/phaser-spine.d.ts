@@ -197,6 +197,7 @@ declare module spine {
         public attachmentVertices: Float32Array;
         public currentSpriteName: string;
         public currentSprite: Phaser.Sprite;
+        public container: Phaser.Group;
         public currentMeshName: string;
         public currentMesh: PIXI.Strip;
         public sprites: {[spriteName: string]: Phaser.Sprite};
