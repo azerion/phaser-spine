@@ -1,7 +1,7 @@
 {
   "name": "@azerion/phaser-spine",
   "author": "Azerion",
-  "version": "3.0.10",
+  "version": "3.0.11",
   "description": "Spine plugin for Phaser.io!",
   "contributors": [
     {
