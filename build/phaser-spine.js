@@ -3,7 +3,7 @@
  * Spine plugin for Phaser.io!
  *
  * Azerion
- * Build at 19-03-2019
+ * Build at 27-09-2022
  * Released under MIT License 
  */
 
@@ -2908,7 +2908,7 @@ var PhaserSpine;
                         if (cacheKey === atlasKey) {
                             var atlas = new spine.Atlas(_this.game.cache.getText(cacheKey), {
                                 load: function (page, file, atlas) {
-                                    _this.image(file, cacheData.basePath + '/' + file.substr(0, file.lastIndexOf('.')) + variant + '.png');
+                                    _this.image(file, cacheData.basePath + "/" + file);
                                 }
                             });
                         }
