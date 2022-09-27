@@ -67,7 +67,7 @@ module PhaserSpine {
                                 let atlas = new spine.Atlas(this.game.cache.getText(cacheKey), {
                                     load: (page: any, file: string, atlas: spine.Atlas) => {
                                         // console.log(page, file, atlas);
-                                        (<PhaserSpine.SpineLoader>this).image(file, cacheData.basePath + '/' + file.substr(0, file.lastIndexOf('.')) + variant + '.png');
+                                        (<PhaserSpine.SpineLoader>this).image(file, `${cacheData.basePath}/${file}`);
                                     }
                                 });
                             }
